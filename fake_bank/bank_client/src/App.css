@@ -1,0 +1,121 @@
+:root{
+  --primary-color: #b1e6d0;
+  --secondary-color: #56638a;
+  --item-color: #dadada;
+}
+
+.app{
+  background: var(--primary-color);
+  height: 100vh;
+  width: 100%;
+  margin: 0;
+}
+
+.login{
+  text-align: center;
+  width: 40%;
+  padding: 5% 0;
+  margin: 0 auto;
+}
+
+.login h1{
+  color: #fff;
+}
+
+.login form{
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+  width: 60%;
+  margin: 2em auto;
+  padding: 2em 0;
+  border-radius: 5px;
+  height: 40vh;
+}
+
+.login label{
+  text-align: left;
+  font-weight: 500;
+  font-size: 1em;
+  margin: 0 5%;
+}
+
+.login input, .login button{
+  margin: 0 5%;
+  height: 2.5em;
+}
+
+.login button{
+  color: #fff;
+  font-size: 1em;
+  font-weight: bold;
+  cursor: pointer;
+  border: none;
+  background: var(--secondary-color);
+  border-radius: 5px;
+}
+
+.Dashboard{
+  width: 50%;
+  left: 15%;
+  position: absolute;
+  top: 15%;
+  background: #fff;
+  display: flex;
+  flex-direction: row;
+  border-radius: 5px;
+}
+
+.Dashboard button{
+  cursor: pointer;
+  border: none;
+  height: 3em;
+  background: var(--secondary-color);
+  border-radius: 5px;
+  color: #fff;
+  font-size: 1em;
+  font-weight: bold;
+}
+
+.Dashboard input, textarea{
+  border: 1px solid var(--item-color);
+}
+
+.main{
+  width: 50%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+}
+
+.main button{
+  width: 20%;
+  height: 2em;
+}
+
+#balance{
+  width: 4em;
+  height: 2.5em;
+}
+
+.side{
+  width: 30%;
+  margin: 10% auto;
+}
+
+.side form{
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+}
+
+.side form input{
+  height: 2em;
+}
+
+.side form button{
+  height: 2.5em;
+}
