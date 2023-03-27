@@ -27,7 +27,7 @@ const connection = mysql.createConnection({
     user: 'root',
     host: 'localhost',
     password: process.env.PASS,
-    database: 'bankinformation'
+    database: 'bankinformation' //enter your own db name
 })
 
 connection.connect((err)=>{
