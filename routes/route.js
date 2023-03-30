@@ -3,6 +3,7 @@ const bodyParser = require('body-parser')
 const path = require('path')
 const bcrypt = require('bcrypt')
 const mysql = require('mysql')
+const axios = require('axios')
 require('dotenv/config')
 
 
@@ -43,7 +44,7 @@ router.post('/register', async (req, res) => {
     // const size = "SELECT COUNT(*) as count FROM user"
     // db.query(size, (err, result) => {
     //     if (err) throw err;
-    //     const l = result.count
+    //     const l = result[0].count
     //     query += `(${l},${firstName},${lastName},${email},${phone},${balance},${length},${income},${password})`
     //     db.query(query, (err) => {
     //         res.send("User added")
@@ -56,11 +57,16 @@ router.post('/secret', (req, res) => {
     console.log('sent secret')
 })
 
-router.get('/get_bank:username', (req, res) => {
-    console.log("get_bank")
-})
-
 router.post('/add_bank', (req, res) => {
+    const username = req.body.username
+    const password = req.body.password
+    axios.post('http://localhost:5000/api/get_bank', {username: username, password: password})
+    .then(response => {
+        res.send(response.data)
+    })
+    .catch(err => {
+        console.log(err)
+    })
     console.log("add_bank")
 })
 
