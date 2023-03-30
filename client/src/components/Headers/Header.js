@@ -97,7 +97,7 @@ const Header = () => {
                   </CardBody>
                 </Card>
               </Col>
-              <Col lg="6" xl="2">
+              <Col sm="4" lg="6" xl="2">
                 <Card className="card-stats mb-4 mb-xl-0">
                   <CardBody>
                     <Row>

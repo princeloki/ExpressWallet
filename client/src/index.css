@@ -59,3 +59,20 @@ nav .dropdown h1{
 .currency-control svg{
     font-size: 2em;
 }
+
+.item-closed{
+    background: rgb(218, 217, 217) !important;
+    border-radius: 50px !important;
+    height: 4em;
+    align-items: center;
+    padding-top: 0.5em;
+}
+.item-closed h2{
+    color: #2b2b2b !important;
+}
+
+.expense-drop-down{
+    margin-left: auto;
+    font-size: 3em;
+    color: #2b2b2b !important;
+}

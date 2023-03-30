@@ -1,10 +1,10 @@
 import Index from "views/Index.js";
-import Profile from "views/examples/Profile.js";
-import ExpenseReports from "views/examples/ExpenseReports";
-import ExpenseManager from "views/examples/ExpenseManager";
-import Register from "views/examples/Register.js";
-import Login from "views/examples/Login.js";
-import CurrencyConverter from "views/examples/CurrencyConverter.js";
+import Profile from "views/pages/Profile.js";
+import ExpenseReports from "views/pages/ExpenseReports";
+import ExpenseManager from "views/pages/ExpenseManager";
+import Register from "views/pages/Register.js";
+import Login from "views/pages/Login.js";
+import CurrencyConverter from "views/pages/CurrencyConverter.js";
 
 var routes = [
   {
@@ -22,24 +22,17 @@ var routes = [
     layout: "/admin"
   },
   {
+    path: "/currency-converter",
+    name: "Currency Converter",
+    icon: "ni ni-money-coins text-green",
+    component: CurrencyConverter,
+    layout: "/admin"
+  },
+  {
     path: "/expense-manager",
     name: "Expense Manager",
     icon: "ni ni-ruler-pencil text-primary",
     component: ExpenseManager,
-    layout: "/admin"
-  },
-  {
-    path: "/user-profile",
-    name: "User Profile",
-    icon: "ni ni-single-02 text-yellow",
-    component: Profile,
-    layout: "/admin"
-  },
-  {
-    path: "/currency-converter",
-    name: "Currency Converter",
-    icon: "ni ni-book-bookmark text-red",
-    component: CurrencyConverter,
     layout: "/admin"
   },
   {
@@ -50,9 +43,12 @@ var routes = [
     layout: "/auth"
   },
   {
+    path: "/user-profile",
+    component: Profile,
+    layout: "/admin"
+  },
+  {
     path: "/register",
-    name: "Register",
-    icon: "ni ni-circle-08 text-pink",
     component: Register,
     layout: "/auth"
   }
