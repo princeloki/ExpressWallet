@@ -6,10 +6,6 @@ const path = require('path');
 const cors = require('cors');
 const mysql = require('mysql');
 
-const app = express();
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-
 const router = express.Router();
 
 const db = mysql.createConnection({
@@ -129,6 +125,34 @@ router.post('/add_payment', (req, res) => {
         console.log(err);
     }
 
+})
+
+router.post('/get_bank', (req, res) => {
+    const username = req.body.username
+    const password = req.body.password
+    let query = `SELECT password FROM bank where username='${username}'`
+    db.query(query, (err, result) => {
+        if(err) throw err;
+        const info = `SELECT bid, balance, currency FROM bank where username='${username}'`
+        const pass = result[0].password
+        if(pass === password){
+            db.query(info, (err, result) => {
+                if (err) throw err;
+                res.send(result[0])
+            })
+        } else{
+            res.send("Does not match")
+        }
+    })
+})
+
+router.get('/get_transactions:id', (req, res) => {
+    const bid = req.params.id
+    let query = `SELECT * FROM transaction WHERE bid = '${bid}'`
+    db.query(query, (err, result) => {
+        if(err) throw err;
+        res.send(result)
+    })
 })
 
 module.exports = router;

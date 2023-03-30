@@ -6,22 +6,15 @@ const apiRoute = require('./routes/route')
 
 const app = express()
 
+
+app.use(cors({
+    origin: 'http://localhost:3001',
+    optionsSuccessStatus: 200
+  }));
+  
+
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
-
-const db = mysql.createConnection({
-    multipleStatements: true,
-    user: 'root',
-    host: 'localhost',
-    password: process.env.PASS,
-    database: 'bankinformation'
-})
-
-db.connect((err)=>{
-    if(err) throw err;
-    console.log("Connected");
-})
-
 
 app.use('/api', apiRoute)
 

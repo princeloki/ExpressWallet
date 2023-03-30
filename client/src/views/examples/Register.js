@@ -13,7 +13,38 @@ import {
   Col
 } from "reactstrap";
 
+import { useState } from "react"
+import axios from "axios"
+
 const Register = () => {
+
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    password: ""
+  })
+
+  const handleChange = (e) => {
+    setFormData(prevFormData=>{
+      return {
+        ...prevFormData,
+        [e.target.name]: e.target.value,
+      }
+    })
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    axios.post("http://localhost:3000/api/register",formData)
+    .then(response => {
+      console.log(response.data)
+    })
+    .catch(err => {
+      console.log(err)
+    })
+  }
+
   return (
     <>
       <Col lg="6" md="8">
@@ -46,7 +77,7 @@ const Register = () => {
             <div className="text-center text-muted mb-4">
               <small>Or sign up with credentials</small>
             </div>
-            <Form role="form">
+            <Form role="form" onSubmit={handleSubmit}>
               <FormGroup>
                 <InputGroup className="input-group-alternative mb-3">
                   <InputGroupAddon addonType="prepend">
@@ -54,7 +85,13 @@ const Register = () => {
                       <i className="ni ni-hat-3" />
                     </InputGroupText>
                   </InputGroupAddon>
-                  <Input placeholder="Name" type="text" />
+                  <Input 
+                  placeholder="Name"
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={(e) => handleChange(e)}
+                  />
                 </InputGroup>
               </FormGroup>
               <FormGroup>
@@ -68,6 +105,26 @@ const Register = () => {
                     placeholder="Email"
                     type="email"
                     autoComplete="new-email"
+                    name="email"
+                    value={formData.email}
+                    onChange={(e) => handleChange(e)}
+                  />
+                </InputGroup>
+              </FormGroup>
+              <FormGroup>
+                <InputGroup className="input-group-alternative mb-3">
+                  <InputGroupAddon addonType="prepend">
+                    <InputGroupText>
+                      <i className="ni ni-email-83" />
+                    </InputGroupText>
+                  </InputGroupAddon>
+                  <Input
+                    placeholder="Phone"
+                    type="phone"
+                    autoComplete="new-phone"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={(e)=>handleChange(e)}
                   />
                 </InputGroup>
               </FormGroup>
@@ -82,6 +139,9 @@ const Register = () => {
                     placeholder="Password"
                     type="password"
                     autoComplete="new-password"
+                    name="password"
+                    value={formData.password}
+                    onChange={(e) => handleChange(e)}
                   />
                 </InputGroup>
               </FormGroup>
@@ -114,7 +174,7 @@ const Register = () => {
                 </Col>
               </Row>
               <div className="text-center">
-                <Button className="mt-4" color="primary" type="button">
+                <Button className="mt-4" color="primary" type="submit">
                   Create account
                 </Button>
               </div>

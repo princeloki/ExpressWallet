@@ -46,15 +46,25 @@ const insertBankAccountData = ()=>{
         last_name: faker.name.lastName(),
         username: faker.internet.userName(),
         password: faker.internet.password(6),
-        balance: faker.finance.amount()
+        balance: faker.finance.amount(),
+        currency: faker.finance.currencyCode()
       };
       bankAccounts.push(bankAccount);
     }
     
     // insert the bank accounts into the MySQL table
-    const sql = 'INSERT INTO bank (bid, first_name, last_name, username, password, balance) VALUES ?';
+    let sql = `CREATE TABLE IF NOT EXISTS bank(
+      bid INT NOT NULL PRIMARY KEY,
+      first_name VARCHAR(255) NOT NULL,
+      last_name VARCHAR(255) NOT NULL,
+      username VARCHAR(255) NOT NULL,
+      password VARCHAR(255) NOT NULL,
+      balance INT NOT NULL,
+      currency VARCHAR(40) NOT NULL
+      ); ` 
+    sql += 'INSERT INTO bank (bid, first_name, last_name, username, password, balance, currency) VALUES ?';
     
-    connection.query(sql, [bankAccounts.map(bankAccount => [bankAccount.bid, bankAccount.first_name, bankAccount.last_name, bankAccount.username, bankAccount.password, bankAccount.balance])], (error, results, fields) => {
+    connection.query(sql, [bankAccounts.map(bankAccount => [bankAccount.bid, bankAccount.first_name, bankAccount.last_name, bankAccount.username, bankAccount.password, bankAccount.balance, bankAccount.currency])], (error, results, fields) => {
       if (error) {
         console.error(error);
       } else {
