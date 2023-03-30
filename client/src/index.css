@@ -1,0 +1,16 @@
+:root{
+    --default-color: #fff;
+
+}
+
+nav h1{
+    color: var(--default-color);
+}
+
+.notif{
+    font-size: 2em;
+}
+
+nav .dropdown h1{
+    font-size: 1.5em !important;
+}

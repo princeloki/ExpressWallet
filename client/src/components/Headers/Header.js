@@ -1,4 +1,6 @@
 import { Card, CardBody, CardTitle, Container, Row, Col } from "reactstrap";
+import { FcCurrencyExchange } from "react-icons/fc"
+import { BsCurrencyYen } from "react-icons/bs"
 
 const Header = () => {
   return (
@@ -17,15 +19,15 @@ const Header = () => {
                           tag="h5"
                           className="text-uppercase text-muted mb-0"
                         >
-                          Traffic
+                          Today's Balance
                         </CardTitle>
                         <span className="h2 font-weight-bold mb-0">
-                          350,897
+                          $350,897
                         </span>
                       </div>
                       <Col className="col-auto">
-                        <div className="icon icon-shape bg-danger text-white rounded-circle shadow">
-                          <i className="fas fa-chart-bar" />
+                        <div className="icon icon-shape bg-blue text-white rounded-circle shadow">
+                          <FcCurrencyExchange />
                         </div>
                       </Col>
                     </Row>
@@ -33,7 +35,7 @@ const Header = () => {
                       <span className="text-success mr-2">
                         <i className="fa fa-arrow-up" /> 3.48%
                       </span>{" "}
-                      <span className="text-nowrap">Since last month</span>
+                      <span className="text-nowrap">Since yesterday</span>
                     </p>
                   </CardBody>
                 </Card>
@@ -47,13 +49,13 @@ const Header = () => {
                           tag="h5"
                           className="text-uppercase text-muted mb-0"
                         >
-                          New users
+                          This Week's Balance
                         </CardTitle>
-                        <span className="h2 font-weight-bold mb-0">2,356</span>
+                        <span className="h2 font-weight-bold mb-0">$2,356</span>
                       </div>
                       <Col className="col-auto">
-                        <div className="icon icon-shape bg-warning text-white rounded-circle shadow">
-                          <i className="fas fa-chart-pie" />
+                        <div className="icon icon-shape bg-blue text-white rounded-circle shadow">
+                          <FcCurrencyExchange />
                         </div>
                       </Col>
                     </Row>
@@ -75,13 +77,13 @@ const Header = () => {
                           tag="h5"
                           className="text-uppercase text-muted mb-0"
                         >
-                          Sales
+                          This Month's Balance
                         </CardTitle>
-                        <span className="h2 font-weight-bold mb-0">924</span>
+                        <span className="h2 font-weight-bold mb-0">$924</span>
                       </div>
                       <Col className="col-auto">
-                        <div className="icon icon-shape bg-yellow text-white rounded-circle shadow">
-                          <i className="fas fa-users" />
+                        <div className="icon icon-shape bg-blue text-white rounded-circle shadow">
+                          <FcCurrencyExchange />
                         </div>
                       </Col>
                     </Row>
@@ -89,7 +91,7 @@ const Header = () => {
                       <span className="text-warning mr-2">
                         <i className="fas fa-arrow-down" /> 1.10%
                       </span>{" "}
-                      <span className="text-nowrap">Since yesterday</span>
+                      <span className="text-nowrap">Since last month</span>
                     </p>
                   </CardBody>
                 </Card>
@@ -98,27 +100,13 @@ const Header = () => {
                 <Card className="card-stats mb-4 mb-xl-0">
                   <CardBody>
                     <Row>
-                      <div className="col">
-                        <CardTitle
-                          tag="h5"
-                          className="text-uppercase text-muted mb-0"
-                        >
-                          Performance
-                        </CardTitle>
+                        <Col className="col-auto">
+                          <div className="icon icon-shape bg-green text-white rounded-circle shadow">
+                            <BsCurrencyYen />
+                          </div>
+                        </Col>
                         <span className="h2 font-weight-bold mb-0">49,65%</span>
-                      </div>
-                      <Col className="col-auto">
-                        <div className="icon icon-shape bg-info text-white rounded-circle shadow">
-                          <i className="fas fa-percent" />
-                        </div>
-                      </Col>
                     </Row>
-                    <p className="mt-3 mb-0 text-muted text-sm">
-                      <span className="text-success mr-2">
-                        <i className="fas fa-arrow-up" /> 12%
-                      </span>{" "}
-                      <span className="text-nowrap">Since last month</span>
-                    </p>
                   </CardBody>
                 </Card>
               </Col>

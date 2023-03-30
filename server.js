@@ -13,7 +13,7 @@ const app = express()
 
 
 app.use(cors({
-    origin: 'http://localhost:3001',
+    origin: 'http://localhost:3000',
     optionsSuccessStatus: 200
 }));
   
@@ -34,22 +34,27 @@ db.connect((err)=>{
 
 const loadCurrency = () =>{
     let count = 1;
-    fs.createReadStream(path.join(__dirname, 'codes-all.csv'))
-    .pipe(parse({ delimiter: ",", from_line: 2}))
-    .on("data", (row)=>{
-        const nsql = `INSERT INTO currency (cid, iso, country) VALUES(${count}, '${row[2]}', '${row[0]}');`;
-        db.query(nsql, (err)=>{
-            if(err) throw err;
-            console.log("INSERT Completed");
+    try{
+        fs.createReadStream(path.join(__dirname, 'codes-all.csv'))
+        .pipe(parse({ delimiter: ",", from_line: 2}))
+        .on("data", (row)=>{
+            const nsql = `INSERT INTO currency (cid, iso, country) VALUES(${count}, "${row[2]}", "${row[0]}");`;
+            // console.log(nsql);
+            db.query(nsql, (err)=>{
+                if(err) throw err;
+                console.log("INSERT Completed");
+            })
+            count++;
         })
-        count++;
-    })
-    .on("error", (err)=>{
-        console.log(err.message);
-    })
-    .on("end", ()=>{
-        console.log("finished");
-    })
+        .on("error", (err)=>{
+            console.log(err.message);
+        })
+        .on("end", ()=>{
+            console.log("finished");
+        })
+    }catch(err){
+        console.log(err)
+    }
     
 }
 
@@ -58,9 +63,9 @@ app.use(bodyParser.urlencoded({ extended: true }))
 
 app.use('/api', apiRoute)
 
-loadCurrency()
+// loadCurrency()
 
 
-app.listen(3000, ()=>{
+app.listen(4000, ()=>{
     console.log('listening on port 3000');
 })
