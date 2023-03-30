@@ -60,15 +60,45 @@ nav .dropdown h1{
     font-size: 2em;
 }
 
+.spending-container{
+    display: flex;
+    flex-direction: column;
+    gap: 2em;
+}
+
 .item-closed{
     background: rgb(218, 217, 217) !important;
     border-radius: 50px !important;
     height: 4em;
     align-items: center;
     padding-top: 0.5em;
+    cursor: pointer;
 }
+
+.item-closed:hover{
+    background:  rgb(201, 201, 201) !important;
+}
+
 .item-closed h2{
     color: #2b2b2b !important;
+    font-weight: bold;
+}
+
+.item-opened{
+    height: 20em;
+    background: #fff;
+    border-radius: 50px !important;
+    align-items: center;
+    text-align: center;
+}
+
+.item-opened h2{
+    color: #2b2b2b !important;
+    font-weight: bold;
+}
+
+.open-control{
+    cursor: pointer;
 }
 
 .expense-drop-down{

@@ -1,6 +1,4 @@
-import { useState } from "react";
-import { RiArrowDropDownLine } from "react-icons/ri";
-// reactstrap components
+
 import {
   Card,
   Container,
@@ -9,26 +7,20 @@ import {
 } from "reactstrap";
 
 import Header from "components/Headers/Header.js";
+import Spending from "./components/Spending";
 
 const ExpenseReports = (props) => {
+  const size = ["January 2023","February 2023","March 2023"]
+  const spendings = size.map((spending, index) =>{
+    return(<Spending date={spending} key={index}/>)
+  })
 
   return (
     <>
       <Header />
       {/* Page content */}
-      <Container className="mt--7" fluid>
-        <Row>
-          <Col className="mb-5 mb-xl-0 align-items-center" xl="12">
-            <Card className="shadow item-closed">
-              <Row className="align-items-center">
-                <div className="col">
-                  <h2 className="mb-0">January 2023</h2>
-                </div>
-                <RiArrowDropDownLine className="expense-drop-down"/>
-              </Row>
-            </Card>
-          </Col>
-        </Row>
+      <Container className="mt--7 spending-container" fluid>
+        {spendings}
       </Container>
     </>
   );
