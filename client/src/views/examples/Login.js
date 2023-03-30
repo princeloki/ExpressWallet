@@ -18,9 +18,18 @@ import { useState } from "react"
 const Login = () => {
 
   const [formData, setFormData] = useState({
-    name: "",
-    
+    email: "",
+    password: ""
   })
+
+  const handleChange = (e) => {
+    setFormData(prevFormData =>{
+      return{
+        ...prevFormData,
+        [e.target.name]: e.target.value,
+      }
+    })
+  }
 
   return (
     <>
@@ -65,6 +74,9 @@ const Login = () => {
                   <Input
                     placeholder="Email"
                     type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={(e)=>handleChange(e)}
                     autoComplete="new-email"
                   />
                 </InputGroup>
@@ -79,6 +91,9 @@ const Login = () => {
                   <Input
                     placeholder="Password"
                     type="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={(e)=>handleChange(e)}
                     autoComplete="new-password"
                   />
                 </InputGroup>
