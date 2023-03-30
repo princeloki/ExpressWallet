@@ -1,6 +1,7 @@
 import { Card, CardBody, CardTitle, Container, Row, Col } from "reactstrap";
 import { FcCurrencyExchange } from "react-icons/fc"
 import { BsCurrencyYen } from "react-icons/bs"
+import { RiArrowDropDownLine } from "react-icons/ri"
 
 const Header = () => {
   return (
@@ -22,7 +23,7 @@ const Header = () => {
                           Today's Balance
                         </CardTitle>
                         <span className="h2 font-weight-bold mb-0">
-                          $350,897
+                          ￥897/<span>1897</span>
                         </span>
                       </div>
                       <Col className="col-auto">
@@ -49,9 +50,9 @@ const Header = () => {
                           tag="h5"
                           className="text-uppercase text-muted mb-0"
                         >
-                          This Week's Balance
+                          Week's Balance
                         </CardTitle>
-                        <span className="h2 font-weight-bold mb-0">$2,356</span>
+                        <span className="h2 font-weight-bold mb-0">￥2356/<span>4237</span></span>
                       </div>
                       <Col className="col-auto">
                         <div className="icon icon-shape bg-blue text-white rounded-circle shadow">
@@ -77,9 +78,9 @@ const Header = () => {
                           tag="h5"
                           className="text-uppercase text-muted mb-0"
                         >
-                          This Month's Balance
+                          Month's Balance
                         </CardTitle>
-                        <span className="h2 font-weight-bold mb-0">$924</span>
+                        <span className="h2 font-weight-bold mb-0">￥4924/<span>8888</span></span>
                       </div>
                       <Col className="col-auto">
                         <div className="icon icon-shape bg-blue text-white rounded-circle shadow">
@@ -96,16 +97,22 @@ const Header = () => {
                   </CardBody>
                 </Card>
               </Col>
-              <Col lg="6" xl="3">
+              <Col lg="6" xl="2">
                 <Card className="card-stats mb-4 mb-xl-0">
                   <CardBody>
                     <Row>
                         <Col className="col-auto">
-                          <div className="icon icon-shape bg-green text-white rounded-circle shadow">
-                            <BsCurrencyYen />
+                          <div className="icon icon-shape bg-light text-white rounded-circle shadow">
+                            <BsCurrencyYen className="text-green"/>
                           </div>
                         </Col>
-                        <span className="h2 font-weight-bold mb-0">49,65%</span>
+                        <Col className="col-auto my-auto">
+                          <div className="currency-control my-auto">
+                            <h2>YEN</h2>
+                            <RiArrowDropDownLine />
+                          </div>
+                        </Col>
+                        
                     </Row>
                   </CardBody>
                 </Card>

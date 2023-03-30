@@ -9,8 +9,53 @@ nav h1{
 
 .notif{
     font-size: 2em;
+    cursor: pointer;
+}
+
+nav .user{
+    background: #245378;
 }
 
 nav .dropdown h1{
     font-size: 1.5em !important;
+}
+
+.user-cont{
+    display: flex !important;
+    flex-direction: row;
+    gap: 1em;
+}
+
+.user-cont a{
+    padding: 0.2em 0.3em !important;
+}
+
+.user-button{
+    border-radius: 30px;
+}
+
+.user-button .name{
+    color: #3b3b3b;
+}
+
+.currency-control{
+    text-align: center;
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+    cursor: pointer;
+    padding: 0.5em 1em;
+}
+
+.currency-control:hover{
+    background: #e6e6e6;
+    border-radius: 30px;
+}
+
+.currency-control h2{
+    margin: 0;
+}
+
+.currency-control svg{
+    font-size: 2em;
 }
