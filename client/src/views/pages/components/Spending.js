@@ -8,22 +8,16 @@ import {
   Col
 } from "reactstrap";
 
-const Spending = (props)=>{
-    const [clicked, setClicked] = useState(false)
-  
-    const handleClick = ()=>{
-        setClicked(!clicked)
-    }
+const Spending = ({date, clicked, handleClick})=>{
 
-    console.log(clicked)
     return(
         <Row>
           <Col className="mb-5 mb-xl-0" xl="12">
-            {clicked === false ?
+            {!clicked?
             <Card className="shadow item-closed" onClick={handleClick}>
               <Row className="align-items-center">
                 <div className="col">
-                  <h2 className="mb-0">{props.date}</h2>
+                  <h2 className="mb-0">{date}</h2>
                 </div>
                 <RiArrowDropDownLine className="expense-drop-down"/>
               </Row>
@@ -32,7 +26,7 @@ const Spending = (props)=>{
             <Card className="shadow item-opened">
                 <Row className="align-items-center open-control"  onClick={handleClick}>
                     <div className="col">
-                        <h2 className="mb-0">{props.date}</h2>
+                        <h2 className="mb-0">{date}</h2>
                     </div>
                     <RiArrowDropDownLine className="expense-drop-down"/>
                 </Row>
