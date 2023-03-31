@@ -24,7 +24,7 @@ const ExpenseReports = (props) => {
 
   return (
     <>
-      <Header />
+      <Header onDashboard={props.onDashboard}/>
       {/* Page content */}
       <Container className="mt--7 spending-container" fluid>
         {spendings}

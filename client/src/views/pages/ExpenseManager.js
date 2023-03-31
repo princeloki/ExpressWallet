@@ -16,7 +16,7 @@ const ExpenseManager = (props) => {
 
   return (
     <>
-      <Header />
+      <Header onDashboard={props.onDashboard}/>
       {/* Page content */}
       <Container className="mt--7" fluid>
         <Row className="mt-5">
@@ -39,7 +39,7 @@ const ExpenseManager = (props) => {
               <CardHeader className="border-0">
                 <Row className="align-items-center">
                   <div className="col">
-                    <h3 className="mb-0">Top Categories</h3>
+                    <h3 className="mb-0">RECOMMENDED EXPENSES</h3>
                   </div>
                   <div className="col text-right">
                     <Button

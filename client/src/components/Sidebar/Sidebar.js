@@ -37,6 +37,11 @@ const Sidebar = (props) => {
   const closeCollapse = () => {
     setCollapseOpen(false);
   };
+
+  const handleClick = (path) => {
+    closeCollapse();
+    path === "/index" ? props.setOnDashboard(true) : props.setOnDashboard(false);
+  }
   // creates the links that appear in the left menu / Sidebar
   const createLinks = (routes) => {
     return routes.map((prop, key) => {
@@ -45,7 +50,7 @@ const Sidebar = (props) => {
           <NavLink
             to={prop.layout + prop.path}
             tag={NavLinkRRD}
-            onClick={closeCollapse}
+            onClick={()=>handleClick(prop.path)}
             activeClassName="active"
           >
             <i className={prop.icon} />
@@ -56,7 +61,7 @@ const Sidebar = (props) => {
     });
   };
 
-  const { bgColor, routes } = props;
+  const { routes } = props;
   return (
     <Navbar
       className="navbar-vertical fixed-left navbar-light bg-white"
@@ -108,18 +113,6 @@ const Sidebar = (props) => {
               <DropdownItem to="/admin/user-profile" tag={Link}>
                 <i className="ni ni-single-02" />
                 <span>My profile</span>
-              </DropdownItem>
-              <DropdownItem to="/admin/user-profile" tag={Link}>
-                <i className="ni ni-settings-gear-65" />
-                <span>Settings</span>
-              </DropdownItem>
-              <DropdownItem to="/admin/user-profile" tag={Link}>
-                <i className="ni ni-calendar-grid-58" />
-                <span>Activity</span>
-              </DropdownItem>
-              <DropdownItem to="/admin/user-profile" tag={Link}>
-                <i className="ni ni-support-16" />
-                <span>Support</span>
               </DropdownItem>
               <DropdownItem divider />
               <DropdownItem href="#pablo" onClick={(e) => e.preventDefault()}>

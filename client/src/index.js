@@ -1,4 +1,3 @@
-import React from "react";
 import ReactDOM from "react-dom/client";
 import './index.css';
 import { BrowserRouter, Route, Switch, Redirect } from "react-router-dom";
@@ -11,6 +10,7 @@ import AdminLayout from "layouts/Admin.js";
 import AuthLayout from "layouts/Auth.js";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
+
 
 root.render(
   <BrowserRouter>

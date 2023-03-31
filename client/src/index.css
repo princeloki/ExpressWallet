@@ -7,6 +7,10 @@ nav h1{
     color: var(--default-color);
 }
 
+.curve{
+    border-radius: 30px !important;
+}
+
 .notif{
     font-size: 2em;
     cursor: pointer;
@@ -84,13 +88,22 @@ nav .dropdown h1{
     font-weight: bold;
 }
 
+.item-closed:first-of-type {
+    opacity: 0.9;
+}
+
 .item-opened{
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
     height: 20em;
     background: #fff;
     border-radius: 50px !important;
     align-items: center;
     text-align: center;
+    opacity: 0.8;
 }
+
 
 .item-opened h2{
     color: #2b2b2b !important;
@@ -105,4 +118,43 @@ nav .dropdown h1{
     margin-left: auto;
     font-size: 3em;
     color: #2b2b2b !important;
+}
+
+.expense-up-arrow{
+    font-size: 2.1em;
+    color: #2b2b2b !important;
+}
+
+.table-container{
+    width: 90%;
+}
+
+.expense-table{
+    width: 100%;
+}
+
+td{
+    color: #464646 !important;
+    font-weight: bold;
+    font-size: 1em !important;
+    border-top: none !important;
+}
+
+th{
+    font-size: 1em !important;
+    font-weight: bold !important;
+    border-top: none !important;
+    color: #111111 !important;
+    border-bottom: 1px solid #2b2b2b !important;
+}
+
+tr:last-of-type{
+    border-bottom: 1px solid #2b2b2b !important;
+}
+
+
+.footer{
+    position: fixed;
+    bottom: 0;
+    width: 80%;
 }
