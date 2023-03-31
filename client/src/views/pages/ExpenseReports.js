@@ -12,11 +12,12 @@ const ExpenseReports = (props) => {
   const handleSpendingClick = (index)=>{
       clickedIndex === index ? setClickedIndex(null) : setClickedIndex(index) 
   }
-  const size = ["January 2023","February 2023","March 2023"]
-  const spendings = size.map((spending, index) =>{
+  
+  const dates = ["January 2023","February 2023","March 2023"]
+  const spendings = dates.map((date, index) =>{
     return(<Spending  
       key={index}
-      date={spending}
+      date={date}
       clicked={clickedIndex===index}
       handleClick={()=>handleSpendingClick(index)}
       />)

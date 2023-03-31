@@ -1,6 +1,6 @@
 
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Table } from "reactstrap"
 import { RiArrowDropDownLine } from "react-icons/ri";
 import { RiArrowUpSLine } from "react-icons/ri";
@@ -9,8 +9,25 @@ import {
   Row,
   Col
 } from "reactstrap";
+import SpendingTransactions from "./SpendingTransactions"
 
 const Spending = ({date, clicked, handleClick})=>{
+    const [spendings, setSpendings] = useState([["12/01/2023","RENT","12.00","0.00","12.00"],["27/01/2023","UTILITIES","560.00","0.00","560.00"],["28/01/2023","ENTERTAINMENT","205.00","0.00","205.00"]])
+    const [clickedIndex, setClickedIndex] = useState(null)
+
+    const openTransaction = (index) =>{
+        clickedIndex === index ? setClickedIndex(null) : setClickedIndex(index);
+    }
+
+    useEffect(()=>{
+        console.log("Spendings retrieved")
+    },[])
+
+    const trs = spendings.map((spending, index) =>{
+        return(
+            <SpendingTransactions key={index} openTransaction={()=>openTransaction(index)} clicked={clickedIndex===index} spends={spending}/>
+        )
+    })
 
     return(
         <Row>
@@ -58,57 +75,7 @@ const Spending = ({date, clicked, handleClick})=>{
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                            <td>
-                                12/01/2023
-                            </td>
-                            <td>
-                                RENT
-                            </td>
-                            <td>
-                                $12.00
-                            </td>
-                            <td>
-                                $0.00
-                            </td>
-                            <td>
-                                $12
-                            </td>
-                            </tr>
-                            <tr>
-                            <td>
-                                27/01/2023
-                            </td>
-                            <td>
-                                UTILITIES
-                            </td>
-                            <td>
-                                $560
-                            </td>
-                            <td>
-                                $0.00
-                            </td>
-                            <td>
-                                $560
-                            </td>
-                            </tr>
-                            <tr>
-                            <td>
-                                28/01/2023
-                            </td>
-                            <td>
-                                ENTERTAINMENT
-                            </td>
-                            <td>
-                                $205.00
-                            </td>
-                            <td>
-                                $0.00
-                            </td>
-                            <td>
-                                $205.00
-                            </td>
-                            </tr>
+                            {trs}
                         </tbody>
                     </Table>
                 </Row>
