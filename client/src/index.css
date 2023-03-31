@@ -169,16 +169,59 @@ tr:last-of-type{
     0 !important;
 }
 
+.latest-trans{
+    width: 100%;
+}
+
+.latest-trans table{
+    margin: 0 auto;
+    width: 90%;
+}
+
+.expense-manager-table, h3{
+    text-align: center;
+}
+
+.expense-manager-table th{
+    border-bottom: none !important;
+}
+
 .expense-manager-table tr:last-of-type{
     border-bottom: none !important;
 }
 
-.expense-manager-data td{
-    color: #464646;
+.expense-manager-data{
+    border-bottom: 1px solid #afafaf !important;
 }
 
+.expense-manager-data td{
+    color: #646464 !important;
+    font-size: 0.85em !important;
+}
+
+.expense-manager-data svg{
+    cursor: pointer;
+    font-size: 1.5em;
+    color: #050505;
+}
+
+.top-cats{
+    min-height: 20em;
+}
+
+.top-cats h3{
+    border-bottom: 1px solid #464646;
+    margin: 0 2em;
+}
+
+.info{
+    cursor: pointer;
+}
+
+
 .footer{
-    position: fixed;
+    position: relative;
     bottom: 0;
     width: 80%;
+    margin-top: 3em;
 }

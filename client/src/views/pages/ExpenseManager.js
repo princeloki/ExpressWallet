@@ -11,6 +11,7 @@ import {
 
 
 import Header from "components/Headers/Header.js";
+import { GrCircleInformation } from "react-icons/gr"
 
 const ExpenseManager = (props) => {
   const [expenses, setExpenses] = useState([
@@ -44,9 +45,9 @@ const ExpenseManager = (props) => {
     <>
       <Header onDashboard={props.onDashboard}/>
       {/* Page content */}
-      <Container className="mt--7" fluid>
+      <Container className="mt--7 expense-container" fluid>
         <Row className="mt-5">
-          <Col className="mb-5 mb-xl-0" xl="6">
+          <Col className="mb-5 mb-xl-0" xl="5">
             <Card className="curve shadow">
               <div className="latest-trans">
                 <Table
@@ -68,10 +69,10 @@ const ExpenseManager = (props) => {
               </div>
             </Card>
           </Col>
-          <Col xl="4">
+          <Col xl="3">
             <Card className="curve shadow">
               <div className="top-cats">
-                    <h3 className="mb-0">RECOMMENDED EXPENSES</h3>
+                    <h3 className="mb-0">RECOMMENDED EXPENSES <GrCircleInformation className="info"/></h3>
                     <div className="cats">
 
                     </div>

@@ -7,7 +7,7 @@ import Header from "components/Headers/Header.js";
 import Spending from "./components/Spending";
 
 const ExpenseReports = (props) => {
-  const [clickedIndex, setClickedIndex] = useState(null)
+  const [clickedIndex, setClickedIndex] = useState(0)
 
   const handleSpendingClick = (index)=>{
       clickedIndex === index ? setClickedIndex(null) : setClickedIndex(index) 
