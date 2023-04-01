@@ -3,6 +3,7 @@
     min-height: 100vh;
 }
 
+
 nav h1{
     color: var(--default-color);
 }
@@ -218,6 +219,29 @@ tr:last-of-type{
     cursor: pointer;
 }
 
+.expense-editor{
+    opacity: 0.95;
+    position: relative;
+    position: fixed;
+    z-index: 1;
+    top: 25%;
+    left: 40%;
+    min-height: 20em;
+    width: 20%;
+    background: #fff;
+    transition: all 0.5s ease-in-out;
+}
+
+.expense-editor button{
+    position: absolute;
+    bottom: 1em;
+    left: 40%;
+    width: 20%;
+    background:#67a2cf;
+    border: none;
+    color: #fff;
+    font-weight: bold;
+}
 
 .footer{
     position: relative;

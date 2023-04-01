@@ -45,6 +45,10 @@ const ExpenseManager = (props) => {
     <>
       <Header onDashboard={props.onDashboard}/>
       {/* Page content */}
+      {clickedIndex !== null && <div className="curve expense-editor mb-xl-0">
+
+      <button className="curve" onClick={()=>setClickedIndex(null)}>Close</button>
+      </div>}
       <Container className="mt--7 expense-container" fluid>
         <Row className="mt-5">
           <Col className="mb-5 mb-xl-0" xl="5">
@@ -74,7 +78,7 @@ const ExpenseManager = (props) => {
               <div className="top-cats">
                     <h3 className="mb-0">RECOMMENDED EXPENSES <GrCircleInformation className="info"/></h3>
                     <div className="cats">
-
+                      
                     </div>
               </div>
             </Card>

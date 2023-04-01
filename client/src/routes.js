@@ -22,11 +22,9 @@ var routes = [
     layout: "/admin"
   },
   {
-    path: "/currency-converter",
+    path: "",
     name: "Currency Converter",
     icon: "ni ni-money-coins text-green",
-    component: CurrencyConverter,
-    layout: "/admin"
   },
   {
     path: "/expense-manager",
