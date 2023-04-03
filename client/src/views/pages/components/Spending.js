@@ -9,9 +9,9 @@ import {
   Row,
   Col
 } from "reactstrap";
-import SpendingTransactions from "./SpendingTransactions"
+import SpendingTransactions from "./trans"
 
-const Spending = ({date, clicked, handleClick})=>{
+const Spending = ({date, clicked, handleClick, details, setDetails})=>{
     const [spendings, setSpendings] = useState([["12/01/2023","RENT","12.00","0.00","12.00"],["27/01/2023","UTILITIES","560.00","0.00","560.00"],["28/01/2023","ENTERTAINMENT","205.00","0.00","205.00"]])
     const [clickedIndex, setClickedIndex] = useState(null)
 
@@ -20,12 +20,14 @@ const Spending = ({date, clicked, handleClick})=>{
     }
 
     useEffect(()=>{
+        console.log(details)    
+        !details && setClickedIndex(null)
         console.log("Spendings retrieved")
-    },[])
+    },[details])
 
     const trs = spendings.map((spending, index) =>{
         return(
-            <SpendingTransactions key={index} openTransaction={()=>openTransaction(index)} clicked={clickedIndex===index} spends={spending}/>
+            <SpendingTransactions key={index} openTransaction={()=>openTransaction(index)} clicked={clickedIndex===index} spends={spending} setDetails={setDetails}/>
         )
     })
 

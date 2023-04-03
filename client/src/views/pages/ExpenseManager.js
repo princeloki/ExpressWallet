@@ -47,7 +47,7 @@ const ExpenseManager = (props) => {
       {/* Page content */}
       {clickedIndex !== null && <div className="curve expense-editor mb-xl-0">
 
-      <button className="curve" onClick={()=>setClickedIndex(null)}>Close</button>
+      <button className="curve" onClick={()=>setClickedIndex(null)}>Save</button>
       </div>}
       <Container className="mt--7 expense-container" fluid>
         <Row className="mt-5">
@@ -75,7 +75,7 @@ const ExpenseManager = (props) => {
           </Col>
           <Col xl="3">
             <Card className="curve shadow">
-              <div className="top-cats">
+              <div className="rec-exp">
                     <h3 className="mb-0">RECOMMENDED EXPENSES <GrCircleInformation className="info"/></h3>
                     <div className="cats">
                       

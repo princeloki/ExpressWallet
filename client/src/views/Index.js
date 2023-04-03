@@ -116,7 +116,7 @@ const Index = (props) => {
         </Row>
         <Row className="mt-5">
           <Col className="mb-5 mb-xl-0" xl="8">
-            <Card className="shadow">
+            <Card className="curve shadow">
               <CardHeader className="border-0">
                 <Row className="align-items-center">
                   <div className="col">

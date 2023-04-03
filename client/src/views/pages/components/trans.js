@@ -1,6 +1,6 @@
 import { useState,useEffect } from 'react'
 
-const SpendingTransactions = ({openTransaction, clicked, spends}) =>{
+const SpendingTransactions = ({openTransaction, clicked, spends, setDetails}) =>{
 
     useEffect(()=>{
         console.log("Transactions received")
@@ -22,17 +22,19 @@ const SpendingTransactions = ({openTransaction, clicked, spends}) =>{
     }
     ])
 
-    const tds = transactions.map((transaction,index) =>{
-        return(
-            <tr className="trans-info" key={index}>
-                <td>{transaction.date}</td>
-                <td>{transaction.merchant}</td>
-                <td>${transaction.sub}.00</td>
-                <td>${transaction.tax}.00</td>
-                <td>${transaction.total}.00</td>
-            </tr>
-        )
-    })
+    transactions&&clicked && setDetails(transactions)
+
+    // const tds = transactions.map((transaction,index) =>{
+    //     return(
+    //         <tr className="trans-info" key={index}>
+    //             <td>{transaction.date}</td>
+    //             <td>{transaction.merchant}</td>
+    //             <td>${transaction.sub}.00</td>
+    //             <td>${transaction.tax}.00</td>
+    //             <td>${transaction.total}.00</td>
+    //         </tr>
+    //     )
+    // })
     return(
         <>
             <tr className="main-row" onClick={openTransaction}>
@@ -42,9 +44,6 @@ const SpendingTransactions = ({openTransaction, clicked, spends}) =>{
                 <td>${spends[3]}</td>
                 <td>${spends[4]}</td>
             </tr>
-            {clicked &&
-                tds
-            }
         </>
     )
 }

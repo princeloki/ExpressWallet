@@ -67,7 +67,6 @@ router.post('/add_bank', (req, res) => {
     .catch(err => {
         console.log(err)
     })
-    console.log("add_bank")
 })
 
 router.delete('/delete_bank:id', (req,res) => {
@@ -94,8 +93,28 @@ router.delete('/delete_expense', (req, res)=>{
     console.log("delete expense")
 })
 
+router.post('/create_spending', (req, res) => {
+    console.log("spending added")
+})
+
+router.put('/update_spending', (req, res) => {
+    console.log("spending updated")
+})
+
+router.delete('/delete_spending', (req, res) => {
+    console.log("delete expense")
+})
+
 router.post('/get_spendings:id', (req, res)=>{
     console.log("spendings")
+})
+
+router.post('/assign_transactions', (req, res)=>{
+    console.log("transaction assigned")
+})
+
+router.get('/get_assigned', (req, res)=>{
+    console.log("assigned retrieved")
 })
 
 router.put('/update_spendings:name', (req, res)=>{
