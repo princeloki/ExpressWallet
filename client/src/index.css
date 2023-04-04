@@ -77,6 +77,36 @@ nav .dropdown h1{
     background: #5e72e4;
 }
 
+.registration-box{
+    position: relative !important;
+    min-height: 25em !important;
+}
+
+.buttons{
+    display: flex !important;
+    flex-direction: row !important;
+}
+
+.next-button{
+    font-size: 1.2em !important;
+    background: none;
+    position: absolute !important;
+    right: 2em;
+    bottom: 1em;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.back-button{
+    font-size: 1.2em !important;
+    background: none;
+    position: absolute !important;
+    left: 2em;
+    bottom: 1em;
+    border: none !important;
+    box-shadow: none !important;
+}
+
 .accounts-added{
     font-weight: bold;
     align-items: center;

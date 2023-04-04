@@ -13,10 +13,10 @@ import { useState } from "react";
 import axios from "axios";
 import { BsGlobe } from "react-icons/bs";
 import { FaSchool } from "react-icons/fa";
+import { AiOutlineRight } from "react-icons/ai"
 
 
-
-const FirstPage = () =>{
+const FirstPage = ({handleIndexChange}) =>{
 
     const [formData, setFormData] = useState({
       country: "",
@@ -35,6 +35,7 @@ const FirstPage = () =>{
     
     const handleSubmit = (e) => {
         e.preventDefault()
+        handleIndexChange(2)
         axios.post("http://localhost:3000/api/set_country",formData)
         .then(response => {
         console.log(response.data)
@@ -80,11 +81,11 @@ const FirstPage = () =>{
               />
             </InputGroup>
           </FormGroup>
-          <div className="text-center">
-            <Button className="mt-4 next-button" color="primary" type="submit">
-              Next
-            </Button>
-          </div>
+            <div className="text-center buttons">
+                <Button className="mt-4 next-button" type="submit">
+                Next <AiOutlineRight />
+                </Button>
+            </div>
         </Form>
       </CardBody>
     )

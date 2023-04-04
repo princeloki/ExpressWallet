@@ -15,13 +15,16 @@ import {
 import { useState } from "react"
 import axios from "axios"
 import { BsCurrencyDollar } from "react-icons/bs"
+import { AiOutlineRight } from "react-icons/ai"
+import { AiOutlineLeft } from "react-icons/ai"  
 
 
-const SecondPage = () =>{
+const SecondPage = ({handleIndexChange}) =>{
+    const [setBudget, setSetBudget] = useState("")
 
     const [formData, setFormData] = useState({
       length: "",
-      income: ""
+      income: 0
     })
   
 
@@ -33,13 +36,17 @@ const SecondPage = () =>{
         }
         })
     }
+
+    const handleSetBudget = (e) => {
+        setSetBudget(e.target.value)
+    }
     
     const handleSubmit = (e) => {
-        console.log(formData)
         e.preventDefault()
+        handleIndexChange(3)
         axios.post("http://localhost:3000/api/set_remittance",formData)
         .then(response => {
-        console.log(response.data)
+          console.log(response.data)
         })
         .catch(err => {
         console.log(err)
@@ -75,9 +82,9 @@ const SecondPage = () =>{
               </InputGroupAddon>
               <Input
                 type="select"
-                name="income"
-                value={formData.income}
-                onChange={(e) => handleChange(e)}
+                name="sel"
+                value={setBudget}
+                onChange={(e) => handleSetBudget(e)}
               >
                 <option>---Select---</option>
                 <option>Yes</option>
@@ -85,10 +92,30 @@ const SecondPage = () =>{
               </Input>
             </InputGroup>
           </FormGroup>
-          <div className="text-center">
-            <Button className="mt-4 next-button" color="primary" type="submit">
-              Next
-            </Button>
+          {setBudget==="Yes" && <FormGroup>
+            <InputGroup className="input-group-alternative mb-3">
+              <InputGroupAddon addonType="prepend">
+                <InputGroupText>
+                  <i className="ni ni-hat-3" />
+                </InputGroupText>
+              </InputGroupAddon>
+              <Input 
+              placeholder="How much will you receive each month?"
+              type="text"
+              name="income"
+              autoComplete="new-income"
+              value={formData.income}
+              onChange={(e) => handleChange(e)}
+              />
+            </InputGroup>
+          </FormGroup>}
+          <div className="text-center buttons">
+              <Button className="mt-4 back-button" onClick={()=>handleIndexChange(1)}>
+                    <AiOutlineLeft /> Back
+              </Button>
+              <Button className="mt-4 next-button" type="submit">
+              Next <AiOutlineRight />
+              </Button>
           </div>
         </Form>
       </CardBody>

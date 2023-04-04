@@ -24,7 +24,7 @@ const Register = () => {
   return (
     <>
       <Col lg="6" md="8">
-        <Card className="bg-secondary curve shadow border-0">
+        <Card className="bg-secondary curve shadow border-0 registration-box">
           {index === 0 && <Reg handleIndexChange={handleIndexChange} />}
           {index === 1 && <FirstPage handleIndexChange={handleIndexChange} />}
           {index === 2 && <SecondPage handleIndexChange={handleIndexChange} />}

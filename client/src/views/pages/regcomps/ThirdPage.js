@@ -16,15 +16,17 @@ import { useState } from "react"
 import axios from "axios"
 import { BsCurrencyExchange } from "react-icons/bs"
 import { BsCurrencyDollar } from "react-icons/bs"
+import { AiOutlineRight } from "react-icons/ai"
+import { AiOutlineLeft } from "react-icons/ai"  
 
 
-const ThirdPage = () =>{
+const ThirdPage = ({handleIndexChange}) =>{
 
     const [setBudget, setSetBudget] = useState("")
 
     const [formData, setFormData] = useState({
       currency: "USD",
-      budget: ""
+      budget: 0
     })
   
 
@@ -42,8 +44,8 @@ const ThirdPage = () =>{
     }
     
     const handleSubmit = (e) => {
-        console.log(formData, setBudget)
         e.preventDefault()
+        handleIndexChange(4)
         axios.post("http://localhost:3000/api/set_budget",formData)
         .then(response => {
         console.log(response.data)
@@ -113,11 +115,14 @@ const ThirdPage = () =>{
               />
             </InputGroup>
           </FormGroup>}
-          <div className="text-center">
-            <Button className="mt-4 next-button" color="primary" type="submit">
-              Next
-            </Button>
-          </div>
+            <div className="text-center buttons">
+                <Button className="mt-4 back-button" onClick={()=>handleIndexChange(2)}>
+                <AiOutlineLeft /> Back
+                </Button>
+                <Button className="mt-4 next-button" type="submit">
+                Next <AiOutlineRight />
+                </Button>
+            </div>
         </Form>
       </CardBody>
     )

@@ -7,12 +7,14 @@ import {
   } from "reactstrap";
 
 import { AiOutlinePlusCircle } from "react-icons/ai"
-  
+import { AiOutlineRight } from "react-icons/ai"
+import { AiOutlineLeft } from "react-icons/ai"  
+
 import { useState } from "react"
 import axios from "axios"
 
 
-const FourthPage = () =>{
+const FourthPage = ({handleIndexChange}) =>{
 
     const [setBudget, setSetBudget] = useState("")
 
@@ -47,9 +49,12 @@ const FourthPage = () =>{
                 <div className="add-box">
                     <AiOutlinePlusCircle className="add-button" onClick={openBank} /> 
                 </div>
-                <div className="text-center">
+                <div className="text-center buttons">
+                    <Button className="mt-4 back-button" onClick={()=>handleIndexChange(3)}>
+                    <AiOutlineLeft /> Back
+                    </Button>
                     <Button className="mt-4 next-button" color="primary" type="submit">
-                    Next
+                    Save
                     </Button>
                 </div>
             </CardBody>
