@@ -16,34 +16,13 @@ import { FaSchool } from "react-icons/fa";
 import { AiOutlineRight } from "react-icons/ai"
 
 
-const FirstPage = ({handleIndexChange}) =>{
-
-    const [formData, setFormData] = useState({
-      country: "",
-      host: ""
-    })
-  
-
-    const handleChange = (e) => {
-        setFormData(prevFormData=>{
-        return {
-            ...prevFormData,
-            [e.target.name]: e.target.value,
-        }
-        })
-    }
+const FirstPage = ({handleIndexChange, handleAddition, userData}) =>{
     
     const handleSubmit = (e) => {
         e.preventDefault()
         handleIndexChange(2)
-        axios.post("http://localhost:3000/api/set_country",formData)
-        .then(response => {
-        console.log(response.data)
-        })
-        .catch(err => {
-        console.log(err)
-        })
     }
+
     return(
       <CardBody className="px-lg-5 py-lg-5">
         <Form role="form" onSubmit={handleSubmit}>
@@ -59,8 +38,8 @@ const FirstPage = ({handleIndexChange}) =>{
               type="text"
               name="country"
               autoComplete="new-country"
-              value={formData.country}
-              onChange={(e) => handleChange(e)}
+              value={userData.country}
+              onChange={(e) => handleAddition(e)}
               />
             </InputGroup>
           </FormGroup>
@@ -76,8 +55,8 @@ const FirstPage = ({handleIndexChange}) =>{
                 type="text"
                 autoComplete="new-host"
                 name="host"
-                value={formData.host}
-                onChange={(e) => handleChange(e)}
+                value={userData.host}
+                onChange={(e) => handleAddition(e)}
               />
             </InputGroup>
           </FormGroup>

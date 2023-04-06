@@ -39,17 +39,22 @@ router.post('/register', async (req, res) => {
     const balance = 0
     const length = 0
     const income = 0
-    console.log(firstName, lastName, email, phone, hash, balance,length,income)
-    // let query = `INSERT INTO user(uid,first_name,last_name,email,phone_num,balance,length,income,password) VALUES`
-    // const size = "SELECT COUNT(*) as count FROM user"
-    // db.query(size, (err, result) => {
-    //     if (err) throw err;
-    //     const l = result[0].count
-    //     query += `(${l},${firstName},${lastName},${email},${phone},${balance},${length},${income},${password})`
-    //     db.query(query, (err) => {
-    //         res.send("User added")
-    //     })
-    // })
+    const country = ""
+    const host = ""
+    const currency = "USD"
+    const budget = 0
+    console.log(firstName, lastName, email, phone, hash, balance,length,income,password)
+    let query = `INSERT INTO user(uid,first_name,last_name,email,phone_num,balance,length,income,password,country,host,currency,budget) VALUES`
+    const size = "SELECT COUNT(*) as count FROM user"
+    db.query(size, (err, result) => {
+        if (err) throw err;
+        const l = result[0].count
+        query += `(${l},'${firstName}','${lastName}','${email}','${phone}',${balance},${length},${income},'${password}','${country}','${host}','${currency}',${budget})`
+        db.query(query, (err) => {
+            if (err) throw err;
+            res.send("User added")
+        })
+    })
     console.log("register")
 })
 
@@ -97,11 +102,11 @@ router.post('/create_spending', (req, res) => {
     console.log("spending added")
 })
 
-router.put('/update_spending', (req, res) => {
+router.put('/update_spending:id', (req, res) => {
     console.log("spending updated")
 })
 
-router.delete('/delete_spending', (req, res) => {
+router.delete('/delete_spending:id', (req, res) => {
     console.log("delete expense")
 })
 
@@ -115,11 +120,6 @@ router.post('/assign_transactions', (req, res)=>{
 
 router.get('/get_assigned', (req, res)=>{
     console.log("assigned retrieved")
-})
-
-router.put('/update_spendings:name', (req, res)=>{
-    const spendingName = req.params.name;
-    console.log(`Updated the ${spendingName} Spending`)
 })
 
 router.delete('/delete_account', (req, res) => {

@@ -19,23 +19,9 @@ import { AiOutlineRight } from "react-icons/ai"
 import { AiOutlineLeft } from "react-icons/ai"  
 
 
-const SecondPage = ({handleIndexChange}) =>{
+const SecondPage = ({handleIndexChange,handleAddition,userData}) =>{
     const [setBudget, setSetBudget] = useState("")
 
-    const [formData, setFormData] = useState({
-      length: "",
-      income: 0
-    })
-  
-
-    const handleChange = (e) => {
-        setFormData(prevFormData=>{
-        return {
-            ...prevFormData,
-            [e.target.name]: e.target.value,
-        }
-        })
-    }
 
     const handleSetBudget = (e) => {
         setSetBudget(e.target.value)
@@ -44,13 +30,6 @@ const SecondPage = ({handleIndexChange}) =>{
     const handleSubmit = (e) => {
         e.preventDefault()
         handleIndexChange(3)
-        axios.post("http://localhost:3000/api/set_remittance",formData)
-        .then(response => {
-          console.log(response.data)
-        })
-        .catch(err => {
-        console.log(err)
-        })
     }
     return(
       <CardBody className="px-lg-5 py-lg-5">
@@ -67,13 +46,13 @@ const SecondPage = ({handleIndexChange}) =>{
               type="text"
               name="length"
               autoComplete="new-length"
-              value={formData.length}
-              onChange={(e) => handleChange(e)}
+              value={userData.length}
+              onChange={(e) => handleAddition(e)}
               />
             </InputGroup>
           </FormGroup>
           <FormGroup>
-            <Label class="reg-label" for="income">Will you receive income/remmittance?</Label>
+            <Label className="reg-label" for="income">Will you receive income/remmittance?</Label>
             <InputGroup className="input-group-alternative mb-3">
               <InputGroupAddon addonType="prepend">
                 <InputGroupText>
@@ -104,8 +83,8 @@ const SecondPage = ({handleIndexChange}) =>{
               type="text"
               name="income"
               autoComplete="new-income"
-              value={formData.income}
-              onChange={(e) => handleChange(e)}
+              value={userData.income}
+              onChange={(e) => handleAddition(e)}
               />
             </InputGroup>
           </FormGroup>}

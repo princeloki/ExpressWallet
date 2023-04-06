@@ -13,7 +13,7 @@ const app = express()
 
 
 app.use(cors({
-    origin: 'http://localhost:3000',
+    origin: 'http://localhost:3001',
     optionsSuccessStatus: 200
 }));
   
@@ -67,5 +67,5 @@ app.use('/api', apiRoute)
 
 
 app.listen(4000, ()=>{
-    console.log('listening on port 3000');
+    console.log('listening on port 4000');
 })

@@ -13,31 +13,15 @@ import {
   } from "reactstrap";
   
 import { useState } from "react"
-import axios from "axios"
 import { BsCurrencyExchange } from "react-icons/bs"
 import { BsCurrencyDollar } from "react-icons/bs"
 import { AiOutlineRight } from "react-icons/ai"
 import { AiOutlineLeft } from "react-icons/ai"  
 
 
-const ThirdPage = ({handleIndexChange}) =>{
+const ThirdPage = ({handleIndexChange, handleAddition, userData}) =>{
 
     const [setBudget, setSetBudget] = useState("")
-
-    const [formData, setFormData] = useState({
-      currency: "USD",
-      budget: 0
-    })
-  
-
-    const handleChange = (e) => {
-        setFormData(prevFormData=>{
-        return {
-            ...prevFormData,
-            [e.target.name]: e.target.value,
-        }
-        })
-    }
 
     const handleSetBudget = (e) => {
         setSetBudget(e.target.value)
@@ -46,19 +30,12 @@ const ThirdPage = ({handleIndexChange}) =>{
     const handleSubmit = (e) => {
         e.preventDefault()
         handleIndexChange(4)
-        axios.post("http://localhost:3000/api/set_budget",formData)
-        .then(response => {
-        console.log(response.data)
-        })
-        .catch(err => {
-        console.log(err)
-        })
     }
     return(
       <CardBody className="px-lg-5 py-lg-5">
         <Form role="form" onSubmit={handleSubmit}>
           <FormGroup>
-            <Label class="reg-label" for="income">Preferred Currency</Label>
+            <Label className="reg-label" for="income">Preferred Currency</Label>
             <InputGroup className="input-group-alternative mb-3">
               <InputGroupAddon addonType="prepend">
                 <InputGroupText>
@@ -67,9 +44,9 @@ const ThirdPage = ({handleIndexChange}) =>{
               </InputGroupAddon>
               <Input
                 type="select"
-                name="income"
-                value={formData.currency}
-                onChange={(e) => handleChange(e)}
+                name="currency"
+                value={userData.currency}
+                onChange={(e) => handleAddition(e)}
               >
                 <option>USD</option>
                 <option>EUR</option>
@@ -79,7 +56,7 @@ const ThirdPage = ({handleIndexChange}) =>{
             </InputGroup>
           </FormGroup>
           <FormGroup>
-            <Label class="reg-label" for="income">Would you like us to set your budget for you?</Label>
+            <Label className="reg-label" for="income">Would you like us to set your budget for you?</Label>
             <InputGroup className="input-group-alternative mb-3">
               <InputGroupAddon addonType="prepend">
                 <InputGroupText>
@@ -110,8 +87,8 @@ const ThirdPage = ({handleIndexChange}) =>{
               type="text"
               name="budget"
               autoComplete="new-budget"
-              value={formData.budget}
-              onChange={(e) => handleChange(e)}
+              value={userData.budget}
+              onChange={(e) => handleAddition(e)}
               />
             </InputGroup>
           </FormGroup>}

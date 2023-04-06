@@ -17,7 +17,7 @@ import {
 import { useState } from "react"
 import axios from "axios"
 
-const Reg = () =>{
+const Reg = ({handleIndexChange}) =>{
 
     const [formData, setFormData] = useState({
       name: "",
@@ -38,9 +38,10 @@ const Reg = () =>{
     
     const handleSubmit = (e) => {
         e.preventDefault()
-        axios.post("http://localhost:3000/api/register",formData)
+        axios.post("http://localhost:4000/api/register",formData)
         .then(response => {
-        console.log(response.data)
+          console.log(response.data)
+          handleIndexChange(1)
         })
         .catch(err => {
         console.log(err)

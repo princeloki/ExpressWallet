@@ -24,17 +24,6 @@ const FourthPage = ({handleIndexChange}) =>{
         console.log("Bank opened")
     }
     
-    const handleSubmit = (e) => {
-        console.log(formData, setBudget)
-        e.preventDefault()
-        axios.post("http://localhost:3000/api/set_budget",formData)
-        .then(response => {
-        console.log(response.data)
-        })
-        .catch(err => {
-        console.log(err)
-        })
-    }
     return(      
         <>
             <CardHeader className="bg-transparent pb-5 bank-header">
