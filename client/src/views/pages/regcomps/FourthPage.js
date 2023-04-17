@@ -1,5 +1,3 @@
-
-
 import {
     Button,
     CardHeader,
@@ -7,21 +5,12 @@ import {
   } from "reactstrap";
 
 import { AiOutlinePlusCircle } from "react-icons/ai"
-import { AiOutlineRight } from "react-icons/ai"
 import { AiOutlineLeft } from "react-icons/ai"  
 
-import { useState } from "react"
-import axios from "axios"
-
-
-const FourthPage = ({handleIndexChange}) =>{
-
-    const [setBudget, setSetBudget] = useState("")
-
-    const [formData, setFormData] = useState([])
+const FourthPage = ({handleIndexChange, setActive, submitUserData, bankAmount}) =>{
 
     const openBank = () =>{
-        console.log("Bank opened")
+        setActive(true);
     }
     
     return(      
@@ -31,7 +20,7 @@ const FourthPage = ({handleIndexChange}) =>{
                     <small>Add Bank Account(s)</small>
                 </div>
                 <div className="text-center accounts-added">
-                    <span className="btn-inner--text">{formData.length} Accounts Added</span>
+                    <span className="btn-inner--text">{bankAmount} Account(s) Added</span>
                 </div>
             </CardHeader>
             <CardBody className="px-lg-5 py-lg-5">
@@ -42,7 +31,7 @@ const FourthPage = ({handleIndexChange}) =>{
                     <Button className="mt-4 back-button" onClick={()=>handleIndexChange(3)}>
                     <AiOutlineLeft /> Back
                     </Button>
-                    <Button className="mt-4 next-button" color="primary" type="submit">
+                    <Button className="mt-4 next-button" onClick={submitUserData} color="primary">
                     Save
                     </Button>
                 </div>

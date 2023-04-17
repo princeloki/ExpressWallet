@@ -13,7 +13,6 @@ import {
   } from "reactstrap";
   
 import { useState } from "react"
-import axios from "axios"
 import { BsCurrencyDollar } from "react-icons/bs"
 import { AiOutlineRight } from "react-icons/ai"
 import { AiOutlineLeft } from "react-icons/ai"  

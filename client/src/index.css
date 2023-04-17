@@ -342,9 +342,29 @@ tr:last-of-type{
     font-weight: bold;
 }
 
+.reg-cont{
+    position: absolute !important;
+    z-index: 0;
+}
+
+.bank-card{
+    position: absolute !important;
+    height: 20em;
+    width: 30em;
+    top: 100%;
+    z-index: 2;
+}
+
+.bank-card .input-group{
+    width: 80% !important;
+    margin: 2em auto;
+}
+
 .footer{
-    position: relative;
+    position: absolute;
+    background: none !important;
     bottom: 0;
     width: 80%;
+    left: 10%;
     margin-top: 3em;
 }

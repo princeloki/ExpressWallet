@@ -1,3 +1,5 @@
+
+
 const express = require('express')
 const bodyParser = require('body-parser')
 const path = require('path')
@@ -23,9 +25,33 @@ db.connect((err)=>{
 })
 
 
-
 router.post('/login', (req, res) => {
-    console.log("login")
+    const email = req.body.email
+    const password = req.body.password
+    const sql = `SELECT uid, email, password FROM user WHERE email = '${email}'`
+    db.query(sql, (err,result) => {
+        if (err) throw err;
+        const uid = result[0].uid;
+        const email = result[0].email;
+        const pass = result[0].password;
+        bcrypt.compare(password, pass, function(err, result){
+            if (err){
+                console.log(err)
+            } else{
+                if (result){
+                    res.send({
+                        message:"Passwords match",
+                        body: {
+                            uid: uid,
+                            email: email
+                        }
+                    });
+                } else{
+                    res.send({message: "Passwords do not match"});
+                }
+            }
+        })
+    })
 })
 
 router.post('/register', async (req, res) => {
@@ -43,19 +69,33 @@ router.post('/register', async (req, res) => {
     const host = ""
     const currency = "USD"
     const budget = 0
-    console.log(firstName, lastName, email, phone, hash, balance,length,income,password)
     let query = `INSERT INTO user(uid,first_name,last_name,email,phone_num,balance,length,income,password,country,host,currency,budget) VALUES`
     const size = "SELECT COUNT(*) as count FROM user"
     db.query(size, (err, result) => {
         if (err) throw err;
         const l = result[0].count
-        query += `(${l},'${firstName}','${lastName}','${email}','${phone}',${balance},${length},${income},'${password}','${country}','${host}','${currency}',${budget})`
+        query += `(${l},'${firstName}','${lastName}','${email}','${phone}',${balance},${length},${income},'${hash}','${country}','${host}','${currency}',${budget})`
         db.query(query, (err) => {
             if (err) throw err;
-            res.send("User added")
+            res.send({count: l});
         })
     })
-    console.log("register")
+})
+
+router.put('/set_user', (req, res)=>{
+    const email = req.body.email;
+    const country = req.body.country;
+    const host =  req.body.host;
+    const length = req.body.length;
+    const income = req.body.income;
+    const currency = req.body.currency;
+    const budget = req.body.budget;
+    let query = `UPDATE user SET country = '${country}', host = '${host}', length = ${length}, income = ${income}, 
+    currency = '${currency}', budget = ${budget} WHERE email='${email}'`
+    db.query(query, (err)=>{
+        if (err) throw err;
+        res.send("User data updated");
+    })
 })
 
 router.post('/secret', (req, res) => {
@@ -63,11 +103,25 @@ router.post('/secret', (req, res) => {
 })
 
 router.post('/add_bank', (req, res) => {
-    const username = req.body.username
-    const password = req.body.password
+    const uid = req.body.uid;
+    const username = req.body.username;
+    const password = req.body.password;
     axios.post('http://localhost:5000/api/get_bank', {username: username, password: password})
     .then(response => {
-        res.send(response.data)
+        const bankData = response.data 
+        const balance = `UPDATE user SET balance = ${bankData.balance} WHERE uid = ${uid}`
+        db.query(balance, (err)=>{
+            if (err) throw err;
+            const bank = `INSERT INTO bank (bid, uid, balance, currency) VALUES (${bankData.bid}, ${uid}, ${bankData.balance}, '${bankData.currency}')`
+            db.query(bank, (err)=>{
+                if (err) throw err;
+                const amount = `SELECT COUNT(*) as number FROM bank WHERE uid = ${uid}`
+                db.query(amount, (err,result)=>{
+                    if (err) throw err;
+                    res.send({count: result[0].number})
+                })
+            })
+        })
     })
     .catch(err => {
         console.log(err)

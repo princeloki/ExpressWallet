@@ -13,6 +13,7 @@ import {
   Col
 } from "reactstrap";
 
+import axios from 'axios';
 import { useState } from "react"
 
 const Login = () => {
@@ -23,11 +24,24 @@ const Login = () => {
   })
 
   const handleChange = (e) => {
+    console.log(formData)
     setFormData(prevFormData =>{
       return{
         ...prevFormData,
         [e.target.name]: e.target.value,
       }
+    })
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    console.log("Clicked")
+    axios.post('http://localhost:4000/api/login', formData)
+    .then(response => {
+      console.log(response)
+    })
+    .catch(err => {
+      console.log(err)
     })
   }
 
@@ -63,7 +77,7 @@ const Login = () => {
             <div className="text-center text-muted mb-4">
               <small>Or sign in with credentials</small>
             </div>
-            <Form role="form">
+            <Form role="form" onSubmit={handleSubmit}>
               <FormGroup className="mb-3">
                 <InputGroup className="input-group-alternative">
                   <InputGroupAddon addonType="prepend">

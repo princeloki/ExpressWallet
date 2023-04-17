@@ -76,6 +76,16 @@ const ExpenseManager = (props) => {
           <Col xl="3">
             <Card className="curve shadow">
               <div className="rec-exp">
+                    <h3 className="mb-0">NEW TRANSACTIONS <GrCircleInformation className="info"/></h3>
+                    <div className="cats">
+                      
+                    </div>
+              </div>
+            </Card>
+          </Col>
+          <Col xl="3">
+            <Card className="curve shadow">
+              <div className="rec-exp">
                     <h3 className="mb-0">RECOMMENDED EXPENSES <GrCircleInformation className="info"/></h3>
                     <div className="cats">
                       

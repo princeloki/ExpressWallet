@@ -9,8 +9,6 @@ import {
     InputGroup
   } from "reactstrap";
   
-import { useState } from "react";
-import axios from "axios";
 import { BsGlobe } from "react-icons/bs";
 import { FaSchool } from "react-icons/fa";
 import { AiOutlineRight } from "react-icons/ai"

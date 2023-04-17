@@ -75,7 +75,7 @@ const ThirdPage = ({handleIndexChange, handleAddition, userData}) =>{
               </Input>
             </InputGroup>
           </FormGroup>
-          {setBudget==="Yes" && <FormGroup>
+          {setBudget==="No" && <FormGroup>
             <InputGroup className="input-group-alternative mb-3">
               <InputGroupAddon addonType="prepend">
                 <InputGroupText>
