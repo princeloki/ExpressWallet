@@ -10,8 +10,9 @@ import Sidebar from "components/Sidebar/Sidebar.js";
 import routes from "routes.js";
 
 const Admin = (props) => {
-  
-  
+  const userInfo = localStorage.getItem('user');
+  const [user, setUser] = useState(userInfo ? JSON.parse(userInfo) : null);
+
   const [onDashboard, setOnDashboard] = useState(true);
   const mainContent = React.useRef(null);
   const location = useLocation();
@@ -30,7 +31,7 @@ const Admin = (props) => {
             path={prop.layout + prop.path}
             key={key}
             render={(props) => (
-              <prop.component {...props} onDashboard={onDashboard} />
+              <prop.component {...props} onDashboard={onDashboard} user={user}/>
             )}
           />
         );
@@ -57,7 +58,8 @@ const Admin = (props) => {
       <Sidebar
         {...props}
         routes={routes}
-        setOnDashboard={setOnDashboard}
+        setOnDashboard={setOnDashboard} 
+        user={user}
       />
       <div className="main-content" ref={mainContent}>
         <AdminNavbar
@@ -68,9 +70,9 @@ const Admin = (props) => {
           {getRoutes(routes)}
           <Redirect from="*" to="/admin/index" />
         </Switch>
-        <Container fluid>
+        {/* <Container fluid>
           <AdminFooter />
-        </Container>
+        </Container> */}
       </div>
     </>
   );

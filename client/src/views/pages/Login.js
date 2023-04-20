@@ -1,3 +1,5 @@
+
+
 import {
   Button,
   Card,
@@ -15,16 +17,17 @@ import {
 
 import axios from 'axios';
 import { useState } from "react"
+import { useHistory } from "react-router-dom";
 
 const Login = () => {
-
+  const history = useHistory();
+  
   const [formData, setFormData] = useState({
     email: "",
     password: ""
   })
 
   const handleChange = (e) => {
-    console.log(formData)
     setFormData(prevFormData =>{
       return{
         ...prevFormData,
@@ -35,10 +38,11 @@ const Login = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    console.log("Clicked")
     axios.post('http://localhost:4000/api/login', formData)
     .then(response => {
-      console.log(response)
+      const userString = JSON.stringify(response.data.body);
+      localStorage.setItem('user', userString);
+      history.push("/admin/index")
     })
     .catch(err => {
       console.log(err)
@@ -126,7 +130,7 @@ const Login = () => {
                 </label>
               </div>
               <div className="text-center">
-                <Button className="my-4" color="primary" type="button">
+                <Button className="my-4" color="primary" type="submit">
                   Sign in
                 </Button>
               </div>

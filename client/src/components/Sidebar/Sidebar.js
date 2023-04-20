@@ -1,3 +1,5 @@
+
+
 import { useState } from "react";
 import { NavLink as NavLinkRRD, Link } from "react-router-dom";
 import { PropTypes } from "prop-types";
@@ -23,7 +25,10 @@ import {Collapse,
   Col
 } from "reactstrap";
 
+import { useHistory } from "react-router-dom"
+
 const Sidebar = (props) => {
+  const history = useHistory()
   const [collapseOpen, setCollapseOpen] = useState();
   // verifies if routeName is the one active (in browser input)
   const activeRoute = (routeName) => {
@@ -33,7 +38,7 @@ const Sidebar = (props) => {
   const toggleCollapse = () => {
     setCollapseOpen((data) => !data);
   };
-  // closes the collapse
+
   const closeCollapse = () => {
     setCollapseOpen(false);
   };
@@ -60,6 +65,12 @@ const Sidebar = (props) => {
       );
     });
   };
+
+  const logout = () =>{
+    console.log("clicked")
+    localStorage.removeItem('user');
+    history.push("/auth/login")
+  }
 
   const { routes } = props;
   return (
@@ -115,7 +126,7 @@ const Sidebar = (props) => {
                 <span>My profile</span>
               </DropdownItem>
               <DropdownItem divider />
-              <DropdownItem href="#pablo" onClick={(e) => e.preventDefault()}>
+              <DropdownItem href="#" onClick={logout}>
                 <i className="ni ni-user-run" />
                 <span>Logout</span>
               </DropdownItem>

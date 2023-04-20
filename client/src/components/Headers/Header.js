@@ -1,11 +1,49 @@
-import { Card, CardBody, CardTitle, Container, Row, Col } from "reactstrap";
+
+
+import { 
+  Card, 
+  CardBody, 
+  CardTitle, 
+  Container, 
+  Row, 
+  Col, 
+  FormGroup,
+  Form,
+  Label,
+  Input,
+  InputGroupAddon,
+  InputGroupText,
+  InputGroup
+} from "reactstrap";
+
 import { FcCurrencyExchange } from "react-icons/fc"
 import { BsCurrencyYen } from "react-icons/bs"
 import { RiArrowDropDownLine } from "react-icons/ri"
 
-const Header = ({onDashboard}) => {
+const Header = ({onDashboard, userData, setUser}) => {
+
+  const currIcon = () =>{
+    return(
+      <div></div>
+    )
+  }
+
+
+  const setCurrency = (e) =>{
+    setUser(prevUserData=>{
+      return{
+        ...prevUserData,
+        balance: prevUserData.balance*2,
+        income: prevUserData.income*2,
+        currency: e.target.value,
+      }
+    })
+  }
+  
+
   return (
     <>
+      {userData &&
       <div className="header bg-gradient-info pb-8 pt-5 pt-md-8">
         <Container fluid>
           <div className="header-body">
@@ -22,9 +60,9 @@ const Header = ({onDashboard}) => {
                             className="text-uppercase text-muted mb-0"
                           >
                             Today's Balance
-                          </CardTitle>
+                          </CardTitle>  
                           <span className="h2 font-weight-bold mb-0">
-                            ￥897/<span>1897</span>
+                            ${userData.budget/30}/<span>{userData.budget/30}</span>
                           </span>
                         </div>
                         <Col className="col-auto">
@@ -53,7 +91,7 @@ const Header = ({onDashboard}) => {
                           >
                             Week's Balance
                           </CardTitle>
-                          <span className="h2 font-weight-bold mb-0">￥2356/<span>4237</span></span>
+                          <span className="h2 font-weight-bold mb-0">${userData.budget/4}/<span>{userData.budget/4}</span></span>
                         </div>
                         <Col className="col-auto">
                           <div className="icon icon-shape bg-blue text-white rounded-circle shadow">
@@ -81,7 +119,7 @@ const Header = ({onDashboard}) => {
                           >
                             Month's Balance
                           </CardTitle>
-                          <span className="h2 font-weight-bold mb-0">￥4924/<span>8888</span></span>
+                          <span className="h2 font-weight-bold mb-0">${userData.budget}/<span>{userData.budget}</span></span>
                         </div>
                         <Col className="col-auto">
                           <div className="icon icon-shape bg-blue text-white rounded-circle shadow">
@@ -111,8 +149,20 @@ const Header = ({onDashboard}) => {
                         </Col>
                         <Col className="col-auto my-auto">
                           <div className="currency-control my-auto">
-                            <h2>YEN</h2>
-                            <RiArrowDropDownLine />
+                            <InputGroup className="input-group-alternative mb-3">
+                              <Input
+                                type="select"
+                                name="currency"
+                                value={userData.currency}
+                                onChange={(e) => setCurrency(e)}
+                              >
+                                <option>USD</option>
+                                <option>EUR</option>
+                                <option>GBP</option>
+                                <option>YEN</option>
+                                <option>JMD</option>
+                              </Input>
+                            </InputGroup>
                           </div>
                         </Col>
                         
@@ -124,6 +174,7 @@ const Header = ({onDashboard}) => {
           </div>
         </Container>
       </div>
+      }
     </>
   );
 };

@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 // reactstrap components
 import {
   DropdownMenu,
@@ -14,6 +14,15 @@ import {
 import { IoIosNotifications } from "react-icons/io"
 
 const AdminNavbar = (props) => {
+
+  const history = useHistory();
+  
+  const logout = () =>{
+    console.log("clicked")
+    localStorage.removeItem('user');
+    history.push("/auth/login")
+  }
+  
   return (
     <>
       <Navbar className="navbar-top navbar-dark" expand="md" id="navbar-main">
@@ -48,7 +57,7 @@ const AdminNavbar = (props) => {
                   <span>My profile</span>
                 </DropdownItem>
                 <DropdownItem divider />
-                <DropdownItem href="#pablo" onClick={(e) => e.preventDefault()}>
+                <DropdownItem href="#pablo" onClick={logout}>
                   <i className="ni ni-user-run" />
                   <span>Logout</span>
                 </DropdownItem>

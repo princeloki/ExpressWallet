@@ -360,6 +360,48 @@ tr:last-of-type{
     margin: 2em auto;
 }
 
+.top-cats-col{
+    width: 100% !important;
+}
+
+.top-cats-header{
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    gap: 4em;
+    margin-bottom: 1em;
+}
+
+.top-cats-header h3{
+    width: 8em;
+}
+
+.top-cats-header a{
+    margin-left: auto;
+    width: 6em;
+}
+
+.top-cats-body{
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 0.5em;
+}
+
+.top-cats-body:first-of-type{
+    margin-top: 1em;
+}
+
+.top-cats-body h2, .top-cats-body h3{ 
+    text-align: left;
+    line-height: 1em;
+}
+
+.top-cats-body h3{
+    font-size: 0.8em;
+    color: #818181;
+}
+
+
 .footer{
     position: absolute;
     background: none !important;

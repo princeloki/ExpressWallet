@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import Expense from "./components/Expense"
 
 import {
@@ -11,9 +11,23 @@ import {
 
 
 import Header from "components/Headers/Header.js";
-import { GrCircleInformation } from "react-icons/gr"
+import { GrCircleInformation } from "react-icons/gr";
+import axios from "axios";
 
 const ExpenseManager = (props) => {
+
+  const [userData, setUserData] = useState(null)
+
+  useEffect(() => {
+    axios.get(`http://localhost:4000/api/get_user/${props.user.uid}`)
+    .then(response=>{
+      setUserData(response.data)
+    })
+    .catch(err=>{
+      console.log(err)
+    })
+  },[])
+
   const [expenses, setExpenses] = useState([
     {
       name: "GROCERIES",
@@ -43,7 +57,7 @@ const ExpenseManager = (props) => {
 
   return (
     <>
-      <Header onDashboard={props.onDashboard}/>
+      <Header onDashboard={props.onDashboard} userData={userData}/>
       {/* Page content */}
       {clickedIndex !== null && <div className="curve expense-editor mb-xl-0">
 

@@ -94,7 +94,21 @@ router.put('/set_user', (req, res)=>{
     currency = '${currency}', budget = ${budget} WHERE email='${email}'`
     db.query(query, (err)=>{
         if (err) throw err;
-        res.send("User data updated");
+        const user = `SELECT uid, email FROM user WHERE email = '${email}'`
+        db.query(user, (err, result)=>{
+            if (err) throw err;
+            res.send({message: "Success", body:result[0]})
+        })
+    })
+})
+
+router.get('/get_user/:id', (req, res)=>{
+    const uid = req.params.uid;
+    const sq = `SELECT first_name, last_name, email, balance, length, income, currency, budget FROM user WHERE uid='${uid}'`
+    db.query(sq, (err, result)=>{
+        if (err) throw err;
+        const user = result[0];
+        res.send(user);
     })
 })
 
@@ -109,12 +123,27 @@ router.post('/add_bank', (req, res) => {
     axios.post('http://localhost:5000/api/get_bank', {username: username, password: password})
     .then(response => {
         const bankData = response.data 
-        const balance = `UPDATE user SET balance = ${bankData.balance} WHERE uid = ${uid}`
+        const balance = `UPDATE user SET balance = balance + ${bankData.balance} WHERE uid = ${uid}`
         db.query(balance, (err)=>{
             if (err) throw err;
             const bank = `INSERT INTO bank (bid, uid, balance, currency) VALUES (${bankData.bid}, ${uid}, ${bankData.balance}, '${bankData.currency}')`
             db.query(bank, (err)=>{
                 if (err) throw err;
+                axios.get(`http://localhost:5000/api/get_transactions/${bankData.bid}`)
+                .then(response=>{
+                    const trans = response.data
+                    for(let i=0;i<trans.length;i++){
+                        let isoDate = new Date(trans[i].date).toISOString().replace('T', ' ').replace('Z', '');
+                        const sq = `INSERT INTO transaction (bid, merchant_name, iso, category, currency, date, amount) VALUES
+                         (${trans[i].bid},'${trans[i].merchant}',${trans[i].iso},'${trans[i].category}','${trans[i].currency}','${isoDate}',${trans[i].amount})`
+                        db.query(sq, (err)=>{
+                            if (err) throw err;
+                        })
+                    }
+                })
+                .catch(err=>{
+                    console.log(err);
+                })
                 const amount = `SELECT COUNT(*) as number FROM bank WHERE uid = ${uid}`
                 db.query(amount, (err,result)=>{
                     if (err) throw err;
@@ -132,8 +161,60 @@ router.delete('/delete_bank:id', (req,res) => {
     console.log("bank deleted")
 })
 
-router.post('/get_transactions:id', (req, res)=>{
-    console.log("transactions")
+router.get('/update_transactions/:id', (req, res) => {
+    const uid = req.params.id;
+    const query = `SELECT * FROM bank WHERE uid = ${uid}`;
+    db.query(query, (err, result) => {
+      if (err) throw err;
+      for (let i = 0; i < result.length; i++) {
+        console.log(result[i].bid);
+        axios
+          .get(`http://localhost:5000/api/get_transactions/${result[i].bid}`)
+          .then((response) => {
+            const trans = response.data;
+            for (let i = 0; i < trans.length; i++) {
+              let isoDate = new Date(trans[i].date)
+                .toISOString()
+                .replace('T', ' ')
+                .replace('Z', '');
+  
+              const sq = `INSERT IGNORE INTO transaction (bid, merchant_name, iso, category, currency, date, amount) VALUES (${trans[i].bid},'${trans[i].merchant}',${trans[i].iso},'${trans[i].category}','${trans[i].currency}','${isoDate}',${trans[i].amount})`;
+  
+              db.query(sq, (err) => {
+                if (err) throw err;
+              });
+            }
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+      }
+  
+      res.send('Transactions updated successfully');
+    });
+  });
+  
+
+router.get('/get_top_five_transactions/:id', (req, res)=>{
+    const uid = req.params.id;
+    const sql = `SELECT * FROM Transaction WHERE bid in (SELECT bid FROM bank WHERE uid = '${uid}') ORDER BY date DESC LIMIT 5`
+    db.query(sql, (err, result) =>{
+        if (err) throw err;
+        res.send(result)
+    })
+})
+
+router.get('/get_most_common/:id', (req, res)=>{
+    const uid = req.params.id;
+    const sql = `SELECT merchant_name, SUM(amount) as total, COUNT(*) AS transaction_count FROM transaction
+                WHERE bid IN (SELECT bid FROM bank WHERE uid = ${uid})
+                GROUP BY merchant_name
+                ORDER BY transaction_count DESC
+                LIMIT 5;`
+    db.query(sql, (err, result)=>{
+        if (err) throw err;
+        res.send(result);
+    })
 })
 
 router.put('/update_user', (req, res) => {

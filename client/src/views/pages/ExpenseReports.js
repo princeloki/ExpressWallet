@@ -1,4 +1,3 @@
-import { useState } from "react"
 import {
   Container,
   Table,
@@ -6,12 +5,27 @@ import {
   Row
 } from "reactstrap";
 
+import { useState, useEffect } from "react";
 import Header from "components/Headers/Header.js";
 import Spending from "./components/Spending";
+import axios from 'axios';
 
 const ExpenseReports = (props) => {
   const [clickedIndex, setClickedIndex] = useState(0)
   const [moreDetails, setMoreDetails] = useState(null)
+
+  const [userData, setUserData] = useState(null)
+
+  useEffect(() => {
+    axios.get(`http://localhost:4000/api/get_user/${props.user.uid}`)
+    .then(response=>{
+      setUserData(response.data)
+    })
+    .catch(err=>{
+      console.log(err)
+    })
+  },[])
+
 
   const handleSpendingClick = (index)=>{
       clickedIndex === index ? setClickedIndex(null) : setClickedIndex(index) 
@@ -33,7 +47,7 @@ const ExpenseReports = (props) => {
 
   return (
     <>
-      <Header onDashboard={props.onDashboard}/>
+      <Header onDashboard={props.onDashboard} userData={userData}/>
       {/* Page content */}
       {moreDetails && 
       <Col className="curve spending-list" xl="9">
