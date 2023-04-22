@@ -331,7 +331,7 @@ tr:last-of-type{
     transition: all 0.5s ease-in-out;
 }
 
-.expense-editor button{
+.save-button{
     position: absolute;
     bottom: 1em;
     left: 40%;
@@ -401,6 +401,135 @@ tr:last-of-type{
     color: #818181;
 }
 
+.cats{
+    display: flex;
+    flex-direction: column;
+    width: 80%;
+    margin: 0 auto;
+}
+
+.cats button:first-of-type{
+    margin-top: 1em;
+}
+
+.cats button:last-of-type{
+    width: 100%;
+    text-align: center;
+    margin-bottom: 2em;
+}
+
+.expense-adder{
+    position: absolute !important;
+    top: 5em;
+    left: 5em;
+    background: #fff;
+    width: 50%;
+    height: 50vh;
+    z-index: 5;
+}
+
+.expense-adder form{
+    width: 80%;
+    margin: 2em auto;
+}
+
+.expense-adder button{
+    margin-left: 2em;
+}
+
+.editor-container{
+    width: 90%;
+    min-height: 15em;
+    margin: 1em auto;
+    margin-bottom: 4em;
+}
+
+.edit-buttons{
+    display: flex;
+    flex-direction: row;
+}
+
+.edit-buttons button{
+    
+}
+
+.trans-adds{
+    display: flex;
+    flex-direction: row;
+    min-height: 2em;
+    min-width: 3em !important;
+    margin: 0;
+    gap: 0.5em;
+}
+
+
+.trans-adds svg{
+    font-size: 2.5em;
+    margin: 0.5em 0 !important;
+    overflow: hidden !important;
+    align-items: center;
+    cursor: pointer;
+}
+
+.trans-adds button{
+    height: 4em;
+    min-width: 10em;
+    margin: 0.5em 0 !important;
+    overflow: hidden !important;
+}
+
+.assign-exp{
+    opacity: 0.98;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    text-align: center;
+    width: 30%;
+    min-height: 50vh;
+    position: absolute;
+    top: 15em;
+    right: 30%;
+    z-index: 5;
+}
+
+.assign-exp h2{
+    width: 90%;
+    margin: 0.5em auto 0.5em auto;
+    padding-bottom: 0.5em;
+    font-weight: bold;
+    border-bottom: 1px solid #cfcfcf;
+}
+
+.expense-list{
+    display: flex;
+    flex-direction: column;
+    gap: 0.2em;
+}
+
+.assign-exp button{
+    width: 90% !important;
+    margin: 0 auto;
+    height: 2.5em;
+    border: none;
+    border-radius: 5px;
+    background: #89c9fa;
+    color: #fff;
+    font-weight: bold;
+    font-size: 1em;
+    box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+    transition: all 0.1s ease;
+}
+
+.assign-exp button:hover{
+    height: 2.6em;
+}
+
+.assign-exp button:last-of-type{
+    background: #5e72e4;
+    position: absolute;
+    bottom: 1em;
+    left: 5%;
+}
 
 .footer{
     position: absolute;

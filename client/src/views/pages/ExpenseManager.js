@@ -1,3 +1,5 @@
+
+
 import { useState,useEffect } from "react";
 import Expense from "./components/Expense"
 
@@ -6,17 +8,31 @@ import {
   Container,
   Row,
   Col,
-  Table
+  Table,
+  Button
 } from "reactstrap";
 
 
 import Header from "components/Headers/Header.js";
 import { GrCircleInformation } from "react-icons/gr";
 import axios from "axios";
+import UpdateExpense from "./components/UpdateExpense";
+import AddExpense from "./components/AddExpense";
+import { AiOutlineCheck } from "react-icons/ai";
+import { AiOutlineClose } from "react-icons/ai"
+import AssignTransactions from "./components/AssignTransaction";
 
 const ExpenseManager = (props) => {
 
   const [userData, setUserData] = useState(null)
+  const [trans, setTrans] = useState([])
+  const [expenses, setExpenses] = useState([])
+  const [clickedIndex, setClickedIndex] = useState(null)
+  const [add, setAdd] = useState(false)
+  const [assign, setAssign] = useState(false);
+  const [openAssign, setOpenAssign] = useState(null);
+
+  const [reloadExpenses, setReloadExpenses] = useState(false);
 
   useEffect(() => {
     axios.get(`http://localhost:4000/api/get_user/${props.user.uid}`)
@@ -28,26 +44,52 @@ const ExpenseManager = (props) => {
     })
   },[])
 
-  const [expenses, setExpenses] = useState([
-    {
-      name: "GROCERIES",
-      priority: "Medium",
-      type: "Adjustable"
-    },{
-      name: "ACCOMODATION",
-      priority: "High",
-      type: "Fixed"
-    },{
-      name: "TRANSPORTATION",
-      priority: "Medium",
-      type: "Adjustable"
-    }
-  ])
-  const [clickedIndex, setClickedIndex] = useState(null)
+  useEffect(()=>{
+    axios.get(`http://localhost:4000/api/get_transactions/${props.user.uid}`)
+    .then(response=>{
+      setTrans(response.data)
+    })
+    .catch(err=>{
+      console.log(err)
+    })
+  },[userData])
+
+  useEffect(()=>{
+    axios.get(`http://localhost:4000/api/get_expenses/${props.user.uid}`)
+    .then(response=>{
+      setExpenses(response.data)
+    })
+    .catch(err=>{
+      console.log(err)
+    })
+  }, [userData, reloadExpenses])
+
+  const handleAssign = (index)=>{
+    setAssign(true)
+  }
+
+  const handleOpen = (index)=>{
+    openAssign === index ? setOpenAssign(null) : setOpenAssign(index)
+  }
+
+  const transactions = trans.slice(0,5).map((tran, index)=>{
+    const date = new Date(tran.date)
+    const formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    return(
+      <div key={index} className="trans-adds">
+        <Button onClick={()=>handleOpen(index)}>{tran.merchant_name} ({tran.category})<br/>{formattedDate} </Button>
+        {openAssign===index && <AiOutlineCheck onClick={()=>handleAssign(index)}/>}
+        {openAssign===index && <AiOutlineClose />}
+      </div>
+    )
+  })
+
+
 
   const setClick = (index) =>{
     clickedIndex === index ? setClickedIndex(null) : setClickedIndex(index)
   }
+
 
   const exps = expenses.map((expense, index) => {
     return(
@@ -59,15 +101,22 @@ const ExpenseManager = (props) => {
     <>
       <Header onDashboard={props.onDashboard} userData={userData}/>
       {/* Page content */}
-      {clickedIndex !== null && <div className="curve expense-editor mb-xl-0">
-
-      <button className="curve" onClick={()=>setClickedIndex(null)}>Save</button>
+      {clickedIndex !== null && 
+      <UpdateExpense expense={expenses[clickedIndex]} setClickedIndex={setClickedIndex}/>
+      }
+      {add &&
+      <div className="curve expense-adder">
+      <AddExpense uid={props.user.uid} setReloadExpenses={setReloadExpenses} reloadExpenses={reloadExpenses} setAdd={setAdd}/>
+      </div>}
+      {assign &&
+      <div>
+        <AssignTransactions transaction={trans[openAssign]} setAssign={setAssign} expenseList={expenses}/>
       </div>}
       <Container className="mt--7 expense-container" fluid>
         <Row className="mt-5">
           <Col className="mb-5 mb-xl-0" xl="5">
             <Card className="curve shadow">
-              <div className="latest-trans">
+              <div className="expense-man">
                 <Table
                     responsive
                     size=""
@@ -81,18 +130,22 @@ const ExpenseManager = (props) => {
                     </tr>
                   </thead>
                   <tbody>
-                    {exps}
+                    {expenses && exps}
                   </tbody>
                 </Table>
               </div>
+              
+              <Button className="add-expense" color="primary" onClick={()=>setAdd(true)}>Add</Button>
             </Card>
           </Col>
           <Col xl="3">
             <Card className="curve shadow">
               <div className="rec-exp">
-                    <h3 className="mb-0">NEW TRANSACTIONS <GrCircleInformation className="info"/></h3>
+                    <h3 className="mb-0">ASSIGN NEW TRANSACTIONS <GrCircleInformation className="info"/></h3>
                     <div className="cats">
+                      {transactions}
                       
+                      {trans.length > 5 && <Button color="primary">Open More</Button>}
                     </div>
               </div>
             </Card>

@@ -69,12 +69,13 @@ router.post('/register', async (req, res) => {
     const host = ""
     const currency = "USD"
     const budget = 0
-    let query = `INSERT INTO user(uid,first_name,last_name,email,phone_num,balance,length,income,password,country,host,currency,budget) VALUES`
+    const total = 0
+    let query = `INSERT INTO user(uid,first_name,last_name,email,phone_num,balance,length,income,password,country,host,currency,budget,total) VALUES`
     const size = "SELECT COUNT(*) as count FROM user"
     db.query(size, (err, result) => {
         if (err) throw err;
         const l = result[0].count
-        query += `(${l},'${firstName}','${lastName}','${email}','${phone}',${balance},${length},${income},'${hash}','${country}','${host}','${currency}',${budget})`
+        query += `(${l},'${firstName}','${lastName}','${email}','${phone}',${balance},${length},${income},'${hash}','${country}','${host}','${currency}',${budget},${total})`
         db.query(query, (err) => {
             if (err) throw err;
             res.send({count: l});
@@ -104,7 +105,7 @@ router.put('/set_user', (req, res)=>{
 
 router.get('/get_user/:id', (req, res)=>{
     const uid = req.params.uid;
-    const sq = `SELECT first_name, last_name, email, balance, length, income, currency, budget FROM user WHERE uid='${uid}'`
+    const sq = `SELECT first_name, last_name, email, balance, length, income, currency, budget, total FROM user WHERE uid='${uid}'`
     db.query(sq, (err, result)=>{
         if (err) throw err;
         const user = result[0];
@@ -194,6 +195,14 @@ router.get('/update_transactions/:id', (req, res) => {
     });
   });
   
+router.get('/get_transactions/:id', (req, res) => {
+    const uid = req.params.id;
+    const sql = `SELECT * FROM Transaction WHERE bid in (SELECT bid FROM bank WHERE uid = ${uid}) ORDER BY date DESC`;
+    db.query(sql, (err, result) => {
+        if (err) throw err;
+        res.send(result);
+    })
+})
 
 router.get('/get_top_five_transactions/:id', (req, res)=>{
     const uid = req.params.id;
@@ -222,7 +231,29 @@ router.put('/update_user', (req, res) => {
 })
 
 router.post('/add_expense', (req, res) => {
-    console.log("expense added")
+    const uid = req.body.uid
+    const expense_name = req.body.expense_name
+    const amount = req.body.amount
+    const state = req.body.state === 'Fixed' ? 'F' : 'A'
+    const priority = req.body.priority === 'High' ? 'H' : req.body.priority === 'Normal' ? 'N' : 'L'
+    sql1 = `INSERT INTO expense (uid, expense_name, expense_amount, state, priority) VALUES (${uid}, '${expense_name}', ${amount}, '${state}', '${priority}')`
+    sql2 = `UPDATE user SET total = total + ${amount} WHERE uid = ${uid}`
+    db.query(sql1, (err)=>{
+        if (err) throw err;
+        db.query(sql2, (err)=>{
+            if (err) throw err;
+            res.send({message: "Expense added successfully"});
+        })
+    })
+})
+
+router.get('/get_expenses/:id', (req, res) => {
+    const uid = req.params.id;
+    sql = `SELECT * FROM expense WHERE uid = ${uid}`
+    db.query(sql, (err, results)=>{
+        if (err) throw err;
+        res.send(results);
+    })
 })
 
 router.put('/update_expense', (req, res)=>{

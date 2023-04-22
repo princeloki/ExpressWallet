@@ -31,7 +31,7 @@ import axios from "axios";
 
 const Index = (props) => {
   const history = useHistory()
-  props.user==null && history.push("/auth/login")
+  !props.user && history.push("/auth/login")
 
   const [userData, setUserData] = useState(null)
   const [transactions, setTransactions] = useState([])

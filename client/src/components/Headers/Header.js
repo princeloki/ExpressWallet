@@ -21,7 +21,6 @@ import { BsCurrencyYen } from "react-icons/bs"
 import { RiArrowDropDownLine } from "react-icons/ri"
 
 const Header = ({onDashboard, userData, setUser}) => {
-
   const currIcon = () =>{
     return(
       <div></div>
@@ -62,7 +61,7 @@ const Header = ({onDashboard, userData, setUser}) => {
                             Today's Balance
                           </CardTitle>  
                           <span className="h2 font-weight-bold mb-0">
-                            ${userData.budget/30}/<span>{userData.budget/30}</span>
+                            ${(userData.total/30).toFixed(2)}/<span>{(userData.budget/30).toFixed(2)}</span>
                           </span>
                         </div>
                         <Col className="col-auto">
@@ -91,7 +90,7 @@ const Header = ({onDashboard, userData, setUser}) => {
                           >
                             Week's Balance
                           </CardTitle>
-                          <span className="h2 font-weight-bold mb-0">${userData.budget/4}/<span>{userData.budget/4}</span></span>
+                          <span className="h2 font-weight-bold mb-0">${(userData.total/4).toFixed(2)}/<span>{(userData.budget/4).toFixed(2)}</span></span>
                         </div>
                         <Col className="col-auto">
                           <div className="icon icon-shape bg-blue text-white rounded-circle shadow">
@@ -119,7 +118,7 @@ const Header = ({onDashboard, userData, setUser}) => {
                           >
                             Month's Balance
                           </CardTitle>
-                          <span className="h2 font-weight-bold mb-0">${userData.budget}/<span>{userData.budget}</span></span>
+                          <span className="h2 font-weight-bold mb-0">${(userData.total).toFixed(2)}/<span>{(userData.budget).toFixed(2)}</span></span>
                         </div>
                         <Col className="col-auto">
                           <div className="icon icon-shape bg-blue text-white rounded-circle shadow">
