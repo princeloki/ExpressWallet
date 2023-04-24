@@ -1,5 +1,3 @@
-
-
 import { 
   Card, 
   CardBody, 
@@ -7,19 +5,12 @@ import {
   Container, 
   Row, 
   Col, 
-  FormGroup,
-  Form,
-  Label,
   Input,
-  InputGroupAddon,
-  InputGroupText,
   InputGroup
 } from "reactstrap";
 
-import { FcCurrencyExchange } from "react-icons/fc"
-import { BsCurrencyYen } from "react-icons/bs"
-import { RiArrowDropDownLine } from "react-icons/ri"
-
+import { FcCurrencyExchange } from "react-icons/fc";
+import { BsCurrencyYen } from "react-icons/bs";
 const Header = ({onDashboard, userData, setUser}) => {
   const currIcon = () =>{
     return(
@@ -58,11 +49,16 @@ const Header = ({onDashboard, userData, setUser}) => {
                             tag="h5"
                             className="text-uppercase text-muted mb-0"
                           >
-                            Today's Balance
+                            Today
                           </CardTitle>  
-                          <span className="h2 font-weight-bold mb-0">
-                            ${(userData.total/30).toFixed(2)}/<span>{(userData.budget/30).toFixed(2)}</span>
-                          </span>
+                          <div className="budget-header">
+                            <span className="h2 font-weight-bold mb-0">
+                              ${(userData.budget/30).toFixed(2)} | Budget
+                            </span>
+                            <span className="h2 font-weight-bold mb-0 bal-text">
+                              ${((userData.balance)/30-(userData.budget/30)).toFixed(2)} | Balance
+                            </span>
+                          </div>
                         </div>
                         <Col className="col-auto">
                           <div className="icon icon-shape bg-blue text-white rounded-circle shadow">
@@ -88,9 +84,16 @@ const Header = ({onDashboard, userData, setUser}) => {
                             tag="h5"
                             className="text-uppercase text-muted mb-0"
                           >
-                            Week's Balance
+                            This Week
                           </CardTitle>
-                          <span className="h2 font-weight-bold mb-0">${(userData.total/4).toFixed(2)}/<span>{(userData.budget/4).toFixed(2)}</span></span>
+                          <div className="budget-header">
+                            <span className="h2 font-weight-bold mb-0">
+                              ${(userData.budget/4).toFixed(2)} | Budget
+                            </span>
+                            <span className="h2 font-weight-bold mb-0 bal-text">
+                              ${((userData.balance)/4-(userData.budget/4)).toFixed(2)} | Balance
+                            </span>
+                          </div>
                         </div>
                         <Col className="col-auto">
                           <div className="icon icon-shape bg-blue text-white rounded-circle shadow">
@@ -116,9 +119,16 @@ const Header = ({onDashboard, userData, setUser}) => {
                             tag="h5"
                             className="text-uppercase text-muted mb-0"
                           >
-                            Month's Balance
+                            This Month
                           </CardTitle>
-                          <span className="h2 font-weight-bold mb-0">${(userData.total).toFixed(2)}/<span>{(userData.budget).toFixed(2)}</span></span>
+                          <div className="budget-header">
+                            <span className="h2 font-weight-bold mb-0">
+                              ${(userData.budget).toFixed(2)} | Budget
+                            </span>
+                            <span className="h2 font-weight-bold mb-0 bal-text">
+                              ${((userData.balance)-(userData.budget)).toFixed(2)} | Balance
+                            </span>
+                          </div>
                         </div>
                         <Col className="col-auto">
                           <div className="icon icon-shape bg-blue text-white rounded-circle shadow">

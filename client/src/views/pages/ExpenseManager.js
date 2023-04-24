@@ -23,26 +23,15 @@ import { AiOutlineClose } from "react-icons/ai"
 import AssignTransactions from "./components/AssignTransaction";
 
 const ExpenseManager = (props) => {
-
-  const [userData, setUserData] = useState(null)
   const [trans, setTrans] = useState([])
   const [expenses, setExpenses] = useState([])
   const [clickedIndex, setClickedIndex] = useState(null)
   const [add, setAdd] = useState(false)
   const [assign, setAssign] = useState(false);
   const [openAssign, setOpenAssign] = useState(null);
+  const [reloadTransaction, setReloadTransaction] = useState(false);
 
   const [reloadExpenses, setReloadExpenses] = useState(false);
-
-  useEffect(() => {
-    axios.get(`http://localhost:4000/api/get_user/${props.user.uid}`)
-    .then(response=>{
-      setUserData(response.data)
-    })
-    .catch(err=>{
-      console.log(err)
-    })
-  },[])
 
   useEffect(()=>{
     axios.get(`http://localhost:4000/api/get_transactions/${props.user.uid}`)
@@ -52,7 +41,7 @@ const ExpenseManager = (props) => {
     .catch(err=>{
       console.log(err)
     })
-  },[userData])
+  },[props.user, reloadTransaction])
 
   useEffect(()=>{
     axios.get(`http://localhost:4000/api/get_expenses/${props.user.uid}`)
@@ -62,7 +51,7 @@ const ExpenseManager = (props) => {
     .catch(err=>{
       console.log(err)
     })
-  }, [userData, reloadExpenses])
+  }, [props.user, reloadExpenses])
 
   const handleAssign = (index)=>{
     setAssign(true)
@@ -72,6 +61,21 @@ const ExpenseManager = (props) => {
     openAssign === index ? setOpenAssign(null) : setOpenAssign(index)
   }
 
+  const handleNone = (trans) => {
+    axios.post('http://localhost:4000/api/assign_transactions',{
+        eid: "",
+        merchant_code: trans.iso,
+        merchant_name: trans.merchant_name
+    })
+    .then(response=>{
+        setAssign(false)
+        setReloadTransaction(!reloadTransaction)
+    })
+    .catch(err =>{
+        console.log(err)
+    })
+  }
+
   const transactions = trans.slice(0,5).map((tran, index)=>{
     const date = new Date(tran.date)
     const formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
@@ -79,12 +83,10 @@ const ExpenseManager = (props) => {
       <div key={index} className="trans-adds">
         <Button onClick={()=>handleOpen(index)}>{tran.merchant_name} ({tran.category})<br/>{formattedDate} </Button>
         {openAssign===index && <AiOutlineCheck onClick={()=>handleAssign(index)}/>}
-        {openAssign===index && <AiOutlineClose />}
+        {openAssign===index && <AiOutlineClose onClick={()=>handleNone(tran)}/>}
       </div>
     )
   })
-
-
 
   const setClick = (index) =>{
     clickedIndex === index ? setClickedIndex(null) : setClickedIndex(index)
@@ -99,7 +101,7 @@ const ExpenseManager = (props) => {
 
   return (
     <>
-      <Header onDashboard={props.onDashboard} userData={userData}/>
+      <Header onDashboard={props.onDashboard} userData={props.user}/>
       {/* Page content */}
       {clickedIndex !== null && 
       <UpdateExpense expense={expenses[clickedIndex]} setClickedIndex={setClickedIndex}/>
@@ -110,7 +112,7 @@ const ExpenseManager = (props) => {
       </div>}
       {assign &&
       <div>
-        <AssignTransactions transaction={trans[openAssign]} setAssign={setAssign} expenseList={expenses}/>
+        <AssignTransactions transaction={trans[openAssign]} setAssign={setAssign} expenseList={expenses} setReloadTransaction={setReloadTransaction} reloadTransaction={reloadTransaction}/>
       </div>}
       <Container className="mt--7 expense-container" fluid>
         <Row className="mt-5">
@@ -144,8 +146,7 @@ const ExpenseManager = (props) => {
                     <h3 className="mb-0">ASSIGN NEW TRANSACTIONS <GrCircleInformation className="info"/></h3>
                     <div className="cats">
                       {transactions}
-                      
-                      {trans.length > 5 && <Button color="primary">Open More</Button>}
+                      {/* {trans.length > 5 && <Button color="primary">Open More</Button>} */}
                     </div>
               </div>
             </Card>

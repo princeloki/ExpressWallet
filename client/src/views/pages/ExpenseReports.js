@@ -1,8 +1,9 @@
+
+
 import {
   Container,
   Table,
-  Col,
-  Row
+  Col
 } from "reactstrap";
 
 import { useState, useEffect } from "react";
@@ -12,44 +13,69 @@ import axios from 'axios';
 
 const ExpenseReports = (props) => {
   const [clickedIndex, setClickedIndex] = useState(0)
-  const [moreDetails, setMoreDetails] = useState(null)
+  const [moreDetails, setMoreDetails] = useState([])
+  const [spends, setSpends] = useState([])
 
-  const [userData, setUserData] = useState(null)
-
-  useEffect(() => {
-    axios.get(`http://localhost:4000/api/get_user/${props.user.uid}`)
+  useEffect(()=>{
+    axios.get(`http://localhost:4000/api/get_spendings/${props.user.uid}`)
     .then(response=>{
-      setUserData(response.data)
+      setSpends(response.data);
     })
     .catch(err=>{
       console.log(err)
     })
-  },[])
+  },[props.user.uid])
 
+  const setUpDetails = moreDetails.map((detail, index) =>{
+    const formattedDate = new Date(detail.date).toISOString().slice(0, 10);
+    return(
+      <tr key={index}>
+        <td>{formattedDate}</td>
+        <td>{detail.merchant_name} - {detail.category}</td>
+        <td>({detail.currency}) {detail.amount.toFixed(2)}</td>
+      </tr>
+    )
+  })
 
   const handleSpendingClick = (index)=>{
       clickedIndex === index ? setClickedIndex(null) : setClickedIndex(index) 
   }
 
-  console.log(moreDetails)
+  // Group spendings by month and year
+  const spendingsByMonthYear = spends.reduce((acc, spend) => {
+    const monthYear = `${spend.month} ${spend.year}`
+    if (acc[monthYear]) {
+      acc[monthYear].push(spend)
+    } else {
+      acc[monthYear] = [spend]
+    }
+    return acc
+  }, {})
   
-  const dates = ["January 2023","February 2023","March 2023"]
-  const spendings = dates.map((date, index) =>{
-    return(<Spending  
-      key={index}
-      date={date}
-      clicked={clickedIndex===index}
-      handleClick={()=>handleSpendingClick(index)}
-      details={moreDetails}
-      setDetails={setMoreDetails}
-      />)
+  // Generate Spending components for each month and year group
+  const spendingGroups = Object.keys(spendingsByMonthYear).map((monthYear, index) => {
+    const spendsForMonthYear = spendingsByMonthYear[monthYear]
+    return (
+      <div key={index}>
+        <Spending
+          key={index}
+          date={monthYear}
+          spend={spendsForMonthYear}
+          clicked={clickedIndex === index}
+          handleClick={() => handleSpendingClick(index)}
+          details={moreDetails}
+          setDetails={setMoreDetails}
+        />
+      </div>
+    )
   })
+  
 
   return (
     <>
-      <Header onDashboard={props.onDashboard} userData={userData}/>
+      <Header onDashboard={props.onDashboard} userData={props.user}/>
       {/* Page content */}
-      {moreDetails && 
+      {moreDetails.length>0 && 
       <Col className="curve spending-list" xl="9">
         <Table 
             responsive
@@ -57,30 +83,25 @@ const ExpenseReports = (props) => {
           <thead>
             <tr>
             <th>
-                Date
+              Date
             </th>
             <th>
-                Description
+              Description
             </th>
             <th>
-                Sub Total
-            </th>
-            <th>
-                Tax
-            </th>
-            <th>
-                Total
+              Amount
             </th>
             </tr>
           </thead>
           <tbody>
+            {setUpDetails}
           </tbody>
         </Table>
-        <button className="curve" onClick={()=>setMoreDetails(null)}>Close</button>
+        <button className="curve" onClick={()=>setMoreDetails([])}>Close</button>
       </Col> 
     }
       <Container className="mt--7 spending-container" fluid>
-        {spendings}
+        {spendingGroups}
       </Container>
     </>
   );

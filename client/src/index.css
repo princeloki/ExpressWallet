@@ -25,6 +25,18 @@ nav .dropdown h1{
     font-size: 1.5em !important;
 }
 
+.budget-header{
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+}
+
+.bal-text{
+    font-size: 0.9em !important;
+    font-weight: bold !important;
+    color: #989898 !important;
+}
+
 .user-cont{
     display: flex !important;
     flex-direction: row;
@@ -196,11 +208,13 @@ nav .dropdown h1{
     z-index: 5 !important;
     min-height: 40em;
     background: #fff;
+    text-align: center;
 }
 
 .spending-list button{
     position: absolute;
-    bottom: 10%;
+    margin-top: 1em;
+    bottom: 5%;
     width: 10%;
     height: 2em;
     left: 45%;

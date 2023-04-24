@@ -1,10 +1,6 @@
-
-
 import React,{ useState } from "react";
 import { useLocation, Route, Switch, Redirect } from "react-router-dom";
-import { Container } from "reactstrap";
 import AdminNavbar from "components/Navbars/AdminNavbar.js";
-import AdminFooter from "components/Footers/AdminFooter.js";
 import Sidebar from "components/Sidebar/Sidebar.js";
 
 import routes from "routes.js";
@@ -12,6 +8,7 @@ import routes from "routes.js";
 const Admin = (props) => {
   const userInfo = localStorage.getItem('user');
   const [user, setUser] = useState(userInfo ? JSON.parse(userInfo) : null);
+
 
   const [onDashboard, setOnDashboard] = useState(true);
   const mainContent = React.useRef(null);
@@ -31,7 +28,7 @@ const Admin = (props) => {
             path={prop.layout + prop.path}
             key={key}
             render={(props) => (
-              <prop.component {...props} onDashboard={onDashboard} user={user}/>
+              <prop.component {...props} onDashboard={onDashboard} user={user} setUserData={setUser}/>
             )}
           />
         );
@@ -65,6 +62,7 @@ const Admin = (props) => {
         <AdminNavbar
           {...props}
           brandText={getBrandText(props.location.pathname)}
+          user={user}
         />
         <Switch>
           {getRoutes(routes)}

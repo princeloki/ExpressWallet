@@ -6,6 +6,8 @@ const path = require('path')
 const bcrypt = require('bcrypt')
 const mysql = require('mysql')
 const axios = require('axios')
+const { exec } = require('child_process');
+const dJSON = require('dirty-json')
 require('dotenv/config')
 
 
@@ -28,12 +30,20 @@ db.connect((err)=>{
 router.post('/login', (req, res) => {
     const email = req.body.email
     const password = req.body.password
-    const sql = `SELECT uid, email, password FROM user WHERE email = '${email}'`
+    const sql = `SELECT * FROM user WHERE email = '${email}'`
     db.query(sql, (err,result) => {
         if (err) throw err;
         const uid = result[0].uid;
         const email = result[0].email;
         const pass = result[0].password;
+        const first_name = result[0].first_name
+        const last_name = result[0].last_name
+        const balance = result[0].balance
+        const length = result[0].length
+        const income = result[0].income
+        const currency = result[0].currency
+        const budget = result[0].budget
+        const total = result[0].total
         bcrypt.compare(password, pass, function(err, result){
             if (err){
                 console.log(err)
@@ -43,7 +53,15 @@ router.post('/login', (req, res) => {
                         message:"Passwords match",
                         body: {
                             uid: uid,
-                            email: email
+                            email: email,
+                            first_name: first_name,
+                            last_name: last_name,
+                            balance: balance,
+                            length: length,
+                            income: income,
+                            currency: currency,
+                            budget: budget,
+                            total: total
                         }
                     });
                 } else{
@@ -105,7 +123,7 @@ router.put('/set_user', (req, res)=>{
 
 router.get('/get_user/:id', (req, res)=>{
     const uid = req.params.uid;
-    const sq = `SELECT first_name, last_name, email, balance, length, income, currency, budget, total FROM user WHERE uid='${uid}'`
+    const sq = `SELECT uid, first_name, last_name, email, balance, length, income, currency, budget, total FROM user WHERE uid='${uid}'`
     db.query(sq, (err, result)=>{
         if (err) throw err;
         const user = result[0];
@@ -197,7 +215,9 @@ router.get('/update_transactions/:id', (req, res) => {
   
 router.get('/get_transactions/:id', (req, res) => {
     const uid = req.params.id;
-    const sql = `SELECT * FROM Transaction WHERE bid in (SELECT bid FROM bank WHERE uid = ${uid}) ORDER BY date DESC`;
+    const sql = `SELECT * FROM Transaction WHERE bid in (SELECT bid FROM bank WHERE uid = ${uid}) 
+    AND NOT EXISTS (SELECT * FROM assign WHERE assign.merchant_name = Transaction.merchant_name
+    AND assign.merchant_code = Transaction.iso) ORDER BY date DESC`;
     db.query(sql, (err, result) => {
         if (err) throw err;
         res.send(result);
@@ -237,7 +257,7 @@ router.post('/add_expense', (req, res) => {
     const state = req.body.state === 'Fixed' ? 'F' : 'A'
     const priority = req.body.priority === 'High' ? 'H' : req.body.priority === 'Normal' ? 'N' : 'L'
     sql1 = `INSERT INTO expense (uid, expense_name, expense_amount, state, priority) VALUES (${uid}, '${expense_name}', ${amount}, '${state}', '${priority}')`
-    sql2 = `UPDATE user SET total = total + ${amount} WHERE uid = ${uid}`
+    sql2 = `UPDATE user SET budget = budget + ${amount} WHERE uid = ${uid}`
     db.query(sql1, (err)=>{
         if (err) throw err;
         db.query(sql2, (err)=>{
@@ -264,24 +284,104 @@ router.delete('/delete_expense', (req, res)=>{
     console.log("delete expense")
 })
 
-router.post('/create_spending', (req, res) => {
-    console.log("spending added")
-})
+// router.post('/create_spending', (req, res) => {
+//     console.log("spending added")
+// })
 
-router.put('/update_spending:id', (req, res) => {
-    console.log("spending updated")
-})
+// router.put('/update_spending:id', (req, res) => {
+//     console.log("spending updated")
+// })
 
-router.delete('/delete_spending:id', (req, res) => {
-    console.log("delete expense")
-})
+// router.delete('/delete_spending/:id', (req, res) => {
+//     console.log("delete expense")
+// })
 
-router.post('/get_spendings:id', (req, res)=>{
-    console.log("spendings")
+router.get('/get_spendings/:id', (req, res)=>{
+    const uid = req.params.id
+    const sql = 
+    `SELECT eid, spending_name, MONTHNAME(date) as month, YEAR(date) as year, SUM(spending_amount) as total
+    FROM spending
+    WHERE eid in (SELECT eid FROM expense WHERE uid = ${uid})
+    GROUP BY eid, spending_name, YEAR(date), MONTHNAME(date)
+    ORDER BY YEAR(date) DESC, MONTHNAME(date) DESC      
+    `
+    db.query(sql, (err, result)=>{
+        if (err) throw err;
+        res.send(result);
+    })
 })
 
 router.post('/assign_transactions', (req, res)=>{
-    console.log("transaction assigned")
+    const eid = req.body.eid ? req.body.eid : null
+    const merchant_code = req.body.merchant_code
+    const merchant_name = req.body.merchant_name
+    const date = new Date(req.body.date).toISOString().slice(0, 10);
+    const amount = req.body.amount
+    const sql1 = `INSERT INTO assign (eid, merchant_code, merchant_name) VALUES (${eid}, ${merchant_code}, '${merchant_name}')`;
+    const sql2 = `INSERT INTO spending (eid, spending_name, spending_amount, date) VALUES (${eid}, (SELECT expense_name FROM expense WHERE eid = ${eid}), ${amount}, '${date}')`;
+    db.query(sql1, (err)=>{
+        if (err) throw err;
+        db.query(sql2, (err)=>{
+            if (err) throw err;
+            res.send({message: "Transaction & Spending added successfully"});
+        })
+    })
+})
+
+router.post('/get_spending_trans', (req, res)=>{
+    const eid = req.body.eid;
+    const month = req.body.month;
+    const year = req.body.year;
+    const query = 
+    `SELECT * 
+    FROM transaction
+    JOIN assign ON transaction.iso = assign.merchant_code
+    WHERE assign.eid = ${eid}
+    AND MONTHNAME(transaction.date) = '${month}'
+    AND YEAR(transaction.date) = ${year}
+    ORDER BY date DESC
+    `
+    db.query(query, (err, result) => {
+        if (err) throw err;
+        res.send(result);
+    })
+})
+
+router.get('/adjust_expenses/:id', (req, res) => {
+    const uid = req.params.id;
+    const sql = `
+    SELECT expense_name as expense, expense_amount as amount,  priority, state
+    FROM expense
+    ORDER BY expense DESC`
+    db.query(sql, (err, result)=>{
+        const scriptPath = path.join(__dirname,'..','Logic','script.py');
+        if (err) throw err;
+        const sql2 = `SELECT balance FROM user WHERE uid=${uid}`
+        const expenses = result;
+        db.query(sql2, (err, result) => {
+            if (err) throw err;
+            const balance = result[0].balance;
+            const expense_dict = expenses.reduce((acc, item) => {
+                const priority = item.priority;
+            
+                if (!acc[priority]) {
+                    acc[priority] = [];
+                }
+                acc[priority].push(item);
+                return acc;
+            }, {});
+    
+            exec(`python ${scriptPath} "${Buffer.from(JSON.stringify(expense_dict)).toString('base64')}" "${balance}"`, (error, stdout, stderr) => {
+                if(error){
+                    console.error(`exec error: ${error}`);
+                    return res.status(500).send('An error occurred')
+                }
+                res.send({message:"Success",data: dJSON.parse(stdout)})
+                stderr && console.error(`exec error: ${stderr}`);
+                stdout && console.log("Json sent successfully")
+            })
+        })
+    })
 })
 
 router.get('/get_assigned', (req, res)=>{

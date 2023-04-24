@@ -82,12 +82,7 @@ const Register = () => {
     console.log("clicked")
     axios.put("http://localhost:4000/api/set_user",userData)
     .then(response => {
-      const userData = response.data.body
-      axios.get("http://localhost:4000/api/get_user")
-      const userString = JSON.stringify(response.data.body);
-      localStorage.setItem('user', userString)
-      console.log(response.data.body)
-      history.push('/admin/index')
+      history.push('/auth/login')
     })
     .catch(err => {
       console.log(err)

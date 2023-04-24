@@ -33,19 +33,8 @@ const Index = (props) => {
   const history = useHistory()
   !props.user && history.push("/auth/login")
 
-  const [userData, setUserData] = useState(null)
   const [transactions, setTransactions] = useState([])
   const [topCats, setTopCats] = useState([])
-
-  useEffect(() => {
-    axios.get(`http://localhost:4000/api/get_user/${props.user.uid}`)
-    .then(response=>{
-      setUserData(response.data)
-    })
-    .catch(err=>{
-      console.log(err)
-    })
-  },[])
 
   useEffect(()=>{
     axios.get(`http://localhost:4000/api/get_top_five_transactions/${props.user.uid}`)
@@ -55,7 +44,7 @@ const Index = (props) => {
     .catch(err=>{
       console.log(err)
     })
-  },[userData])
+  },[props.user])
 
   useEffect(()=>{
     axios.get(`http://localhost:4000/api/get_most_common/${props.user.uid}`)
@@ -65,7 +54,7 @@ const Index = (props) => {
     .catch(err=>{
       console.log(err)
     })
-  },[userData])
+  },[props.user])
 
   const trans = transactions.map(transaction=>{
     const date = new Date(transaction.date)
@@ -101,7 +90,7 @@ const Index = (props) => {
 
   return (
     <>
-      <Header onDashboard={props.onDashboard} userData={userData} setUser={setUserData} />
+      <Header onDashboard={props.onDashboard} userData={props.user} setUser={props.setUserData} />
       {/* Page content */}
       <Container className="mt--7" fluid>
         <Row>

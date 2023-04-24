@@ -1,5 +1,4 @@
 import { Link, useHistory } from "react-router-dom";
-// reactstrap components
 import {
   DropdownMenu,
   DropdownItem,
@@ -11,14 +10,11 @@ import {
   Media
 } from "reactstrap";
 
-import { IoIosNotifications } from "react-icons/io"
-
+import { IoIosNotifications } from "react-icons/io";
 const AdminNavbar = (props) => {
-
   const history = useHistory();
   
   const logout = () =>{
-    console.log("clicked")
     localStorage.removeItem('user');
     history.push("/auth/login")
   }
@@ -39,11 +35,11 @@ const AdminNavbar = (props) => {
               <DropdownToggle className="pr-0 bg-white user-button" nav>
                 <Media className="align-items-center">
                   <span className="avatar avatar-sm rounded-circle user">
-                    <h1 className="user-initial">JJ</h1>
+                    <h1 className="user-initial">{props.user.first_name&&props.user.last_name && props.user.first_name.charAt(0) + props.user.last_name.charAt(0)}</h1>
                   </span>
                   <Media className="ml-2 d-none d-lg-block">
                     <span className="mb-0 text-sm font-weight-bold name">
-                      Jessica Jones
+                      {props.user ? props.user.first_name : ""} {props.user ? props.user.last_name : ""}
                     </span>
                   </Media>
                 </Media>
