@@ -44,7 +44,12 @@ const Register = () => {
     length: "",
     income: "",
     currency: "USD",
-    budget: ""
+    budget: 0,
+    misc: 0,
+    start: "",
+    high: 0,
+    normal: 0,
+    low: 0
   })
   const [index, setIndex] = useState(0)
 
@@ -93,6 +98,7 @@ const Register = () => {
 
   const handleAddition = (e) =>{
     e.preventDefault()
+    console.log(userData)
     setUserData(prevUserData=>{
       return{
         ...prevUserData,

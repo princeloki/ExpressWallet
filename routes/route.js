@@ -87,15 +87,15 @@ router.post('/register', async (req, res) => {
     const host = ""
     const currency = "USD"
     const budget = 0
-    const total = 0
-    let query = `INSERT INTO user(uid,first_name,last_name,email,phone_num,balance,length,income,password,country,host,currency,budget,total) VALUES`
-    const size = "SELECT COUNT(*) as count FROM user"
-    db.query(size, (err, result) => {
+
+    let query = `INSERT INTO user(first_name,last_name,email,phone_num,balance,length,income,password,country,host,currency,budget) VALUES`
+    query += `('${firstName}','${lastName}','${email}','${phone}',${balance},${length},${income},'${hash}','${country}','${host}','${currency}',${budget})`
+    db.query(query, (err) => {
         if (err) throw err;
-        const l = result[0].count
-        query += `(${l},'${firstName}','${lastName}','${email}','${phone}',${balance},${length},${income},'${hash}','${country}','${host}','${currency}',${budget},${total})`
-        db.query(query, (err) => {
+        const size = "SELECT COUNT(*) as count FROM user"
+        db.query(size, (err, result) => {
             if (err) throw err;
+            const l = result[0].count
             res.send({count: l});
         })
     })
@@ -109,14 +109,29 @@ router.put('/set_user', (req, res)=>{
     const income = req.body.income;
     const currency = req.body.currency;
     const budget = req.body.budget;
+    const misc = req.body.misc;
+    const start = req.body.start;
+    const high = req.body.high;
+    const normal = req.body.normal;
+    const low = req.body.low;
     let query = `UPDATE user SET country = '${country}', host = '${host}', length = ${length}, income = ${income}, 
-    currency = '${currency}', budget = ${budget} WHERE email='${email}'`
+    currency = '${currency}', budget = ${budget}, start='${start}'  WHERE email='${email}'`
     db.query(query, (err)=>{
         if (err) throw err;
         const user = `SELECT uid, email FROM user WHERE email = '${email}'`
         db.query(user, (err, result)=>{
             if (err) throw err;
-            res.send({message: "Success", body:result[0]})
+            const bod = result[0];
+            const uid = result[0].uid;
+            const priority = `INSERT INTO priority (uid, priority_name, percentage) VALUES (${uid}, 'H', ${high}),
+                                                                                            (${uid}, 'N', ${normal}),
+                                                                                             (${uid}, 'L', ${low});
+                            INSERT INTO expense (uid, expense_name, expense_amount, state, priority) VALUES (${uid}, 'MISC', ${misc}, 'A', 'N');
+                            UPDATE user SET budget = ${misc} WHERE uid = ${uid};`
+            db.query(priority, (err)=>{
+                if (err) throw err;
+                res.send({message: "Success", body:bod});
+            })
         })
     })
 })
@@ -145,7 +160,7 @@ router.post('/add_bank', (req, res) => {
         const balance = `UPDATE user SET balance = balance + ${bankData.balance} WHERE uid = ${uid}`
         db.query(balance, (err)=>{
             if (err) throw err;
-            const bank = `INSERT INTO bank (bid, uid, balance, currency) VALUES (${bankData.bid}, ${uid}, ${bankData.balance}, '${bankData.currency}')`
+            const bank = `INSERT IGNORE INTO bank (bid, uid, balance, currency) VALUES (${bankData.bid}, ${uid}, ${bankData.balance}, '${bankData.currency}')`
             db.query(bank, (err)=>{
                 if (err) throw err;
                 axios.get(`http://localhost:5000/api/get_transactions/${bankData.bid}`)
@@ -153,8 +168,8 @@ router.post('/add_bank', (req, res) => {
                     const trans = response.data
                     for(let i=0;i<trans.length;i++){
                         let isoDate = new Date(trans[i].date).toISOString().replace('T', ' ').replace('Z', '');
-                        const sq = `INSERT INTO transaction (bid, merchant_name, iso, category, currency, date, amount) VALUES
-                         (${trans[i].bid},'${trans[i].merchant}',${trans[i].iso},'${trans[i].category}','${trans[i].currency}','${isoDate}',${trans[i].amount})`
+                        const sq = `INSERT IGNORE INTO transaction (tid, bid, merchant_name, iso, category, currency, date, amount) VALUES
+                         (${trans[i].tid}, ${trans[i].bid},'${trans[i].merchant}',${trans[i].iso},'${trans[i].category}','${trans[i].currency}','${isoDate}',${trans[i].amount})`
                         db.query(sq, (err)=>{
                             if (err) throw err;
                         })

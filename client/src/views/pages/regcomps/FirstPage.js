@@ -6,7 +6,8 @@ import {
     Input,
     InputGroupAddon,
     InputGroupText,
-    InputGroup
+    InputGroup,
+    Label
   } from "reactstrap";
   
 import { BsGlobe } from "react-icons/bs";
@@ -54,6 +55,24 @@ const FirstPage = ({handleIndexChange, handleAddition, userData}) =>{
                 autoComplete="new-host"
                 name="host"
                 value={userData.host}
+                onChange={(e) => handleAddition(e)}
+              />
+            </InputGroup>
+          </FormGroup>
+          <FormGroup>
+            <Label className="reg-label" for="start">When do/did you start your exchange?</Label>
+            <InputGroup className="input-group-alternative mb-3">
+              <InputGroupAddon addonType="prepend">
+                <InputGroupText>
+                  <FaSchool />
+                </InputGroupText>
+              </InputGroupAddon>
+              <Input
+                placeholder="When Will/did you start your exchange?"
+                type="date"
+                autoComplete="new-start"
+                name="start"
+                value={userData.start}
                 onChange={(e) => handleAddition(e)}
               />
             </InputGroup>

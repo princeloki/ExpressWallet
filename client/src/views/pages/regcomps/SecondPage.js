@@ -15,6 +15,7 @@ import {
 import { useState } from "react"
 import { BsCurrencyDollar } from "react-icons/bs"
 import { AiOutlineRight } from "react-icons/ai"
+import { BsCurrencyExchange } from "react-icons/bs"
 import { AiOutlineLeft } from "react-icons/ai"  
 
 
@@ -41,13 +42,34 @@ const SecondPage = ({handleIndexChange,handleAddition,userData}) =>{
                 </InputGroupText>
               </InputGroupAddon>
               <Input 
-              placeholder="What your length of exchange"
+              placeholder="What your length of exchange in months"
               type="text"
               name="length"
               autoComplete="new-length"
               value={userData.length}
               onChange={(e) => handleAddition(e)}
               />
+            </InputGroup>
+          </FormGroup>
+          <FormGroup>
+            <Label className="reg-label" for="income">Preferred Currency</Label>
+            <InputGroup className="input-group-alternative mb-3">
+              <InputGroupAddon addonType="prepend">
+                <InputGroupText>
+                  <BsCurrencyExchange />
+                </InputGroupText>
+              </InputGroupAddon>
+              <Input
+                type="select"
+                name="currency"
+                value={userData.currency}
+                onChange={(e) => handleAddition(e)}
+              >
+                <option>USD</option>
+                <option>EUR</option>
+                <option>CAD</option>
+                <option>JPY</option>
+              </Input>
             </InputGroup>
           </FormGroup>
           <FormGroup>

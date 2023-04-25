@@ -13,7 +13,6 @@ import {
   } from "reactstrap";
   
 import { useState } from "react"
-import { BsCurrencyExchange } from "react-icons/bs"
 import { BsCurrencyDollar } from "react-icons/bs"
 import { AiOutlineRight } from "react-icons/ai"
 import { AiOutlineLeft } from "react-icons/ai"  
@@ -35,47 +34,7 @@ const ThirdPage = ({handleIndexChange, handleAddition, userData}) =>{
       <CardBody className="px-lg-5 py-lg-5">
         <Form role="form" onSubmit={handleSubmit}>
           <FormGroup>
-            <Label className="reg-label" for="income">Preferred Currency</Label>
-            <InputGroup className="input-group-alternative mb-3">
-              <InputGroupAddon addonType="prepend">
-                <InputGroupText>
-                  <BsCurrencyExchange />
-                </InputGroupText>
-              </InputGroupAddon>
-              <Input
-                type="select"
-                name="currency"
-                value={userData.currency}
-                onChange={(e) => handleAddition(e)}
-              >
-                <option>USD</option>
-                <option>EUR</option>
-                <option>CAD</option>
-                <option>JPY</option>
-              </Input>
-            </InputGroup>
-          </FormGroup>
-          <FormGroup>
-            <Label className="reg-label" for="income">Would you like us to set your budget for you?</Label>
-            <InputGroup className="input-group-alternative mb-3">
-              <InputGroupAddon addonType="prepend">
-                <InputGroupText>
-                  <BsCurrencyDollar />
-                </InputGroupText>
-              </InputGroupAddon>
-              <Input
-                type="select"
-                name="setBudget"
-                value={setBudget}
-                onChange={(e) => handleSetBudget(e)}
-              >
-                <option>---Select---</option>
-                <option>Yes</option>
-                <option>No</option>
-              </Input>
-            </InputGroup>
-          </FormGroup>
-          {setBudget==="No" && <FormGroup>
+            <Label className="reg-label" for="income">Set a miscellaneous expenses budget!</Label>
             <InputGroup className="input-group-alternative mb-3">
               <InputGroupAddon addonType="prepend">
                 <InputGroupText>
@@ -83,15 +42,60 @@ const ThirdPage = ({handleIndexChange, handleAddition, userData}) =>{
                 </InputGroupText>
               </InputGroupAddon>
               <Input 
-              placeholder="What is your monthly budget?"
+              placeholder="Miscellaneous Expense"
               type="text"
-              name="budget"
-              autoComplete="new-budget"
-              value={userData.budget}
+              name="misc"
+              autoComplete="new-misc"
+              value={userData.misc}
               onChange={(e) => handleAddition(e)}
               />
             </InputGroup>
-          </FormGroup>}
+          </FormGroup>
+          <FormGroup>
+            <Label className="reg-label" for="high">Set the percent of expenses to reduce when re-allocating</Label>
+            <InputGroup className="input-group-alternative mb-3">
+              <InputGroupAddon addonType="prepend">
+                <InputGroupText>
+                  High
+                </InputGroupText>
+              </InputGroupAddon>
+              <Input 
+              type="text"
+              name="high"
+              autoComplete="new-high"
+              value={userData.high}
+              onChange={(e) => handleAddition(e)}
+              />
+            </InputGroup>
+            <InputGroup className="input-group-alternative mb-3">
+              <InputGroupAddon addonType="prepend">
+                <InputGroupText>
+                  Normal
+                </InputGroupText>
+              </InputGroupAddon>
+              <Input 
+              type="text"
+              name="normal"
+              autoComplete="new-normal"
+              value={userData.normal}
+              onChange={(e) => handleAddition(e)}
+              />
+            </InputGroup>
+            <InputGroup className="input-group-alternative mb-3">
+              <InputGroupAddon addonType="prepend">
+                <InputGroupText>
+                  Low
+                </InputGroupText>
+              </InputGroupAddon>
+              <Input 
+              type="text"
+              name="low"
+              autoComplete="new-low"
+              value={userData.low}
+              onChange={(e) => handleAddition(e)}
+              />
+            </InputGroup>
+          </FormGroup>
             <div className="text-center buttons">
                 <Button className="mt-4 back-button" onClick={()=>handleIndexChange(2)}>
                 <AiOutlineLeft /> Back
