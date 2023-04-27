@@ -6,8 +6,10 @@ import { BrowserRouter } from 'react-router-dom';
 import Pages from './routes'
 
 function App() {
-  const [userInfo, setUserInfo] = useState({
-    "fist_name": "",
+  const storedUser = localStorage.getItem("user");
+  console.log(JSON.parse(storedUser))
+  const [user, setUser] = useState(storedUser ? JSON.parse(storedUser) : {
+    "first_name": "",
     "last_name": "",
     "username": "",
     "password": "",
@@ -17,7 +19,7 @@ function App() {
   return (
     <div className="app">
       <BrowserRouter >
-        <Pages user={userInfo} setUser={setUserInfo} />
+        <Pages setUser={setUser} user={user}/>
       </BrowserRouter>
     </div>
   );

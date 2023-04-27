@@ -4,6 +4,7 @@ const AssignTransactions = ({transaction, setAssign, expenseList, setReloadTrans
     const handleClick = (index) => {
         axios.post('http://localhost:4000/api/assign_transactions',{
             eid: expenseList[index].eid,
+            tid: transaction.tid,
             merchant_code: transaction.iso,
             merchant_name: transaction.merchant_name,
             amount: transaction.amount,

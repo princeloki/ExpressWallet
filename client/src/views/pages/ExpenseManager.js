@@ -1,5 +1,3 @@
-
-
 import { useState,useEffect } from "react";
 import Expense from "./components/Expense"
 
@@ -12,7 +10,7 @@ import {
   Button
 } from "reactstrap";
 
-
+import React, { useRef } from 'react'; 
 import Header from "components/Headers/Header.js";
 import { GrCircleInformation } from "react-icons/gr";
 import axios from "axios";
@@ -32,6 +30,29 @@ const ExpenseManager = (props) => {
   const [reloadTransaction, setReloadTransaction] = useState(false);
 
   const [reloadExpenses, setReloadExpenses] = useState(false);
+
+  const updateExpenseRef = useRef();
+  const addExpenseRef = useRef();
+  const assignTransactionsRef = useRef();
+
+  const handleClickOutside = (event) => {
+    if (clickedIndex !== null && updateExpenseRef.current && !updateExpenseRef.current.contains(event.target)) {
+      setClickedIndex(null);
+    }
+    if (add && addExpenseRef.current && !addExpenseRef.current.contains(event.target)) {
+      setAdd(false);
+    }
+    if (assign && assignTransactionsRef.current && !assignTransactionsRef.current.contains(event.target)) {
+      setAssign(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [clickedIndex, add, assign]);
 
   useEffect(()=>{
     axios.get(`http://localhost:4000/api/get_transactions/${props.user.uid}`)
@@ -104,14 +125,15 @@ const ExpenseManager = (props) => {
       <Header onDashboard={props.onDashboard} userData={props.user}/>
       {/* Page content */}
       {clickedIndex !== null && 
-      <UpdateExpense expense={expenses[clickedIndex]} setClickedIndex={setClickedIndex}/>
-      }
+      <div ref={updateExpenseRef}> {/* Add ref to UpdateExpense */}
+        <UpdateExpense expense={expenses[clickedIndex]} setClickedIndex={setClickedIndex} reloadExpenses={reloadExpenses} setReload={setReloadExpenses}/>
+      </div>}
       {add &&
-      <div className="curve expense-adder">
-      <AddExpense uid={props.user.uid} setReloadExpenses={setReloadExpenses} reloadExpenses={reloadExpenses} setAdd={setAdd}/>
+      <div className="curve expense-adder" ref={addExpenseRef}> {/* Add ref to AddExpense */}
+        <AddExpense uid={props.user.uid} setReloadExpenses={setReloadExpenses} reloadExpenses={reloadExpenses} setAdd={setAdd}/>
       </div>}
       {assign &&
-      <div>
+      <div ref={assignTransactionsRef}> {/* Add ref to AssignTransactions */}
         <AssignTransactions transaction={trans[openAssign]} setAssign={setAssign} expenseList={expenses} setReloadTransaction={setReloadTransaction} reloadTransaction={reloadTransaction}/>
       </div>}
       <Container className="mt--7 expense-container" fluid>

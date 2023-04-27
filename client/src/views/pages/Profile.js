@@ -12,8 +12,23 @@ import {
 } from "reactstrap";
 // core components
 import UserHeader from "components/Headers/UserHeader.js";
+import axios from 'axios';
+import { useHistory } from 'react-router-dom';
 
-const Profile = () => {
+const Profile = (props) => {
+  const history = useHistory();
+
+  const deleteAccount = () =>{
+    axios.delete(`http://localhost:4000/api/delete_account/${props.user.uid}`)
+    .then(response=>{
+      localStorage.removeItem("user");
+      history.push('/auth/register');
+    })
+    .catch(err=>{
+      console.log(err);
+    })
+  }
+
   return (
     <>
       <UserHeader />
@@ -31,10 +46,10 @@ const Profile = () => {
                     <Button
                       color="primary"
                       href="#pablo"
-                      onClick={(e) => e.preventDefault()}
+                      onClick={() => deleteAccount()}
                       size="sm"
                     >
-                      Settings
+                      Delete
                     </Button>
                   </Col>
                 </Row>

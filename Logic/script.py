@@ -4,7 +4,6 @@ import sys
 import json
 import base64
 
-
 class Expense:
     def __init__(self, name, amount, priority, state):
         self.name = name
@@ -48,6 +47,13 @@ def create_expenses_from_dict(expense_dict):
             expenses.append(expense)
     return expenses
 
+def get_adjustment_percentages(priority_data):
+    adjustment_percentages = {}
+    for item in priority_data:
+        priority_name = item["priority_name"]
+        percentage = item["percentage"] / 100  # Convert the percentage to a decimal value
+        adjustment_percentages[priority_name] = percentage
+    return adjustment_percentages
 
 
 def main(expense_dict, earnings, adjustment_percentages):
@@ -55,17 +61,12 @@ def main(expense_dict, earnings, adjustment_percentages):
     remaining_balance = earnings - sum([expense.amount for expense in expenses])
 
     adjusted_expenses, adjusted_balance = adjust(expenses, remaining_balance, adjustment_percentages)
-    
-    # Convert adjusted expenses back to a list of dictionaries
     adjusted_expenses_list = [expense.__dict__ for expense in adjusted_expenses]
     
-    # Create the result dictionary with adjusted expenses and adjusted balance
     result_dict = {
         "adjusted_expenses": adjusted_expenses_list,
         "adjusted_balance": adjusted_balance
     }
-    
-    # Convert the result dictionary to a JSON string and print it
     result_json = json.dumps(result_dict)
     print(result_json)
 
@@ -76,11 +77,12 @@ if __name__ == "__main__":
     expense_dict = json.loads(json_str)
 
     earnings = int(sys.argv[2])
-    adjustment_percentages = {
-        "H": 0.1,  # High priority adjustment percentage
-        "N": 0.2,  # Normal priority adjustment percentage
-        "L": 0.3   # Low priority adjustment percentage
-    }
+    
+    adj_base64 = sys.argv[3]
+    adj = json.loads(base64.b64decode(adj_base64).decode('utf-8'))
+    
+    adjustment_percentages = get_adjustment_percentages(adj)
+
 
     main(expense_dict, earnings, adjustment_percentages)
 

@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const cors = require('cors');
 const mysql = require('mysql');
+require('dotenv/config');
 
 const router = express.Router();
 
@@ -12,7 +13,7 @@ const db = mysql.createConnection({
     multipleStatements: true,
     user: 'root',
     host: 'localhost',
-    password: 'shredder000',
+    password: process.env.PASS,
     database: 'bankinformation'
 })
 
@@ -51,6 +52,7 @@ router.post('/update_balance', (req, res) => {
     try{
         db.query(sql, (err) => {
             if(err) throw err;
+            console.log("Balance updated")
             res.send("Balance updated")
         })
     }catch(err){
@@ -71,11 +73,12 @@ router.post('/add_transaction', (req, res) => {
             for(let i=0; i<transactions.length; i++){
                 const isoDate = new Date(transactions[i].date).toISOString().split('T')[0];
                 let sql1 = `INSERT transaction (bid,merchant,iso,category,currency,date,amount) VALUES `;
-                sql1 += `(${uid},'${transactions[i].merchant}',${transactions[i].iso},'${transactions[i].category}','${transactions[i].currency}','${isoDate}',${transactions[i].amount})`
+                sql1 += `(${uid},"${transactions[i].merchant_name}",${transactions[i].iso},'${transactions[i].category}','${transactions[i].currency}','${isoDate}',${transactions[i].amount})`
                 db.query(sql1, (err) => {
                     if(err) throw err;
                 })
             }
+            console.log("Transaction added")
             res.send("Transactions added")
             
         })
@@ -148,9 +151,17 @@ router.post('/get_bank', (req, res) => {
     })
 })
 
+router.get('/get_verified_bank/:id', (req, res) => {
+    let query = `SELECT * FROM bank WHERE bid = ${req.params.id}`
+    db.query(query, (err, result) => {
+        if(err) throw err;
+        res.send(result[0])
+    })
+})
+
 router.get('/get_transactions/:id', (req, res) => {
     const bid = req.params.id
-    let query = `SELECT * FROM transaction WHERE bid = '${bid}'`
+    let query = `SELECT * FROM transaction WHERE bid = ${bid}`
     db.query(query, (err, result) => {
         if(err) throw err;
         res.send(result)

@@ -26,13 +26,21 @@ function Login({setUser}){
         e.preventDefault();
         axios.post("http://localhost:5000/api/login", formData)
         .then(result=>{      
-            setUser({
-                "fist_name": result.data[0].first_name,
+            localStorage.setItem("user", JSON.stringify({
+                "first_name": result.data[0].first_name,
                 "last_name": result.data[0].last_name,
                 "username": result.data[0].username,
                 "password": result.data[0].password,
                 "balance": result.data[0].balance
-            })
+              }));
+              setUser({
+                "first_name": result.data[0].first_name,
+                "last_name": result.data[0].last_name,
+                "username": result.data[0].username,
+                "password": result.data[0].password,
+                "balance": result.data[0].balance
+              })
+              
             navigate('/')
         })
         .catch(err => {

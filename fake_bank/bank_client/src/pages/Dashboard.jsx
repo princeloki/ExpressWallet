@@ -2,10 +2,13 @@
 
 import React,{useState} from 'react';
 import axios from 'axios'
+import { useNavigate } from 'react-router-dom'
 
 function Dashboard({user}){
+    const navigate = useNavigate();
     const [balance, setBalance] = useState(user.balance);
     const [transactions, setTransactions] = useState([]);
+    const [info, setInfo] = useState("No payment made yet");
     const [formData, setFormData] = useState({
         amount: 0,
         merchantName: "",
@@ -59,15 +62,24 @@ function Dashboard({user}){
         "iso": formData.iso, "category": formData.category, 
         "currency": formData.currency})
         .then(result => {
+            setInfo("PAYMENT MADE SUCCESSFULLY")
             console.log(result);
         })
         .catch(err => {
             console.log(err);
         })
     }
+
+    const logout = () =>{
+        localStorage.removeItem("user");
+        navigate('/login');
+    }
     
     return(
         <div className="Dashboard">
+            <div>
+                <button className="logout" onClick={logout}>Logout</button>
+            </div>
             <div className="main">
                 <h1>Dashboard</h1>
                 <h2>Balance: ${balance}</h2>
@@ -82,6 +94,7 @@ function Dashboard({user}){
                 <button onClick={addTransaction}>Add</button>
             </div>
             <div className="side">
+                <div className="info">{info}</div>
                 <form onSubmit={makePayment}>
                     <label htmlFor="amount">Amount ($)</label>
                     <input type="text" name="amount" value={formData.amount} onChange={(e)=>handleChange(e)} placeholder="Enter amount"/>

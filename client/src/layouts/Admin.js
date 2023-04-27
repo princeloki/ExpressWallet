@@ -1,7 +1,8 @@
-import React,{ useState } from "react";
+import React,{ useState,useEffect } from "react";
 import { useLocation, Route, Switch, Redirect } from "react-router-dom";
 import AdminNavbar from "components/Navbars/AdminNavbar.js";
 import Sidebar from "components/Sidebar/Sidebar.js";
+import axios from "axios";
 
 import routes from "routes.js";
 
@@ -13,6 +14,21 @@ const Admin = (props) => {
   const [onDashboard, setOnDashboard] = useState(true);
   const mainContent = React.useRef(null);
   const location = useLocation();
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      axios.get(`http://localhost:4000/api/get_user/${user.uid}`)
+        .then(response => {
+          setUser(response.data)
+          localStorage.setItem("user", JSON.stringify(response.data));
+          console.log(response.data);
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    }, 20000);
+    return () => clearInterval(intervalId);
+  }, []);
 
   React.useEffect(() => {
     document.documentElement.scrollTop = 0;

@@ -1,3 +1,5 @@
+
+
 import {
 Form,
 FormGroup,
@@ -8,10 +10,50 @@ InputGroup
 } from "reactstrap";
 
 import { useState, useEffect } from "react";
+import axios from "axios";
 
+const UpdateExpense = ({expense, setClickedIndex, reloadExpenses, setReload}) => {
 
-const UpdateExpense = ({expense, setClickedIndex}) => {
+const [editing, setEditing] = useState(false);
+const [expenseData, setExpenseData] = useState({
+  eid: expense.eid,
+  expense: expense.expense_name,
+  amount: expense.expense_amount,
+  state: expense.state,
+  priority: expense.priority
+});
 
+const deleteExp = ()=>{
+  axios.delete(`http://localhost:4000/api/delete_expense/${expense.eid}`)
+  .then(response=>{
+    setClickedIndex(null);
+    setReload(!reloadExpenses);
+  })
+  .catch(err=>{
+    console.log(err);
+  })
+}
+
+const updateExp = (e) =>{
+  e.preventDefault();
+  axios.put(`http://localhost:4000/api/update_expense`, expenseData)
+  .then(response=>{
+    setClickedIndex(null);
+    setReload(!reloadExpenses);
+  })
+  .catch(err => {
+    console.log(err);
+  })
+}
+
+const handleChange = (e) =>{
+  setExpenseData(prevExpenseData=>{
+    return{
+      ...prevExpenseData,
+      [e.target.name]: e.target.value,
+    }
+  })
+}
 
 return (
     <>
@@ -19,19 +61,21 @@ return (
         <div className="editor-container">
           <h2>{expense.expense_name}</h2>
           <div className="edit-buttons">
-            <Button color="primary">Delete</Button>
-            <Button color="primary">Edit</Button>
+            <Button onClick={deleteExp} color="primary">Delete</Button>
+            <Button onClick={()=>setEditing(!editing)} color="primary">Edit</Button>
           </div>
+          {editing && 
           <div className="edit">
-            <Form>
+            <Form onSubmit={updateExp}>
               <FormGroup>
                 <Label className="reg-label" for="income">Expense name</Label>
                 <InputGroup>
                   <Input 
                   type="text"
-                  name="exp-name"
+                  name="expense"
                   autoComplete="new-expense"
-                  value={expense.expense_name}
+                  onChange={(e)=>handleChange(e)}
+                  value={expenseData["expense"]}
                   />
                 </InputGroup>
               </FormGroup>
@@ -40,9 +84,10 @@ return (
                 <InputGroup>
                   <Input 
                   type="text"
-                  name="exp-amount"
+                  name="amount"
                   autoComplete="new-amount"
-                  value={expense.expense_amount}
+                  onChange={(e)=>handleChange(e)}
+                  value={expenseData["amount"]}
                   />
                 </InputGroup>
               </FormGroup>
@@ -51,9 +96,10 @@ return (
                 <InputGroup>
                   <Input 
                   type="select"
-                  name="exp-state"
+                  name="state"
                   autoComplete="new-state"
-                  value={expense.state}
+                  onChange={(e)=>handleChange(e)}
+                  value={expenseData["state"] ==="F" ? "Fixed" : "Adjustable"}
                   >
                     <option>Fixed</option>
                     <option>Adjustable</option>
@@ -65,9 +111,10 @@ return (
                 <InputGroup>
                   <Input 
                   type="select"
-                  name="exp-priority"
+                  name="priority"
                   autoComplete="new-priority"
-                  value={expense.priority}
+                  onChange={(e)=>handleChange(e)}
+                  value={expenseData["priority"]==="H" ? "High":expenseData["priority"]==="N" ? "Normal" : "Low" }
                   >
                     <option>High</option>
                     <option>Normal</option>
@@ -75,10 +122,11 @@ return (
                   </Input>
                 </InputGroup>
               </FormGroup>
+              
+              <Button className="save-button" color="primary" type="submit">Save</Button>
             </Form>
-          </div>
+          </div>}
         </div>
-        <button className="curve save-button" onClick={()=>setClickedIndex(null)}>Save</button>
       </div>
     </>
 );

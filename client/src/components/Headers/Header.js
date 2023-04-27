@@ -11,12 +11,30 @@ import {
 
 import { FcCurrencyExchange } from "react-icons/fc";
 import { BsCurrencyYen } from "react-icons/bs";
+import { useState, useEffect } from "react";
+import axios from 'axios';
+
 const Header = ({onDashboard, userData, setUser}) => {
+  const [today, setToday] = useState(0)
+  const [week, setWeek] = useState(0)
+  const [month, setMonth] = useState(0)
   const currIcon = () =>{
     return(
       <div></div>
     )
   }
+
+  useEffect(()=>{
+    axios.get(`http://localhost:4000/api/get_spending_amount/${userData.uid}`)
+    .then(response=>{
+      setToday(response.data["today"]);
+      setWeek(response.data["week"]);
+      setMonth(response.data["month"]);
+    })
+    .catch(err=>{
+      console.log(err);
+    })
+  },[])
 
 
   const setCurrency = (e) =>{
@@ -53,10 +71,10 @@ const Header = ({onDashboard, userData, setUser}) => {
                           </CardTitle>  
                           <div className="budget-header">
                             <span className="h2 font-weight-bold mb-0">
-                              ${(userData.budget/30).toFixed(2)} | Budget
+                            Budget | ${(userData.budget/30).toFixed(2)}                            
                             </span>
                             <span className="h2 font-weight-bold mb-0 bal-text">
-                              ${((userData.balance)/30-(userData.budget/30)).toFixed(2)} | Balance
+                              ${((userData.budget/30)-today).toFixed(2)} remaining
                             </span>
                           </div>
                         </div>
@@ -88,10 +106,10 @@ const Header = ({onDashboard, userData, setUser}) => {
                           </CardTitle>
                           <div className="budget-header">
                             <span className="h2 font-weight-bold mb-0">
-                              ${(userData.budget/4).toFixed(2)} | Budget
+                              Budget | ${(userData.budget/4).toFixed(2)}
                             </span>
                             <span className="h2 font-weight-bold mb-0 bal-text">
-                              ${((userData.balance)/4-(userData.budget/4)).toFixed(2)} | Balance
+                              ${((userData.budget)/4-week).toFixed(2)} remaining
                             </span>
                           </div>
                         </div>
@@ -123,10 +141,10 @@ const Header = ({onDashboard, userData, setUser}) => {
                           </CardTitle>
                           <div className="budget-header">
                             <span className="h2 font-weight-bold mb-0">
-                              ${(userData.budget).toFixed(2)} | Budget
+                            Budget | ${(userData.budget).toFixed(2)}
                             </span>
                             <span className="h2 font-weight-bold mb-0 bal-text">
-                              ${((userData.balance)-(userData.budget)).toFixed(2)} | Balance
+                              ${((userData.budget)-month).toFixed(2)} remaining
                             </span>
                           </div>
                         </div>

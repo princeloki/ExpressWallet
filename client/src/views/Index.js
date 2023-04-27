@@ -35,6 +35,21 @@ const Index = (props) => {
 
   const [transactions, setTransactions] = useState([])
   const [topCats, setTopCats] = useState([])
+  const [reload, setReload] = useState(false)
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      axios.put(`http://localhost:4000/api/update_user/${props.user.uid}`)
+        .then(response => {
+          console.log(response.data);
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    }, 20000);
+    return () => clearInterval(intervalId);
+  }, [props.user.id]);
+  
 
   useEffect(()=>{
     axios.get(`http://localhost:4000/api/get_top_five_transactions/${props.user.uid}`)
@@ -44,7 +59,7 @@ const Index = (props) => {
     .catch(err=>{
       console.log(err)
     })
-  },[props.user])
+  },[props.user, reload])
 
   useEffect(()=>{
     axios.get(`http://localhost:4000/api/get_most_common/${props.user.uid}`)
@@ -54,7 +69,7 @@ const Index = (props) => {
     .catch(err=>{
       console.log(err)
     })
-  },[props.user])
+  },[props.user, reload])
 
   const trans = transactions.map(transaction=>{
     const date = new Date(transaction.date)

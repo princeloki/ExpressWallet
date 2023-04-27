@@ -15,8 +15,8 @@ const AddExpense = ({uid, setReloadExpenses,reloadExpenses,setAdd}) => {
       uid: uid,
       expense_name: "",
       amount: 0,
-      state: "",
-      priority: ""
+      state: "Fixed",
+      priority: "High"
     })
 
 const handleExpense = (e)=>{
