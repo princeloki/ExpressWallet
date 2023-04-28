@@ -3,6 +3,17 @@
     min-height: 100vh;
 }
 
+.danger{
+    color: #e53c3c;
+    font-size: 0.8em;
+    font-weight: bold;
+}
+
+.upper{
+    font-size: 1.2em;
+    color: #ef0c0c;
+    text-transform: uppercase;
+}
 
 nav h1{
     color: var(--default-color);
@@ -15,6 +26,34 @@ nav h1{
 .notif{
     font-size: 2em;
     cursor: pointer;
+}
+
+.readjust-alert{
+    display: flex;
+    flex-direction: row;
+    gap: 2em;
+    align-items: center;
+}
+
+.readj-body{
+    width: 50%;
+    min-height: 30em;
+    position: absolute !important;
+    top: 2em;
+    left: 25%;
+    z-index: 5;
+    text-align: center;
+}
+
+.adj-expens{
+    text-align: left;
+    border-bottom:1px solid rgb(144, 144, 144);
+}
+
+.adj-exp-header{
+    color: #3d3d3d;
+    font-size: 1.2em;
+    font-weight: bold;
 }
 
 nav .user{
@@ -63,6 +102,14 @@ nav .dropdown h1{
     display: flex;
     flex-direction: row;
     align-items: center;
+}
+
+.bank-alert{
+    width: 60%;
+    margin: 0 auto;
+    position: absolute;
+    top: -2em;
+    z-index: 5;
 }
 
 .bank-header .text-center{
@@ -125,19 +172,23 @@ nav .dropdown h1{
     margin-left: auto;
 }
 
+#cur-sel{
+    border: none;
+    cursor: pointer;
+}
+
 .currency-control{
+    width: 100%;
     text-align: center;
     align-items: center;
     display: flex;
     flex-direction: row;
-    cursor: pointer;
-    padding: 0.5em 1em;
 }
 
-.currency-control:hover{
+/* .currency-control:hover{
     background: #e6e6e6;
     border-radius: 30px;
-}
+} */
 
 .currency-control h2{
     margin: 0;
@@ -209,6 +260,7 @@ nav .dropdown h1{
     min-height: 40em;
     background: #fff;
     text-align: center;
+    opacity: 0.95;
 }
 
 .spending-list button{
@@ -222,6 +274,13 @@ nav .dropdown h1{
     background: #67a2cf;
     color: #fff;
     font-weight: bold;
+}
+
+.spending-list th{
+    border-bottom: 0.5px solid #afafaf !important;
+    font-weight: bold !important;
+    font-size: 1.2em !important;
+    letter-spacing: 0.01em !important;
 }
 
 .open-control{

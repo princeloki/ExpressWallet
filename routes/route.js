@@ -71,7 +71,7 @@ router.post('/login', (req, res) => {
                 } else{
                     res.send({message: "Passwords do not match"});
                 }
-            }
+            }   
         })
     })
 })
@@ -195,7 +195,6 @@ router.put(`/update_user/:id`,(req,res)=>{
                 if (err) throw err;
             })
         }
-        res.send(trans)
     })
     
     const upUser = `
@@ -204,8 +203,8 @@ router.put(`/update_user/:id`,(req,res)=>{
     WHERE uid = ${uid}`
     db.query(upUser, (err) => {
         if (err) throw err;
-        console.log('user updated')
-        // res.send("User has been updated")
+        res.send({message: 'user updated'})
+        console.log("User has been updated")
     })
 })
 
@@ -217,6 +216,44 @@ router.get('/get_user/:id', (req, res)=>{
         if (err) throw err;
         const user = result[0];
         res.send(user);
+    })
+})
+
+router.get('/get_rem_budgets/:id', (req, res)=>{
+    const sql = `
+    SELECT e.eid, e.expense_name, e.expense_amount - COALESCE(SUM(s.spending_amount), 0) as total
+    FROM expense e
+    LEFT JOIN spending s ON e.eid = s.eid AND MONTH(s.date) = MONTH(NOW())
+    WHERE e.uid = ${req.params.id}
+    GROUP BY e.eid, e.expense_name, e.expense_amount
+    ORDER BY e.eid;
+    `
+    db.query(sql, (err, result)=>{
+        if (err) throw err;
+        res.send(result);
+    })
+})
+
+router.get('/get_rem_budget/:id', (req, res)=>{
+    const sql = `
+    SELECT SUM(adjusted_total) as grand_total
+    FROM (
+    SELECT e.eid,
+           e.expense_name,
+           e.expense_amount,
+           CASE
+               WHEN e.expense_amount - COALESCE(SUM(s.spending_amount), 0) < 0 THEN 0
+               ELSE e.expense_amount - COALESCE(SUM(s.spending_amount), 0)
+           END as adjusted_total
+    FROM expense e
+    LEFT JOIN spending s ON e.eid = s.eid AND MONTH(s.date) = MONTH(NOW())
+    WHERE e.uid = ${req.params.id}
+    GROUP BY e.eid, e.expense_name, e.expense_amount
+    ) subquery;
+    `
+    db.query(sql, (err, result) => {
+        if (err) throw err;
+        res.send(result[0])
     })
 })
 
@@ -376,7 +413,7 @@ router.put('/update_expense', (req, res)=>{
     const priority = req.body.priority;
     const sql = `
     UPDATE expense
-    SET expense_name = ${expense}, amount = ${amount}, state = ${state}, priority = ${priority}
+    SET expense_name = '${expense}', expense_amount = ${amount}, state = '${state}', priority = '${priority}'
     WHERE eid = ${eid}
     `
     db.query(sql, (err)=>{
@@ -505,18 +542,41 @@ router.post('/get_spending_trans', (req, res)=>{
 router.get('/adjust_expenses/:id', (req, res) => {
     const uid = req.params.id;
     const sql = `
-    SELECT expense_name as expense, expense_amount as amount,  priority, state
-    FROM expense
-    ORDER BY expense DESC`;
+    SELECT e.expense_name as expense, e.expense_amount - COALESCE(SUM(s.spending_amount), 0) as amount, e.state, e.priority 
+    FROM expense e
+    LEFT JOIN spending s ON e.eid = s.eid AND MONTH(s.date) = MONTH(NOW())
+    WHERE e.uid = ${uid}
+    GROUP BY e.eid, e.expense_name, e.expense_amount
+    HAVING e.expense_amount - COALESCE(SUM(s.spending_amount), 0) >= 0
+    ORDER BY e.eid;
+    `;
     const sql2 = `SELECT `
     db.query(sql, (err, result)=>{
         const scriptPath = path.join(__dirname,'..','Logic','script.py');
         if (err) throw err;
-        const sql2 = `SELECT balance FROM user WHERE uid=${uid}`
+        const sql2 = 
+        `
+        SELECT COALESCE(user.balance - SUM(adjusted_total), 0) as grand_total
+        FROM (
+            SELECT e.eid,
+                   e.expense_name,
+                   e.expense_amount,
+                   CASE
+                       WHEN e.expense_amount - COALESCE(SUM(s.spending_amount), 0) < 0 THEN 0
+                       ELSE e.expense_amount - COALESCE(SUM(s.spending_amount), 0)
+                   END as adjusted_total
+            FROM expense e
+            LEFT JOIN spending s ON e.eid = s.eid AND MONTH(s.date) = MONTH(NOW())
+            JOIN user ON user.uid = e.uid
+            WHERE e.uid = ${uid}
+            GROUP BY e.eid, e.expense_name, e.expense_amount
+        ) subquery
+        JOIN user ON user.uid = ${uid};
+        `
         const expenses = result;
         db.query(sql2, (err, result) => {
             if (err) throw err;
-            const balance = result[0].balance;
+            const balance = result[0].grand_total;
             const expense_dict = expenses.reduce((acc, item) => {
                 const priority = item.priority;
             
@@ -547,7 +607,7 @@ router.get('/adjust_expenses/:id', (req, res) => {
                     console.error(`exec error: ${error}`);
                     return res.status(500).send("An error occurred");
                 }
-                res.send({ message: "Success", data: JSON.parse(stdout) });
+                res.send({ data: JSON.parse(stdout) });
                 stderr && console.error(`exec error: ${stderr}`);
                 stdout && console.log("Json sent successfully");
                 });

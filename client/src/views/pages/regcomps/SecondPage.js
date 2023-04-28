@@ -92,7 +92,8 @@ const SecondPage = ({handleIndexChange,handleAddition,userData}) =>{
               </Input>
             </InputGroup>
           </FormGroup>
-          {setBudget==="Yes" && <FormGroup>
+          {setBudget==="Yes" && 
+          <FormGroup>
             <InputGroup className="input-group-alternative mb-3">
               <InputGroupAddon addonType="prepend">
                 <InputGroupText>

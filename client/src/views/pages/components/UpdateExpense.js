@@ -47,6 +47,7 @@ const updateExp = (e) =>{
 }
 
 const handleChange = (e) =>{
+  console.log(expenseData)
   setExpenseData(prevExpenseData=>{
     return{
       ...prevExpenseData,
@@ -99,10 +100,10 @@ return (
                   name="state"
                   autoComplete="new-state"
                   onChange={(e)=>handleChange(e)}
-                  value={expenseData["state"] ==="F" ? "Fixed" : "Adjustable"}
+                  value={expenseData["state"]}
                   >
-                    <option>Fixed</option>
-                    <option>Adjustable</option>
+                    <option value="F">Fixed</option>
+                    <option value="A">Adjustable</option>
                   </Input>
                 </InputGroup>
               </FormGroup>
@@ -110,15 +111,15 @@ return (
                 <Label className="reg-label" for="income">Expense priority</Label>
                 <InputGroup>
                   <Input 
-                  type="select"
-                  name="priority"
-                  autoComplete="new-priority"
-                  onChange={(e)=>handleChange(e)}
-                  value={expenseData["priority"]==="H" ? "High":expenseData["priority"]==="N" ? "Normal" : "Low" }
+                    type="select"
+                    name="priority"
+                    autoComplete="new-priority"
+                    onChange={(e) => handleChange(e)}
+                    value={expenseData["priority"]}
                   >
-                    <option>High</option>
-                    <option>Normal</option>
-                    <option>Low</option>
+                    <option value="H">High</option>
+                    <option value="N">Normal</option>
+                    <option value="L">Low</option>
                   </Input>
                 </InputGroup>
               </FormGroup>

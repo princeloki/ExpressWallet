@@ -38,17 +38,18 @@ const Index = (props) => {
   const [reload, setReload] = useState(false)
 
   useEffect(() => {
+    console.log(props.user.uid);
     const intervalId = setInterval(() => {
       axios.put(`http://localhost:4000/api/update_user/${props.user.uid}`)
         .then(response => {
-          console.log(response.data);
+          props.updateUser();
         })
         .catch(error => {
           console.log(error);
         });
-    }, 20000);
+    }, 5000);
     return () => clearInterval(intervalId);
-  }, [props.user.id]);
+  }, []);
   
 
   useEffect(()=>{
@@ -59,7 +60,7 @@ const Index = (props) => {
     .catch(err=>{
       console.log(err)
     })
-  },[props.user, reload])
+  },[props.user])
 
   useEffect(()=>{
     axios.get(`http://localhost:4000/api/get_most_common/${props.user.uid}`)
@@ -69,7 +70,7 @@ const Index = (props) => {
     .catch(err=>{
       console.log(err)
     })
-  },[props.user, reload])
+  },[props.user])
 
   const trans = transactions.map(transaction=>{
     const date = new Date(transaction.date)
@@ -105,7 +106,7 @@ const Index = (props) => {
 
   return (
     <>
-      <Header onDashboard={props.onDashboard} userData={props.user} setUser={props.setUserData} />
+      <Header onDashboard={props.onDashboard} userData={props.user} setUser={props.setUserData} reload={reload}/>
       {/* Page content */}
       <Container className="mt--7" fluid>
         <Row>

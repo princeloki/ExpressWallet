@@ -55,20 +55,41 @@ def get_adjustment_percentages(priority_data):
         adjustment_percentages[priority_name] = percentage
     return adjustment_percentages
 
+def total_adjustable_expenses(expenses):
+    total = 0
+    for expense in expenses:
+        if expense.state != "F":
+            total += expense.amount
+    return total
 
-def main(expense_dict, earnings, adjustment_percentages):
+
+def main(expense_dict, remaining_balance, adjustment_percentages):
     expenses = create_expenses_from_dict(expense_dict)
-    remaining_balance = earnings - sum([expense.amount for expense in expenses])
-
-    adjusted_expenses, adjusted_balance = adjust(expenses, remaining_balance, adjustment_percentages)
-    adjusted_expenses_list = [expense.__dict__ for expense in adjusted_expenses]
+    total_adjustable = total_adjustable_expenses(expenses)
     
-    result_dict = {
-        "adjusted_expenses": adjusted_expenses_list,
-        "adjusted_balance": adjusted_balance
-    }
-    result_json = json.dumps(result_dict)
-    print(result_json)
+    if(remaining_balance>=0):
+        result_dict = {
+            "message": "Nothing to adjust",
+            "adjusted_expenses": []
+        }
+        result_json = json.dumps(result_dict)
+        print(result_json)
+    elif(abs(remaining_balance)>total_adjustable):
+        result_message = {"message": "Not adjustable", "adjusted_expenses": []}
+        result_json = json.dumps(result_message)
+        print(result_json)
+    else:
+        adjusted_expenses, adjusted_balance = adjust(expenses, remaining_balance, adjustment_percentages)
+        adjusted_expenses_list = [expense.__dict__ for expense in adjusted_expenses]
+
+        result_dict = {
+            "message": "Success",
+            "adjusted_expenses": adjusted_expenses_list,
+            "adjusted_balance": adjusted_balance
+        }
+        result_json = json.dumps(result_dict)
+        print(result_json)
+
 
 
 if __name__ == "__main__":
@@ -76,15 +97,16 @@ if __name__ == "__main__":
     json_str = base64.b64decode(json_base64_str).decode('utf-8')
     expense_dict = json.loads(json_str)
 
-    earnings = int(sys.argv[2])
-    
+    balance = int(sys.argv[2])
+
+
+
     adj_base64 = sys.argv[3]
     adj = json.loads(base64.b64decode(adj_base64).decode('utf-8'))
+
     
     adjustment_percentages = get_adjustment_percentages(adj)
-
-
-    main(expense_dict, earnings, adjustment_percentages)
+    main(expense_dict, balance, adjustment_percentages)
 
 
 
