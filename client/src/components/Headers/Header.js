@@ -16,7 +16,6 @@ import { FcCurrencyExchange } from "react-icons/fc";
 import { BsCurrencyYen } from "react-icons/bs";
 import { useState, useEffect, useRef } from "react";
 import axios from 'axios';
-import { ajaxPrefilter } from "jquery";
 
 const Header = ({onDashboard, userData, setUser}) => {
   const ref = useRef();
@@ -43,6 +42,24 @@ const Header = ({onDashboard, userData, setUser}) => {
     )
   }
 
+  const assignUpdate = () =>{
+    const newAdjusted = []
+
+    let expenses = alert.data.adjusted_expenses
+    for(let i=0; i<expenses.length;i++){
+      expenses[i].state === "A" && newAdjusted.push(expenses[i])
+    }
+
+    axios.put(`http://localhost:4000/api/update_adjusted/${userData.uid}`, {expenses: newAdjusted})
+    .then(response=>{
+      setOpen(false);
+      window.location.reload();
+    })
+    .catch(err=>{
+      console.log(err)
+    })
+  }
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (ref.current && !ref.current.contains(event.target)) {
@@ -58,7 +75,7 @@ const Header = ({onDashboard, userData, setUser}) => {
 
   const adjust = alert.data.adjusted_expenses.map((adjusted_expense,index)=>{
     return(
-      <p className="adj-expens" key={index}><span className="adj-exp-header">{adjusted_expense.name}</span>  <br/> Adjusted amount => ${adjusted_expense.amount.toFixed(2)}</p>
+      adjusted_expense.state === "A" && <p className="adj-expens" key={index}><span className="adj-exp-header">{adjusted_expense.name}</span>  <br/> Adjusted amount => ${adjusted_expense.amount.toFixed(2)}</p>
     )
   })
 
@@ -149,7 +166,7 @@ const Header = ({onDashboard, userData, setUser}) => {
                 </CardTitle>   */}
                 <div className="budget-header">
                   <span className="h2 font-weight-bold mb-0">
-                  {alert.data.message==="Not adjustable" && <p className="danger"><span className="upper">Warning</span>: User budget is unadjustable, deposit money into your account!</p>}   
+                  {alert.data.message==="Not adjustable" && <p className="danger"><span className="upper">Warning</span>: Your budget is unadjustable, deposit money into your account!</p>}   
                   </span>
                   {alert.data.message==="Success" && 
                   <div className="readjust-alert">
@@ -165,8 +182,9 @@ const Header = ({onDashboard, userData, setUser}) => {
         <div ref={ref}>
           <Card className="readj-body curve">
             <CardBody>
+              <h2 className="h2 font-weight-bold mb-0">Recommended adjustments</h2>
               {adjust}
-              <Button color="primary">Accept</Button>
+              <Button color="primary" onClick={assignUpdate}>Accept</Button>
             </CardBody>
           </Card>
         </div>}
@@ -187,12 +205,12 @@ const Header = ({onDashboard, userData, setUser}) => {
                             Today
                           </CardTitle>  
                           <div className="budget-header">
-                            <span className="h2 font-weight-bold mb-0">
+                            {/* <span className="h2 font-weight-bold mb-0">
                             Budget | ${(userData.budget/30).toFixed(2)} <br/>
-                            Remaining exp | ${(budget/30).toFixed(2)}                            
-                            </span>
+                            Expenses left | ${(budget/30).toFixed(2)}                            
+                            </span> */}
                             <span className="h2 font-weight-bold mb-0 bal-text">
-                            Spendable ${stats.day}
+                            Free to spend - ${stats.day}
                             </span>
                           </div>
                         </div>
@@ -223,12 +241,12 @@ const Header = ({onDashboard, userData, setUser}) => {
                             This Week
                           </CardTitle>
                           <div className="budget-header">
-                            <span className="h2 font-weight-bold mb-0">
+                            {/* <span className="h2 font-weight-bold mb-0">
                               Budget | ${(userData.budget/4).toFixed(2)} <br/>
-                              Remaining exp | ${(budget/4).toFixed(2)}         
-                            </span>
+                              Expenses left | ${(budget/4).toFixed(2)}         
+                            </span> */}
                             <span className="h2 font-weight-bold mb-0 bal-text">
-                              Spendable ${stats.tweek}
+                            Free to spend - ${stats.tweek}
                             </span>
                           </div>
                         </div>
@@ -261,10 +279,10 @@ const Header = ({onDashboard, userData, setUser}) => {
                           <div className="budget-header">
                             <span className="h2 font-weight-bold mb-0">
                             Budget | ${(userData.budget).toFixed(2)} <br/>
-                            Remaining exp | ${(budget).toFixed(2)}         
+                            Expenses left | ${(budget).toFixed(2)}         
                             </span>
                             <span className="h2 font-weight-bold mb-0 bal-text">
-                            Spendable ${stats.tmonth}
+                            Free to spend - ${stats.tmonth}
                             </span>
                           </div>
                         </div>

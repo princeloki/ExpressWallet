@@ -604,6 +604,32 @@ tr:last-of-type{
     left: 5%;
 }
 
+.recommended-screen{
+    position: absolute;
+    top: 15%;
+    left: 25%;
+    min-height: 20em;
+    width: 50%;
+    background: #fff;
+    z-index: 5;
+}
+
+.rec-container{
+    margin: 2em;
+}
+
+.recommended-screen h2{
+    margin-top: 2em;
+}
+
+.save-button{
+    margin-top: 1em;
+}
+
+.rec-form{
+    margin-top: 1em;
+}
+
 .footer{
     position: absolute;
     background: none !important;

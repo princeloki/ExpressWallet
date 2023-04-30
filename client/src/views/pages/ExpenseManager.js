@@ -1,3 +1,5 @@
+
+
 import { useState,useEffect } from "react";
 import Expense from "./components/Expense"
 
@@ -19,6 +21,7 @@ import AddExpense from "./components/AddExpense";
 import { AiOutlineCheck } from "react-icons/ai";
 import { AiOutlineClose } from "react-icons/ai"
 import AssignTransactions from "./components/AssignTransaction";
+import RecommendedExpense from "./components/RecommendedExpense";
 
 const ExpenseManager = (props) => {
   const [trans, setTrans] = useState([])
@@ -28,12 +31,29 @@ const ExpenseManager = (props) => {
   const [assign, setAssign] = useState(false);
   const [openAssign, setOpenAssign] = useState(null);
   const [reloadTransaction, setReloadTransaction] = useState(false);
+  const [recommended, setRecommended] = useState([])
+  const [recindex, setRecindex] = useState(null);
 
   const [reloadExpenses, setReloadExpenses] = useState(false);
 
   const updateExpenseRef = useRef();
   const addExpenseRef = useRef();
   const assignTransactionsRef = useRef();
+  const recommendedExpenseRef = useRef(); 
+
+  const handleRecClick = (index)=>{
+    openAssign === index ? setRecindex(null) : setRecindex(index)
+  }
+  
+
+  const newExpense = recommended.map((recommend, index)=>{
+    return(
+      recommend.length !== 0 && <div key={index} className="trans-adds">
+        <Button onClick={()=>handleRecClick(index)}>{recommend.merchant_name} ({recommend.category} - ${recommend.amount})</Button>
+      </div>
+    )
+  })
+
 
   const handleClickOutside = (event) => {
     if (clickedIndex !== null && updateExpenseRef.current && !updateExpenseRef.current.contains(event.target)) {
@@ -47,12 +67,33 @@ const ExpenseManager = (props) => {
     }
   };
 
+  const handleClickOutside2 = (event) => {
+    if (recindex !== null && recommendedExpenseRef.current && !recommendedExpenseRef.current.contains(event.target)) {
+      setRecindex(null);
+    }
+  };
+
+
+  useEffect(()=>{
+    axios.get(`http://localhost:4000/api/get_recommended/${props.user.uid}`)
+    .then(response =>{
+      setRecommended(response.data.data);
+    })
+    .catch(err=>{
+      console.log(err)
+    })
+  },[props.user, reloadTransaction, reloadExpenses])
+
+
   useEffect(() => {
     document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside2);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside2);
     };
-  }, [clickedIndex, add, assign]);
+  }, [recindex,clickedIndex, add, assign]);
+  
 
   useEffect(()=>{
     axios.get(`http://localhost:4000/api/get_transactions/${props.user.uid}`)
@@ -136,6 +177,10 @@ const ExpenseManager = (props) => {
       <div ref={assignTransactionsRef}> {/* Add ref to AssignTransactions */}
         <AssignTransactions transaction={trans[openAssign]} setAssign={setAssign} expenseList={expenses} setReloadTransaction={setReloadTransaction} reloadTransaction={reloadTransaction}/>
       </div>}
+      {recindex !== null && 
+      <div ref={recommendedExpenseRef}> {/* Add ref to RecommendedExpense */}
+        <RecommendedExpense user={props.user} expense={recommended[recindex]} setReloadExpenses={setReloadExpenses} reloadExpenses={reloadExpenses} />
+      </div>}
       <Container className="mt--7 expense-container" fluid>
         <Row className="mt-5">
           <Col className="mb-5 mb-xl-0" xl="5">
@@ -178,7 +223,7 @@ const ExpenseManager = (props) => {
               <div className="rec-exp">
                     <h3 className="mb-0">RECOMMENDED EXPENSES <GrCircleInformation className="info"/></h3>
                     <div className="cats">
-                      
+                      {newExpense}
                     </div>
               </div>
             </Card>

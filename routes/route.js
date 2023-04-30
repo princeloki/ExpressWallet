@@ -6,8 +6,9 @@ const path = require('path')
 const bcrypt = require('bcrypt')
 const mysql = require('mysql')
 const axios = require('axios')
-const { exec } = require('child_process');
+const { exec,spawn  } = require('child_process');
 const dJSON = require('dirty-json')
+const fs = require("fs");
 require('dotenv/config')
 
 
@@ -189,8 +190,8 @@ router.put(`/update_user/:id`,(req,res)=>{
         const trans = result;
         for(let i=0;i<trans.length;i++){
             let isoDate = new Date(trans[i].date).toISOString();
-            let sql1 = `INSERT IGNORE INTO spending (eid, tid, spending_name, spending_amount, date) VALUES 
-            (${trans[i].eid}, ${trans[i].tid},'${trans[i].expense}', ${trans[i].amount}, '${isoDate}')`
+            let sql1 = `INSERT IGNORE INTO spending (eid, tid, spending_name, spending_amount, date, accounted) VALUES 
+            (${trans[i].eid}, ${trans[i].tid},'${trans[i].expense}', ${trans[i].amount}, '${isoDate}', ${trans[i].expense === 'MISC' ? 0 : 1})`
             db.query(sql1, (err)=>{
                 if (err) throw err;
             })
@@ -422,6 +423,20 @@ router.put('/update_expense', (req, res)=>{
     })
 })
 
+router.put('/update_adjusted/:id', (req, res)=>{
+    const uid = req.params.id
+    const expenses = req.body.expenses
+    for(let i=0;i<expenses.length;i++){
+        let sql = `UPDATE expense SET expense_name = '${expenses[i].name}', expense_amount = ${expenses[i].amount}
+        WHERE uid = ${uid} AND expense_name = '${expenses[i].name}'`
+        db.query(sql, (err)=>{
+            if (err) throw err;
+        })
+    }
+        
+    res.send({message: "Successfully updated expenses"})
+})
+
 router.delete('/delete_expense/:eid', (req, res)=>{
     const sql = `
     DELETE FROM expense WHERE eid = ${req.params.eid};
@@ -509,7 +524,7 @@ router.post('/assign_transactions', (req, res)=>{
     const date = new Date(req.body.date).toISOString().slice(0, 10);
     const amount = req.body.amount
     const sql1 = `INSERT IGNORE INTO assign (eid, merchant_code, merchant_name) VALUES (${eid}, ${merchant_code}, "${merchant_name}")`;
-    const sql2 = `INSERT IGNORE INTO spending (eid, tid, spending_name, spending_amount, date) VALUES (${eid},${tid}, (SELECT expense_name FROM expense WHERE eid = ${eid}), ${amount}, '${date}')`;
+    const sql2 = `INSERT IGNORE INTO spending (eid, tid, spending_name, spending_amount, date, accounted) VALUES (${eid},${tid}, (SELECT expense_name FROM expense WHERE eid = ${eid}), ${amount}, '${date}', (SELECT CASE WHEN expense_name <> 'MISC' THEN 1 ELSE 0 END FROM expense WHERE eid = ${eid}))`;
     db.query(sql1, (err)=>{
         if (err) throw err;
         db.query(sql2, (err)=>{
@@ -617,6 +632,111 @@ router.get('/adjust_expenses/:id', (req, res) => {
         })
     })
 })
+
+router.get(`/get_recommended/:id`, (req, res) => {
+    const uid = req.params.id;
+    const sql = `
+    SELECT * 
+    FROM transaction 
+    JOIN spending ON transaction.tid = spending.tid
+    WHERE spending_name = 'MISC' AND accounted = 0
+    AND eid in (SELECT eid FROM expense WHERE uid = ${uid})
+    AND date(transaction.date) >= (SELECT date(start) FROM user WHERE uid=${uid})
+    ORDER BY transaction.date`
+    db.query(sql, (err, result) => {
+        if (err) throw err;
+    
+        // Spawn the Python process
+        const pythonProcess = spawn("python", ["Logic/automatic_expenses.py"]);
+    
+        // Send the JSON object to the Python script through stdin
+        pythonProcess.stdin.write(JSON.stringify({ transactions: result }));
+        pythonProcess.stdin.end();
+    
+        let stdoutData = "";
+        pythonProcess.stdout.on("data", (data) => {
+          stdoutData += data;
+        });
+    
+        pythonProcess.stderr.on("data", (data) => {
+          console.error(`exec error: ${data}`);
+        });
+    
+        pythonProcess.on("close", (code) => {
+          if (code !== 0) {
+            return res.status(500).send("An error occurred");
+          }
+    
+          res.send({ data: JSON.parse(stdoutData) });
+          console.log("Json sent successfully");
+        });
+      });
+    });
+
+router.post('/find_transactions', (req, res) => {
+    const uid = req.body.uid
+    const merchant = req.body.merchant_name
+    const cat = req.body.category
+    const amount = req.body.amount
+    
+    const sql = `SELECT * FROM transaction t WHERE t.bid IN (SELECT bid FROM bank WHERE uid = ${uid}) AND merchant_name = '${merchant}' AND category = '${cat}'
+    AND amount = ${amount}
+    AND date(t.date) >= (SELECT date(start) FROM user WHERE uid=${uid})`
+    db.query(sql, (err, result) => {
+        if (err) throw err;
+        res.send(result);
+    })
+})
+
+router.post('/add_recommended/:id', (req, res) => {
+    const uid = req.params.id
+    const expense_name = req.body.expense
+    const spending_name = req.body.spending_name
+    const category = req.body.category
+    const amount = req.body.amount
+    const priority = req.body.priority
+    const state = req.body.state
+    const sql = `INSERT INTO expense (uid, expense_name, expense_amount, state, priority) VALUES (${uid}, '${expense_name}', ${amount}, '${state}', '${priority}')`;
+    const addSpend = `UPDATE spending SET eid = LAST_INSERT_ID(), spending_name = '${expense_name}', accounted = 1
+    WHERE tid IN (SELECT tid FROM transaction WHERE merchant_name = '${spending_name}' AND category = '${category}' AND amount = '${amount}')
+    `
+    db.query(sql, (err) => {
+        if (err) throw err;
+        db.query(addSpend, (err) => {
+            if (err) throw err;
+            res.send("Recommended expense added")
+        })
+    })
+})
+
+router.post('/ignore_recommendation/:uid', (req, res) => {
+    const uid = req.params.uid;
+    const expense_name = req.body.expense;
+    const category = req.body.category;
+    const amount = req.body.amount;
+
+    const addSpend = `
+        UPDATE spending
+        SET accounted = 1
+        WHERE tid IN (
+            SELECT tid
+            FROM transaction
+            WHERE bid IN (SELECT bid FROM bank WHERE uid  = ?) AND merchant_name = ? AND category = ? AND amount = ?
+        );
+    `;
+
+    // Use parameterized query to prevent SQL injection
+    db.query(addSpend, [uid, expense_name, category, amount], (error, results, fields) => {
+        if (error) {
+            console.error("Error in query execution:", error);
+            res.status(500).send("Error updating spending");
+        } else {
+            res.status(200).send("Spending updated successfully");
+        }
+    });
+});
+
+
 
 router.delete('/delete_account/:id', (req, res) => {
     const uid = req.params.id

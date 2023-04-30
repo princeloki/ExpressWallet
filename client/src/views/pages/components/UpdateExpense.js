@@ -47,7 +47,6 @@ const updateExp = (e) =>{
 }
 
 const handleChange = (e) =>{
-  console.log(expenseData)
   setExpenseData(prevExpenseData=>{
     return{
       ...prevExpenseData,
