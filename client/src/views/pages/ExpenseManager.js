@@ -1,6 +1,6 @@
 
 
-import { useState,useEffect } from "react";
+
 import Expense from "./components/Expense"
 
 import {
@@ -12,14 +12,14 @@ import {
   Button
 } from "reactstrap";
 
-import React, { useRef } from 'react'; 
+import React, { useRef, useState, useEffect } from 'react'; 
 import Header from "components/Headers/Header.js";
 import { GrCircleInformation } from "react-icons/gr";
 import axios from "axios";
 import UpdateExpense from "./components/UpdateExpense";
 import AddExpense from "./components/AddExpense";
 import { AiOutlineCheck } from "react-icons/ai";
-import { AiOutlineClose } from "react-icons/ai"
+import { AiOutlineClose } from "react-icons/ai";
 import AssignTransactions from "./components/AssignTransaction";
 import RecommendedExpense from "./components/RecommendedExpense";
 
@@ -49,7 +49,7 @@ const ExpenseManager = (props) => {
   const newExpense = recommended.map((recommend, index)=>{
     return(
       recommend.length !== 0 && <div key={index} className="trans-adds">
-        <Button onClick={()=>handleRecClick(index)}>{recommend.merchant_name} ({recommend.category} - ${recommend.amount})</Button>
+        <Button onClick={()=>handleRecClick(index)}>{recommend.merchant_name} ({recommend.category})</Button>
       </div>
     )
   })
@@ -96,7 +96,7 @@ const ExpenseManager = (props) => {
   
 
   useEffect(()=>{
-    axios.get(`http://localhost:4000/api/get_transactions/${props.user.uid}`)
+    axios.get(`http://localhost:4000/api/get_noassign_transactions/${props.user.uid}`)
     .then(response=>{
       setTrans(response.data)
     })
@@ -126,7 +126,7 @@ const ExpenseManager = (props) => {
   const handleNone = (trans) => {
     axios.post('http://localhost:4000/api/assign_transactions',{
         eid: "",
-        merchant_code: trans.iso,
+        mcc: trans.mcc,
         merchant_name: trans.merchant_name
     })
     .then(response=>{
@@ -173,14 +173,17 @@ const ExpenseManager = (props) => {
       <div className="curve expense-adder" ref={addExpenseRef}> {/* Add ref to AddExpense */}
         <AddExpense uid={props.user.uid} setReloadExpenses={setReloadExpenses} reloadExpenses={reloadExpenses} setAdd={setAdd}/>
       </div>}
+      <div ></div>
       {assign &&
       <div ref={assignTransactionsRef}> {/* Add ref to AssignTransactions */}
         <AssignTransactions transaction={trans[openAssign]} setAssign={setAssign} expenseList={expenses} setReloadTransaction={setReloadTransaction} reloadTransaction={reloadTransaction}/>
       </div>}
-      {recindex !== null && 
-      <div ref={recommendedExpenseRef}> {/* Add ref to RecommendedExpense */}
-        <RecommendedExpense user={props.user} expense={recommended[recindex]} setReloadExpenses={setReloadExpenses} reloadExpenses={reloadExpenses} />
-      </div>}
+      {recindex!==null && 
+      <div ref={recommendedExpenseRef}>
+        <RecommendedExpense user={props.user} expense={recommended[recindex]} setReloadExpenses={setReloadExpenses}
+        reloadExpenses={reloadExpenses} setRecindex={setRecindex}/>
+      </div>
+      }
       <Container className="mt--7 expense-container" fluid>
         <Row className="mt-5">
           <Col className="mb-5 mb-xl-0" xl="5">
@@ -207,27 +210,26 @@ const ExpenseManager = (props) => {
               <Button className="add-expense" color="primary" onClick={()=>setAdd(true)}>Add</Button>
             </Card>
           </Col>
-          <Col xl="3">
+          {props.user.autoassign===1&&<Col xl="5">
             <Card className="curve shadow">
               <div className="rec-exp">
-                    <h3 className="mb-0">ASSIGN NEW TRANSACTIONS <GrCircleInformation className="info"/></h3>
-                    <div className="cats">
-                      {transactions}
-                      {/* {trans.length > 5 && <Button color="primary">Open More</Button>} */}
-                    </div>
-              </div>
-            </Card>
-          </Col>
-          <Col xl="3">
-            <Card className="curve shadow">
-              <div className="rec-exp">
-                    <h3 className="mb-0">RECOMMENDED EXPENSES <GrCircleInformation className="info"/></h3>
+                    <h3 className="mb-0">RECOMMENDED REASSIGNMENTS<GrCircleInformation className="info"/></h3>
                     <div className="cats">
                       {newExpense}
                     </div>
               </div>
             </Card>
-          </Col>
+          </Col>}
+          {props.user.autoassign===0&&<Col xl="6">
+            <Card className="curve shadow trans-cont">
+              <div className="cat-trans">
+                    <h3 className="mb-0">CATEGORIZE TRANSACTIONS <GrCircleInformation className="info"/></h3>
+                    <div className="cats">
+                      {transactions}
+                    </div>
+              </div>
+            </Card>
+          </Col>}
         </Row>
       </Container>
     </>

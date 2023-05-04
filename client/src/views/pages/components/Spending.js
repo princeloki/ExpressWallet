@@ -11,7 +11,7 @@ import {
 } from "reactstrap";
 import SpendingTransactions from "./SpendingTransaction"
 
-const Spending = ({date, spend, clicked, handleClick, details, setDetails})=>{
+const Spending = ({date, spend, clicked, handleClick, details, setDetails, reload})=>{
     const [clickedIndex, setClickedIndex] = useState(null)
     const openTransaction = (index) =>{
         clickedIndex === index ? setClickedIndex(null) : setClickedIndex(index);
@@ -23,7 +23,7 @@ const Spending = ({date, spend, clicked, handleClick, details, setDetails})=>{
 
     const trs = spend.map((sp, index) =>{
         return(
-            <SpendingTransactions key={index} openTransaction={()=>openTransaction(index)} date={date} clicked={clickedIndex===index} spending={sp} setDetails={setDetails}/>
+            <SpendingTransactions key={index} openTransaction={()=>openTransaction(index)} date={date} clicked={clickedIndex===index} spending={sp} setDetails={setDetails} reload={reload}/>
         )
     })
 

@@ -29,7 +29,7 @@ const Register = () => {
 
   const [bankAmount, setBankAmount] = useState(0)
 
-  const [bankActive, setBankActive] = useState(false)
+  const [bankActive, setBankActive] = useState(true)
 
   const [bankData, setBankData] = useState({
     bank_username: "",
@@ -41,12 +41,12 @@ const Register = () => {
     email: "",
     country: "",
     host: "",
-    length: "",
-    income: "",
+    length: 0,
     currency: "USD",
     budget: 0,
     misc: 0,
     start: "",
+    autoassign: 1,
     high: 0,
     normal: 0,
     low: 0
@@ -94,11 +94,8 @@ const Register = () => {
     })
   }
 
-  console.log(userData)
-
   const handleAddition = (e) =>{
     e.preventDefault()
-    console.log(userData)
     setUserData(prevUserData=>{
       return{
         ...prevUserData,
@@ -109,7 +106,7 @@ const Register = () => {
 
   return (
     <>
-      {bankActive&& <Card className="bg-secondary curve bank-card">
+      {bankActive&&index===4&& <Card className="bg-secondary curve bank-card">
         <Form role="form" onSubmit={addBank}>
           <FormGroup>
             <InputGroup className="input-group-alternative mb-3">

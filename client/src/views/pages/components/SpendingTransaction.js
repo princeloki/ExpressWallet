@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import axios from 'axios';
 
-const SpendingTransactions = ({openTransaction, clicked, spending, setDetails}) =>{
+const SpendingTransactions = ({openTransaction, clicked, spending, setDetails, reload}) =>{
   
     useEffect(()=>{
       axios.post(`http://localhost:4000/api/get_spending_trans`,
@@ -18,7 +18,7 @@ const SpendingTransactions = ({openTransaction, clicked, spending, setDetails}) 
       .catch(err=>{
         console.log(err)
       })
-    },[clicked, setDetails, spending])
+    },[clicked, setDetails, spending, reload])
   
     return(
       <>

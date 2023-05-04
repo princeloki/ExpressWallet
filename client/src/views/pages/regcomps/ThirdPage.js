@@ -43,7 +43,7 @@ const ThirdPage = ({handleIndexChange, handleAddition, userData}) =>{
               </InputGroupAddon>
               <Input 
               placeholder="Miscellaneous Expense"
-              type="text"
+              type="number"
               name="misc"
               autoComplete="new-misc"
               value={userData.misc}
@@ -60,7 +60,7 @@ const ThirdPage = ({handleIndexChange, handleAddition, userData}) =>{
                 </InputGroupText>
               </InputGroupAddon>
               <Input 
-              type="text"
+              type="number"
               name="high"
               autoComplete="new-high"
               value={userData.high}
@@ -74,7 +74,7 @@ const ThirdPage = ({handleIndexChange, handleAddition, userData}) =>{
                 </InputGroupText>
               </InputGroupAddon>
               <Input 
-              type="text"
+              type="number"
               name="normal"
               autoComplete="new-normal"
               value={userData.normal}
@@ -88,7 +88,7 @@ const ThirdPage = ({handleIndexChange, handleAddition, userData}) =>{
                 </InputGroupText>
               </InputGroupAddon>
               <Input 
-              type="text"
+              type="number"
               name="low"
               autoComplete="new-low"
               value={userData.low}

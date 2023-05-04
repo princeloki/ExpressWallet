@@ -41,9 +41,9 @@ base64_data = sys.argv[1]
 
 # Decode the base64 string back to JSON
 input_data = json.loads(base64.b64decode(base64_data))
-
 # Convert input data to a DataFrame
 new_data = pd.DataFrame(input_data)
+
 
 # Standardization for MCC codes
 new_mcc_scaled = mcc_scaler.transform(new_data['mcc'].values.reshape(-1, 1))
@@ -68,4 +68,5 @@ predicted_indices = np.argmax(probs, axis=1)
 predicted_categories = label_encoder.inverse_transform(predicted_indices)
 
 # Return the predicted categories as JSON
+
 print(json.dumps(predicted_categories.tolist()))

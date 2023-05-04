@@ -1,3 +1,5 @@
+
+
 import {
   Button,
   Card,
@@ -10,13 +12,70 @@ import {
   Row,
   Col
 } from "reactstrap";
-// core components
+
 import UserHeader from "components/Headers/UserHeader.js";
 import axios from 'axios';
 import { useHistory } from 'react-router-dom';
+import { useState,useEffect } from "react";
 
 const Profile = (props) => {
   const history = useHistory();
+  const [edit, setEdit] = useState(false);
+  const [priorities, setPriorities] = useState({
+    "H": 0,
+    "N": 0,
+    "L": 0
+  })
+
+  const [formData, setFormData] = useState({
+    email: props.user.email || '',
+    first_name: props.user.first_name || '',
+    last_name: props.user.last_name || '',
+    autoassign: props.user.autoassign
+  })
+
+  const submit = (e) =>{
+    e.preventDefault()
+    axios.post(`http://localhost:4000/api/update_user_info/${props.user.uid}`, {
+      ...formData,
+      ...priorities
+    })
+    .then(response=>{
+      localStorage.setItem("user", JSON.stringify({
+        uid: props.user.uid,
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+        email: formData.email,
+        phone_num: props.user.phone_num,
+        balance: props.user.balance,
+        length: props.user.length,
+        country: props.user.country,
+        host: props.user.host,
+        currency: props.user.currency,
+        budget: props.user.budget,
+        start: props.user.start,
+        autoassign: formData.autoassign
+      }))
+      window.location.reload();
+    })
+    .catch(err=>{
+      console.log(err);
+    })
+  }
+
+  useEffect(()=>{
+    axios.get(`http://localhost:4000/api/get_priorities/${props.user.uid}`)
+    .then(response=>{
+      setPriorities({
+        "H": response.data[0].percentage,
+        "N": response.data[1].percentage,
+        "L": response.data[2].percentage
+      })
+    })
+    .catch(err=>{
+      console.log(err)
+    })
+  },[])
 
   const deleteAccount = () =>{
     axios.delete(`http://localhost:4000/api/delete_account/${props.user.uid}`)
@@ -29,9 +88,48 @@ const Profile = (props) => {
     })
   }
 
+  const handleChange = (e) =>{
+    setEdit(true);
+    setFormData((prevFormData)=>{
+      return{
+        ...prevFormData,
+        [e.target.name]: e.target.value,
+      }
+    })
+  }
+
+  const handlePriority = (e) =>{
+    setEdit(true);
+    setPriorities((prevPriorities)=>{
+      return{
+        ...prevPriorities,
+        [e.target.name]: e.target.value,
+      }
+    })
+  }
+
+  const handleAutoAssign = () =>{
+    setEdit(true);
+    if(formData.autoassign === 0){
+      setFormData(prevFormData=>{
+        return{
+          ...prevFormData,
+          autoassign: 1,
+        }
+      })
+    } else{
+      setFormData(prevFormData=>{
+        return{
+          ...prevFormData,
+          autoassign: 0,
+        }
+      })
+    }
+  }
+
   return (
     <>
-      <UserHeader />
+      <UserHeader user={props.user}/>
       {/* Page content */}
       <Container className="mt--7" fluid>
         <Row>
@@ -45,7 +143,6 @@ const Profile = (props) => {
                   <Col className="text-right" xs="4">
                     <Button
                       color="primary"
-                      href="#pablo"
                       onClick={() => deleteAccount()}
                       size="sm"
                     >
@@ -55,29 +152,22 @@ const Profile = (props) => {
                 </Row>
               </CardHeader>
               <CardBody>
-                <Form>
+                <Form onSubmit={submit}>
+                  <h6 className="heading-small text-muted mb-4">
+                    Turn on Automatic Expense Categorization
+                  </h6>
+                  <div className="pl-lg-4">
+                    <Row>
+                      <Col lg="4">
+                        <Button color="primary" size="sm" onClick={handleAutoAssign}>{formData.autoassign===1 ? "On" : "Off"}</Button>
+                      </Col>
+                    </Row>
+                  </div>
                   <h6 className="heading-small text-muted mb-4">
                     User information
                   </h6>
                   <div className="pl-lg-4">
                     <Row>
-                      <Col lg="6">
-                        <FormGroup>
-                          <label
-                            className="form-control-label"
-                            htmlFor="input-username"
-                          >
-                            Username
-                          </label>
-                          <Input
-                            className="form-control-alternative"
-                            defaultValue="lucky.jesse"
-                            id="input-username"
-                            placeholder="Username"
-                            type="text"
-                          />
-                        </FormGroup>
-                      </Col>
                       <Col lg="6">
                         <FormGroup>
                           <label
@@ -89,7 +179,9 @@ const Profile = (props) => {
                           <Input
                             className="form-control-alternative"
                             id="input-email"
-                            placeholder="jesse@example.com"
+                            name="email"
+                            value={formData.email}
+                            onChange={(e)=>handleChange(e)}
                             type="email"
                           />
                         </FormGroup>
@@ -106,9 +198,10 @@ const Profile = (props) => {
                           </label>
                           <Input
                             className="form-control-alternative"
-                            defaultValue="Lucky"
                             id="input-first-name"
-                            placeholder="First name"
+                            name="first_name"
+                            value={formData.first_name}
+                            onChange={(e)=>handleChange(e)}
                             type="text"
                           />
                         </FormGroup>
@@ -123,9 +216,10 @@ const Profile = (props) => {
                           </label>
                           <Input
                             className="form-control-alternative"
-                            defaultValue="Jesse"
                             id="input-last-name"
-                            placeholder="Last name"
+                            name="last_name"
+                            value={formData.last_name}
+                            onChange={(e)=>handleChange(e)}
                             type="text"
                           />
                         </FormGroup>
@@ -135,43 +229,25 @@ const Profile = (props) => {
                   <hr className="my-4" />
                   {/* Address */}
                   <h6 className="heading-small text-muted mb-4">
-                    Contact information
+                    Budget Reallocation Parameters
                   </h6>
                   <div className="pl-lg-4">
                     <Row>
-                      <Col md="12">
-                        <FormGroup>
-                          <label
-                            className="form-control-label"
-                            htmlFor="input-address"
-                          >
-                            Address
-                          </label>
-                          <Input
-                            className="form-control-alternative"
-                            defaultValue="Bld Mihail Kogalniceanu, nr. 8 Bl 1, Sc 1, Ap 09"
-                            id="input-address"
-                            placeholder="Home Address"
-                            type="text"
-                          />
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                    <Row>
                       <Col lg="4">
                         <FormGroup>
                           <label
                             className="form-control-label"
-                            htmlFor="input-city"
+                            htmlFor="input-high"
                           >
-                            City
+                            High (%)
                           </label>
                           <Input
                             className="form-control-alternative"
-                            defaultValue="New York"
-                            id="input-city"
-                            placeholder="City"
-                            type="text"
+                            id="input-high"
+                            name="H"
+                            value={priorities.H}
+                            onChange={(e)=>handlePriority(e)}
+                            type="number"
                           />
                         </FormGroup>
                       </Col>
@@ -179,16 +255,17 @@ const Profile = (props) => {
                         <FormGroup>
                           <label
                             className="form-control-label"
-                            htmlFor="input-country"
+                            htmlFor="input-normal"
                           >
-                            Country
+                            Normal (%)
                           </label>
                           <Input
                             className="form-control-alternative"
-                            defaultValue="United States"
-                            id="input-country"
-                            placeholder="Country"
-                            type="text"
+                            id="input-normal"
+                            name="N"
+                            value={priorities.N}
+                            onChange={(e)=>handlePriority(e)}
+                            type="number"
                           />
                         </FormGroup>
                       </Col>
@@ -196,14 +273,16 @@ const Profile = (props) => {
                         <FormGroup>
                           <label
                             className="form-control-label"
-                            htmlFor="input-country"
+                            htmlFor="input-low"
                           >
-                            Postal code
+                            Low (%)
                           </label>
                           <Input
                             className="form-control-alternative"
-                            id="input-postal-code"
-                            placeholder="Postal code"
+                            id="input-low"
+                            name="L"
+                            value={priorities.L}
+                            onChange={(e)=>handlePriority(e)}
                             type="number"
                           />
                         </FormGroup>
@@ -211,21 +290,7 @@ const Profile = (props) => {
                     </Row>
                   </div>
                   <hr className="my-4" />
-                  {/* Description */}
-                  <h6 className="heading-small text-muted mb-4">About me</h6>
-                  <div className="pl-lg-4">
-                    <FormGroup>
-                      <label>About Me</label>
-                      <Input
-                        className="form-control-alternative"
-                        placeholder="A few words about you ..."
-                        rows="4"
-                        defaultValue="A beautiful Dashboard for Bootstrap 4. It is Free and
-                        Open Source."
-                        type="textarea"
-                      />
-                    </FormGroup>
-                  </div>
+                  {edit && <Button color="primary" type="submit">Save</Button>}
                 </Form>
               </CardBody>
             </Card>

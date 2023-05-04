@@ -4,7 +4,7 @@ import ExpenseReports from "views/pages/ExpenseReports";
 import ExpenseManager from "views/pages/ExpenseManager";
 import Register from "views/pages/Register.js";
 import Login from "views/pages/Login.js";
-import CurrencyConverter from "views/pages/CurrencyConverter.js";
+import LogTransaction from "views/pages/LogTransaction.js";
 
 var routes = [
   {
@@ -22,9 +22,11 @@ var routes = [
     layout: "/admin"
   },
   {
-    path: "",
-    name: "Currency Converter",
+    path: "log-transaction",
+    name: "Log Transaction",
     icon: "ni ni-money-coins text-green",
+    component: LogTransaction,
+    layout: "/admin"
   },
   {
     path: "/expense-manager",

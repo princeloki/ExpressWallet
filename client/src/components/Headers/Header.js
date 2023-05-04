@@ -9,7 +9,8 @@ import {
   Col, 
   Input,
   InputGroup,
-  Button
+  Button,
+  Table
 } from "reactstrap";
 
 import { FcCurrencyExchange } from "react-icons/fc";
@@ -17,7 +18,7 @@ import { BsCurrencyYen } from "react-icons/bs";
 import { useState, useEffect, useRef } from "react";
 import axios from 'axios';
 
-const Header = ({onDashboard, userData, setUser}) => {
+const Header = ({onDashboard, userData, setUser, toggleShow}) => {
   const ref = useRef();
   const [alert, setAlert] = useState({
     data: {
@@ -25,6 +26,8 @@ const Header = ({onDashboard, userData, setUser}) => {
       adjusted_expenses: []
     }
   })
+  const [remBudgets, setRemBudgets] = useState([])
+  const [expenses, setExpenses] = useState([])
   const [today, setToday] = useState(0)
   const [week, setWeek] = useState(0)
   const [month, setMonth] = useState(0)
@@ -36,6 +39,7 @@ const Header = ({onDashboard, userData, setUser}) => {
     tweek: 0,
     tmonth: 0
   })
+
   const currIcon = () =>{
     return(
       <div></div>
@@ -74,8 +78,18 @@ const Header = ({onDashboard, userData, setUser}) => {
 
 
   const adjust = alert.data.adjusted_expenses.map((adjusted_expense,index)=>{
+    const expense = expenses.find(e => e.expense_name === adjusted_expense.name);
+    
+    if (!expense) {
+      return null;
+    }
+  
     return(
-      adjusted_expense.state === "A" && <p className="adj-expens" key={index}><span className="adj-exp-header">{adjusted_expense.name}</span>  <br/> Adjusted amount => ${adjusted_expense.amount.toFixed(2)}</p>
+      <tr key={index}>
+        <td>{adjusted_expense.name}</td>
+        <td>${expense.expense_amount.toFixed(2)}</td>
+        <td>${adjusted_expense.amount.toFixed(2)}</td>
+      </tr>
     )
   })
 
@@ -92,10 +106,10 @@ const Header = ({onDashboard, userData, setUser}) => {
   
     fetchData(); // Call the function immediately to fetch data on initial render
   
-    const intervalId = setInterval(fetchData, 10000); // Set an interval to fetch data every 10 seconds (10000 milliseconds)
+    //const intervalId = setInterval(fetchData, 10000); // Set an interval to fetch data every 10 seconds (10000 milliseconds)
   
-    return () => clearInterval(intervalId); // Clean up the interval when the component unmounts
-  }, []);
+    //return () => clearInterval(intervalId); // Clean up the interval when the component unmounts
+  }, [projB]);
   
   
   useEffect(() => {
@@ -136,6 +150,18 @@ const Header = ({onDashboard, userData, setUser}) => {
       });
   }, [userData.balance]);
   
+  
+
+
+  useEffect(()=>{
+    axios.get(`http://localhost:4000/api/get_expenses/${userData.uid}`)
+    .then(response=>{
+      setExpenses(response.data);
+    })
+    .catch(err=>{
+      console.log(err);
+    },[])
+  })
 
   const setCurrency = (e) =>{
     setUser(prevUserData=>{
@@ -147,30 +173,24 @@ const Header = ({onDashboard, userData, setUser}) => {
       }
     })
   }
-  
 
   return (
     <>
       {userData &&
       <div className="header bg-gradient-info pb-8 pt-5 pt-md-8">
         {onDashboard && (alert.data.message==="Success" || alert.data.message === "Not adjustable")  && 
+
         <Card className="curve bank-alert mb-4 mb-xl-0">
           <CardBody>
             <Row>
               <div className="col">
-                {/* <CardTitle
-                  tag="h5"
-                  className="text-uppercase text-muted mb-0"
-                >
-                  <span id="bank-alert">Alert</span> 
-                </CardTitle>   */}
                 <div className="budget-header">
                   <span className="h2 font-weight-bold mb-0">
                   {alert.data.message==="Not adjustable" && <p className="danger"><span className="upper">Warning</span>: Your budget is unadjustable, deposit money into your account!</p>}   
                   </span>
                   {alert.data.message==="Success" && 
                   <div className="readjust-alert">
-                    <p className="danger font-weight-bold mb-0">Due to overspenditure you have overshot your budget, view readjustment recommendation</p>
+                    <p className="danger font-weight-bold mb-0">You have overspent your budget by ${projB}. To get back on track, consider reducing your expenses in these categories</p>
                     <Button color="primary"  onClick={() => setOpen(!open)}>View</Button>
                   </div>}
                 </div>
@@ -183,7 +203,18 @@ const Header = ({onDashboard, userData, setUser}) => {
           <Card className="readj-body curve">
             <CardBody>
               <h2 className="h2 font-weight-bold mb-0">Recommended adjustments</h2>
-              {adjust}
+              <Table className="rec-table">
+                <thead>
+                  <tr>
+                    <th>Expense Name</th>
+                    <th>Original</th>
+                    <th>Recommended</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {adjust}
+                </tbody>
+              </Table>
               <Button color="primary" onClick={assignUpdate}>Accept</Button>
             </CardBody>
           </Card>
@@ -193,6 +224,42 @@ const Header = ({onDashboard, userData, setUser}) => {
             <Row>
               {onDashboard &&
               <>
+                <Col sm="4" lg="7" xl="3">
+                  <Card className="curve card-stats mb-4 mb-xl-0">
+                    <CardBody>
+                      <Row>
+                          <Col className="col-auto my-auto">
+                            <div className="currency-control my-auto">
+                            <Col className="col-auto">
+                              <div className="icon icon-shape bg-light text-white rounded-circle shadow">
+                                <BsCurrencyYen className="text-green"/>
+                              </div>
+                            </Col>
+                              <InputGroup className="input-group-alternative mb-3">
+                                <Input
+                                  id="cur-sel"
+                                  type="select"
+                                  name="currency"
+                                  value={userData.currency}
+                                  onChange={(e) => setCurrency(e)}
+                                >
+                                  <option>USD</option>
+                                  <option>EUR</option>
+                                  <option>GBP</option>
+                                  <option>YEN</option>
+                                  <option>JMD</option>
+                                </Input>
+                              </InputGroup>
+                            </div>
+                            <div>
+                              <h3>Current Balance | ${userData.balance}</h3>
+                              <h3>Net Balance | ${projB}</h3>
+                            </div>
+                          </Col>
+                      </Row>
+                    </CardBody>
+                  </Card>
+                </Col>
                 <Col lg="6" xl="3">
                   <Card className="curve card-stats mb-4 mb-xl-0">
                     <CardBody>
@@ -202,29 +269,29 @@ const Header = ({onDashboard, userData, setUser}) => {
                             tag="h5"
                             className="text-uppercase text-muted mb-0"
                           >
-                            Today
-                          </CardTitle>  
+                            This Month
+                          </CardTitle>
                           <div className="budget-header">
-                            {/* <span className="h2 font-weight-bold mb-0">
-                            Budget | ${(userData.budget/30).toFixed(2)} <br/>
-                            Expenses left | ${(budget/30).toFixed(2)}                            
-                            </span> */}
+                            <span className="h2 font-weight-bold mb-0">
+                            Budget | ${(userData.budget).toFixed(2)} <br/>
+                            Expenses left | ${(budget).toFixed(2)}    
+                            </span>
                             <span className="h2 font-weight-bold mb-0 bal-text">
-                            Free to spend - ${stats.day}
+                            Free to spend | ${stats.tmonth}
                             </span>
                           </div>
                         </div>
                         <Col className="col-auto">
-                          <div className="icon icon-shape bg-blue text-white rounded-circle shadow">
-                            <FcCurrencyExchange />
-                          </div>
+                            <Button onClick={toggleShow} color="primary" size="sm">
+                              Show Expenses
+                            </Button>    
                         </Col>
                       </Row>
                       <p className="mt-3 mb-0 text-muted text-sm">
                         <span className="text-success mr-2">
                           <i className="fa fa-arrow-up" /> 3.48%
                         </span>{" "}
-                        <span className="text-nowrap">Since yesterday</span>
+                        <span className="text-nowrap">Since last month</span>
                       </p>
                     </CardBody>
                   </Card>
@@ -241,12 +308,8 @@ const Header = ({onDashboard, userData, setUser}) => {
                             This Week
                           </CardTitle>
                           <div className="budget-header">
-                            {/* <span className="h2 font-weight-bold mb-0">
-                              Budget | ${(userData.budget/4).toFixed(2)} <br/>
-                              Expenses left | ${(budget/4).toFixed(2)}         
-                            </span> */}
                             <span className="h2 font-weight-bold mb-0 bal-text">
-                            Free to spend - ${stats.tweek}
+                            Free to spend | ${stats.tweek}
                             </span>
                           </div>
                         </div>
@@ -274,15 +337,11 @@ const Header = ({onDashboard, userData, setUser}) => {
                             tag="h5"
                             className="text-uppercase text-muted mb-0"
                           >
-                            This Month
+                            Today
                           </CardTitle>
                           <div className="budget-header">
-                            <span className="h2 font-weight-bold mb-0">
-                            Budget | ${(userData.budget).toFixed(2)} <br/>
-                            Expenses left | ${(budget).toFixed(2)}         
-                            </span>
                             <span className="h2 font-weight-bold mb-0 bal-text">
-                            Free to spend - ${stats.tmonth}
+                            Free to spend | ${stats.day}
                             </span>
                           </div>
                         </div>
@@ -296,49 +355,13 @@ const Header = ({onDashboard, userData, setUser}) => {
                         <span className="text-warning mr-2">
                           <i className="fas fa-arrow-down" /> 1.10%
                         </span>{" "}
-                        <span className="text-nowrap">Since last month</span>
+                        <span className="text-nowrap">Since yesterday</span>
                       </p>
                     </CardBody>
                   </Card>
                 </Col>
               </>
               }
-              <Col sm="4" lg="6" xl="2">
-                <Card className="curve card-stats mb-4 mb-xl-0">
-                  <CardBody>
-                    <Row>
-                        <Col className="col-auto my-auto">
-                          <div className="currency-control my-auto">
-                          <Col className="col-auto">
-                            <div className="icon icon-shape bg-light text-white rounded-circle shadow">
-                              <BsCurrencyYen className="text-green"/>
-                            </div>
-                          </Col>
-                            <InputGroup className="input-group-alternative mb-3">
-                              <Input
-                                id="cur-sel"
-                                type="select"
-                                name="currency"
-                                value={userData.currency}
-                                onChange={(e) => setCurrency(e)}
-                              >
-                                <option>USD</option>
-                                <option>EUR</option>
-                                <option>GBP</option>
-                                <option>YEN</option>
-                                <option>JMD</option>
-                              </Input>
-                            </InputGroup>
-                          </div>
-                          <div>
-                            <h3>Proj Balance: ${projB}</h3>
-                          </div>
-                        </Col>
-                        
-                    </Row>
-                  </CardBody>
-                </Card>
-              </Col>
             </Row>
           </div>
         </Container>

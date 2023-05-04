@@ -9,12 +9,19 @@ import {
 import { useState, useEffect } from "react";
 import Header from "components/Headers/Header.js";
 import Spending from "./components/Spending";
+import { BsThreeDots } from "react-icons/bs"
+import AssignTransactions from "./components/AssignTransaction";
+
 import axios from 'axios';
 
 const ExpenseReports = (props) => {
   const [clickedIndex, setClickedIndex] = useState(0)
   const [moreDetails, setMoreDetails] = useState([])
   const [spends, setSpends] = useState([])
+  const [expenses, setExpenses] = useState([])
+  const [assign, setAssign] = useState(false);
+  const [assignTrans, setAssignTrans] = useState([])
+  const [reload, setReload] = useState(false);
 
   useEffect(()=>{
     axios.get(`http://localhost:4000/api/get_spendings/${props.user.uid}`)
@@ -24,7 +31,22 @@ const ExpenseReports = (props) => {
     .catch(err=>{
       console.log(err)
     })
-  },[props.user.uid])
+  },[props.user.uid, reload])
+
+  useEffect(()=>{
+    axios.get(`http://localhost:4000/api/get_expenses/${props.user.uid}`)
+    .then(response=>{
+      setExpenses(response.data)
+    })
+    .catch(err=>{
+      console.log(err)
+    })
+  }, [props.user])
+
+  const handleReassign = (detail) =>{
+    setAssign(true);
+    setAssignTrans(detail);
+  }
 
   const setUpDetails = moreDetails.map((detail, index) =>{
     const formattedDate = new Date(detail.date).toISOString().slice(0, 10);
@@ -33,6 +55,7 @@ const ExpenseReports = (props) => {
         <td>{formattedDate}</td>
         <td>{detail.merchant_name} - {detail.category}</td>
         <td>({detail.currency}) {detail.amount.toFixed(2)}</td>
+        <td><BsThreeDots onClick={()=>handleReassign(detail)}/></td>
       </tr>
     )
   })
@@ -65,6 +88,7 @@ const ExpenseReports = (props) => {
           handleClick={() => handleSpendingClick(index)}
           details={moreDetails}
           setDetails={setMoreDetails}
+          reload={reload}
         />
       </div>
     )
@@ -75,6 +99,8 @@ const ExpenseReports = (props) => {
     <>
       <Header onDashboard={props.onDashboard} userData={props.user}/>
       {/* Page content */}
+      {assign && <AssignTransactions transaction={assignTrans} setAssign={setAssign} expenseList={expenses} 
+      setReloadTransaction={setReload} reloadTransaction={reload} reports={true}/>}
       {moreDetails.length>0 && 
       <Col className="curve spending-list" xl="9">
         <Table 
@@ -90,6 +116,9 @@ const ExpenseReports = (props) => {
             </th>
             <th>
               Amount
+            </th>
+            <th>
+              Reassign
             </th>
             </tr>
           </thead>

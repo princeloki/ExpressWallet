@@ -28,6 +28,112 @@ nav h1{
     cursor: pointer;
 }
 
+.initial{
+    position: absolute;
+    top: 5%;
+    left: 15%;
+    width: 70%;
+    min-height: 60vh;
+    background: #fff;
+    z-index: 5;
+    text-align: center;
+}
+
+.rec-rows {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-gap: 1rem;
+    max-height: 40em; /* adjust to desired maximum height */
+    width: 50%;
+    overflow: auto;
+    margin: auto;
+    padding: 2em 0;
+}
+
+.rec-category {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.rec-adj-head{
+    display: flex;
+    flex-direction: row;
+    gap: 1em;
+    width: 30%;
+    margin: auto;
+    margin-top: 1em;
+    align-items: center;
+}
+
+.rec-adj-head button{
+    height: 3em;
+}
+
+.rec-adjust-form{
+    position: absolute;
+    top: -4em;
+    background: #f6f6f6;
+    width: 50%;
+    min-height: 50vh;
+    margin: auto;
+    z-index: 6;
+}
+
+.rec-adjust-form h2{
+    margin-top: 1em;
+    font-size: 1.3em;
+    font-weight: bold;
+}
+
+.rec-adjust-form form{
+    width: 80%;
+    margin: auto;
+    margin-top: 1em;
+}
+
+.expense-left{
+    position: absolute;
+    z-index: 5;
+    top: 10em;
+    width: 40%;
+    min-height: 40vh;
+    left: 30%;
+    background: #fff;
+}
+
+.expense-container{
+    margin: 3em;
+}
+
+.expense-left h2{
+    margin-top: 1em;
+}
+
+.rec-table{
+    margin-top: 1em !important;
+    margin-bottom: 2em !important;
+}
+
+.rec-table tr{
+
+}
+
+.Initial-Container{
+    margin: 1em;
+}
+
+#add-txt{
+    font-size: 1em;
+    font-weight: bold;
+}
+
+.note{
+    font-size: 0.9em;
+    font-weight: bold;
+}
+
 .readjust-alert{
     display: flex;
     flex-direction: row;
@@ -263,6 +369,18 @@ nav .dropdown h1{
     opacity: 0.95;
 }
 
+.latest-tran-head{
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    gap: 1em;
+    align-items: center;
+}
+
+.latest-tran-head button{
+    margin-left: auto;
+}
+
 .spending-list button{
     position: absolute;
     margin-top: 1em;
@@ -344,6 +462,9 @@ tr:last-of-type{
 
 .latest-trans{
     width: 100%;
+    max-height: 40vh;
+    overflow-y:auto;
+    margin-bottom: 2em !important;
 }
 
 .latest-trans table{
@@ -372,20 +493,21 @@ tr:last-of-type{
     font-size: 0.85em !important;
 }
 
-.expense-manager-data svg{
+.expense-manager-data svg, .spending-list svg{
     cursor: pointer;
     font-size: 1.5em;
     color: #050505;
 }
 
-.rec-exp{
-    min-height: 20em;
+.rec-exp,.cat-trans{
+    min-height: 25em;
 }
 
-.rec-exp h3{
+.rec-exp h3, .cat-trans h3{
     border-bottom: 1px solid #464646;
     margin: 0 2em;
 }
+
 
 .info{
     cursor: pointer;
@@ -433,6 +555,11 @@ tr:last-of-type{
     margin: 2em auto;
 }
 
+.top-cats{
+    margin-left: 2em;
+    min-height: 35vh !important;
+}
+
 .top-cats-col{
     width: 100% !important;
 }
@@ -442,7 +569,6 @@ tr:last-of-type{
     display: flex;
     flex-direction: row;
     gap: 4em;
-    margin-bottom: 1em;
 }
 
 .top-cats-header h3{
@@ -560,9 +686,9 @@ tr:last-of-type{
     width: 30%;
     min-height: 50vh;
     position: absolute;
-    top: 15em;
+    top: 10em;
     right: 30%;
-    z-index: 5;
+    z-index: 10;
 }
 
 .assign-exp h2{
@@ -638,3 +764,187 @@ tr:last-of-type{
     left: 10%;
     margin-top: 3em;
 }
+
+
+
+
+
+/* Absolute Center Spinner */
+.loading {
+    position: fixed;
+    z-index: 6; /* increased z-index */
+    height: 1em;
+    width: 2em;
+    overflow: show;
+    margin: auto;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: -5%;
+    color: #fff !important;
+  }
+  
+  .infront {
+    position: absolute;
+    z-index: 7; /* increased z-index */
+    color: #fff !important;
+    top: 35%;
+    right: 22%;
+  }
+
+  .infront h1{
+    color: #fff !important;
+    font-size: 2.5em;
+    font-weight: bold;
+  }
+
+  .infront p{
+    font-size: 1em;
+    font-weight: bold;
+  }
+  
+  /* Transparent Overlay */
+  .loading:before {
+    content: '';
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.3);
+  }
+  
+  /* :not(:required) hides these rules from IE9 and below */
+  .loading:not(:required) {
+    /* hide "loading..." text */
+    font: 0/0 a;
+    color: transparent;
+    text-shadow: none;
+    background-color: transparent;
+    border: 0;
+  }
+  
+  .loading:not(:required):after {
+    content: '';
+    display: block;
+    font-size: 30px;
+    width: 1em;
+    height: 1em;
+    margin-top: -0.5em;
+    -webkit-animation: spinner 1500ms infinite linear;
+    -moz-animation: spinner 1500ms infinite linear;
+    -ms-animation: spinner 1500ms infinite linear;
+    -o-animation: spinner 1500ms infinite linear;
+    animation: spinner 1500ms infinite linear;
+    border-radius: 0.5em;
+    -webkit-box-shadow: rgba(0, 0, 0, 0.75) 1.5em 0 0 0, rgba(0, 0, 0, 0.75) 1.1em 1.1em 0 0, rgba(0, 0, 0, 0.75) 0 1.5em 0 0, rgba(0, 0, 0, 0.75) -1.1em 1.1em 0 0, rgba(0, 0, 0, 0.5) -1.5em 0 0 0, rgba(0, 0, 0, 0.5) -1.1em -1.1em 0 0, rgba(0, 0, 0, 0.75) 0 -1.5em 0 0, rgba(0, 0, 0, 0.75) 1.1em -1.1em 0 0;
+    box-shadow: rgba(0, 0, 0, 0.75) 1.5em 0 0 0, rgba(0, 0, 0, 0.75) 1.1em 1.1em 0 0, rgba(0, 0, 0, 0.75) 0 1.5em 0 0, rgba(0, 0, 0, 0.75) -1.1em 1.1em 0 0, rgba(0, 0, 0, 0.75) -1.5em 0 0 0, rgba(0, 0, 0, 0.75) -1.1em -1.1em 0 0, rgba(0, 0, 0, 0.75) 0 -1.5em 0 0, rgba(0, 0, 0, 0.75) 1.1em -1.1em 0 0;
+  }
+  
+  /* Animation */
+  
+  @-webkit-keyframes spinner {
+    0% {
+      -webkit-transform: rotate(0deg);
+      -moz-transform: rotate(0deg);
+      -ms-transform: rotate(0deg);
+      -o-transform: rotate(0deg);
+      transform: rotate(0deg);
+    }
+    100% {
+      -webkit-transform: rotate(360deg);
+      -moz-transform: rotate(360deg);
+      -ms-transform: rotate(360deg);
+      -o-transform: rotate(360deg);
+      transform: rotate(360deg);
+    }
+  }
+  @-moz-keyframes spinner {
+    0% {
+      -webkit-transform: rotate(0deg);
+      -moz-transform: rotate(0deg);
+      -ms-transform: rotate(0deg);
+      -o-transform: rotate(0deg);
+      transform: rotate(0deg);
+    }
+    100% {
+      -webkit-transform: rotate(360deg);
+      -moz-transform: rotate(360deg);
+      -ms-transform: rotate(360deg);
+      -o-transform: rotate(360deg);
+      transform: rotate(360deg);
+    }
+  }
+  @-o-keyframes spinner {
+    0% {
+      -webkit-transform: rotate(0deg);
+      -moz-transform: rotate(0deg);
+      -ms-transform: rotate(0deg);
+      -o-transform: rotate(0deg);
+      transform: rotate(0deg);
+    }
+    100% {
+      -webkit-transform: rotate(360deg);
+      -moz-transform: rotate(360deg);
+      -ms-transform: rotate(360deg);
+      -o-transform: rotate(360deg);
+      transform: rotate(360deg);
+    }
+  }
+  @keyframes spinner {
+    0% {
+      -webkit-transform: rotate(0deg);
+      -moz-transform: rotate(0deg);
+      -ms-transform: rotate(0deg);
+      -o-transform: rotate(0deg);
+      transform: rotate(0deg);
+    }
+    100% {
+      -webkit-transform: rotate(360deg);
+      -moz-transform: rotate(360deg);
+      -ms-transform: rotate(360deg);
+      -o-transform: rotate(360deg);
+      transform: rotate(360deg);
+    }
+  }
+
+  
+/*loader*/
+
+.lds-ring {
+    display: inline-block;
+    position: relative;
+    width: 50%;
+    height: 80px;
+    margin: 20% auto;
+    left: 45%;
+  }
+  .lds-ring div {
+    box-sizing: border-box;
+    display: block;
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    border: 8px solid #b1b1b1;
+    border-radius: 50%;
+    animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+    border-color: #b1b1b1 transparent transparent transparent;
+  }
+  .lds-ring div:nth-child(1) {
+    animation-delay: -0.45s;
+  }
+  .lds-ring div:nth-child(2) {
+    animation-delay: -0.3s;
+  }
+  .lds-ring div:nth-child(3) {
+    animation-delay: -0.15s;
+  }
+  @keyframes lds-ring {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }

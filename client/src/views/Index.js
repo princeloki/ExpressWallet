@@ -28,17 +28,58 @@ import Header from "components/Headers/Header.js";
 import { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 import axios from "axios";
+import InitialManager from "./pages/components/InitialManager.js";
 
 const Index = (props) => {
   const history = useHistory()
   !props.user && history.push("/auth/login")
 
+  const [empty, setEmpty] = useState(false);
+
+  const [displayedTransactions, setDisplayedTransactions] = useState(5);
   const [transactions, setTransactions] = useState([])
   const [topCats, setTopCats] = useState([])
   const [reload, setReload] = useState(false)
+  const [showExpenses, setShowExpenses] = useState(false)
+  const [remBudgets, setRemBudgets] = useState([])
+  const [expenses, setExpenses] = useState([])
+  const [buttonLabel, setButtonLabel] = useState("See More");
+
+  const toggle = ()=>{
+    setShowExpenses(!showExpenses);
+  }
+
+  useEffect(()=>{
+    axios.get(`http://localhost:4000/api/get_rem_budgets/${props.user.uid}`)
+    .then(response=>{
+      setRemBudgets(response.data)
+    })
+    .catch(err=>{
+      console.log(err);
+    })
+  },[])
+
+  useEffect(()=>{
+    axios.get(`http://localhost:4000/api/get_expenses/${props.user.uid}`)
+    .then(response=>{
+      setExpenses(response.data);
+    })
+    .catch(err=>{
+      console.log(err);
+    },[])
+  })
+
+  useEffect(()=>{
+    axios.get(`http://localhost:4000/api/get_spendings/${props.user.uid}`)
+    .then(response=>{
+      response.data.length===0 ? setEmpty(true) : setEmpty(false);
+    })
+    .catch(err=>{
+      console.log(err);
+    })
+  },[])
 
   useEffect(() => {
-    console.log(props.user.uid);
     const intervalId = setInterval(() => {
       axios.put(`http://localhost:4000/api/update_user/${props.user.uid}`)
         .then(response => {
@@ -53,7 +94,7 @@ const Index = (props) => {
   
 
   useEffect(()=>{
-    axios.get(`http://localhost:4000/api/get_top_five_transactions/${props.user.uid}`)
+    axios.get(`http://localhost:4000/api/get_transactions/${props.user.uid}`)
     .then(response=>{
       setTransactions(response.data)
     })
@@ -72,20 +113,54 @@ const Index = (props) => {
     })
   },[props.user])
 
-  const trans = transactions.map(transaction=>{
+  const rembudg = remBudgets.map((remBudget, index) => {
+    const expense = expenses.find(e => e.eid === remBudget.eid);
+  
+    if (!expense) {
+      return null;
+    }
+  
+    return (
+      <tr key={index}>
+        <td>{expense.expense_name}</td>
+        <td>${expense.expense_amount.toFixed(2)}</td>
+        <td>${remBudget.total.toFixed(2)}</td>
+      </tr>
+    );
+  });
+  
+  
+
+  const trans = transactions.slice(0, displayedTransactions).map((transaction, index) => {
+  
     const date = new Date(transaction.date)
     const formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
     return(
-      <tr>
+      <tr key={index}>
         <td>{transaction.merchant_name} ({transaction.category}) {formattedDate}</td>
         <td>{transaction.currency} {transaction.amount}.00</td>
       </tr>
     )
-  })
+  });
 
-  const tops = topCats.map(topCat=>{
+  const handleSeeMore = () => {
+    if (buttonLabel === "Collapse") {
+      setDisplayedTransactions(5);
+      setButtonLabel("See More");
+    } else {
+      setDisplayedTransactions(prevDisplayedTransactions => {
+        if (prevDisplayedTransactions + 10 >= transactions.length) {
+          setButtonLabel("Collapse");
+        }
+        return prevDisplayedTransactions + 10;
+      });
+    }
+  };
+  
+
+  const tops = topCats.map((topCat,index)=>{
     return(
-      <div className="top-cats-body">
+      <div key={index} className="top-cats-body">
         <h2>{topCat.merchant_name}</h2>
         <h3>${topCat.total}.00</h3>
       </div>
@@ -106,8 +181,31 @@ const Index = (props) => {
 
   return (
     <>
-      <Header onDashboard={props.onDashboard} userData={props.user} setUser={props.setUserData} reload={reload}/>
+      <Header onDashboard={props.onDashboard} userData={props.user} setUser={props.setUserData} reload={reload} toggleShow={toggle}/>
       {/* Page content */}
+      {showExpenses && 
+        <div className="expense-left curve">
+          <div className="expense-container">
+            <h2>Expenseses Left To Be Paid</h2>
+            <Table
+              responsive
+              size="">
+              <thead>
+                <tr>
+                  <th>Category</th>
+                  <th>Budget</th>
+                  <th>Amount Left</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rembudg}
+              </tbody>
+            </Table>
+            <Button color="primary" onClick={toggle}>Close</Button>
+          </div> 
+        </div>
+      }
+      {empty && <InitialManager userData={props.user}/>}
       <Container className="mt--7" fluid>
         <Row>
           <Col className="mb-5 mb-xl-0" xl="8">
@@ -183,27 +281,33 @@ const Index = (props) => {
             <Card className="curve shadow">
               <CardHeader className="border-0">
                 <Row className="align-items-center">
-                  <div className="col">
-                    <h3 className="mb-0">Last 5 Transactions</h3>
-                    <Table
-                        responsive
-                        size=""
-                        className="last-5-table">
-                      <thead>
-                        <tr>
-                          <th>Description</th>
-                          <th>Amount</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {trans}
-                      </tbody>
-                    </Table>
+                  <div className="col latest-tran-head">
+                    <h3 className="mb-0">Latest Transactions</h3>
+                    <Button
+                        color="primary"
+                        onClick={handleSeeMore}
+                        size="sm"
+                      >
+                        {buttonLabel}
+                      </Button>
                   </div>
                 </Row>
               </CardHeader>
               <div className="latest-trans">
-
+                <Table
+                    responsive
+                    size=""
+                    className="last-5-table">
+                  <thead>
+                    <tr>
+                      <th>Description</th>
+                      <th>Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {trans}
+                  </tbody>
+                </Table>
               </div>
             </Card>
           </Col>
@@ -212,25 +316,23 @@ const Index = (props) => {
               <CardHeader className="border-0">
                 <Row className="align-items-center top-cats-col">
                   <div className="col">
-                    <div className="top-cats-header">
+                    <div className="top-cats-header latest-tran-head">
                       <h3 className="mb-0">Top Categories</h3>
                       <Button
                         color="primary"
-                        href="#pablo"
                         onClick={(e) => e.preventDefault()}
                         size="sm"
                       >
-                        See all
+                        General
                       </Button>
                     </div>
-                    {tops}
                   </div>
                   <div className="col text-right">
                   </div>
                 </Row>
               </CardHeader>
               <div className="top-cats">
-              
+                  {tops}
               </div>
             </Card>
           </Col>

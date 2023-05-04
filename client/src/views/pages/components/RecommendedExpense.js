@@ -15,14 +15,16 @@ import axios from "axios";
 const RecommendedExpense = ({user, expense, setReloadExpenses, reloadExpenses, setRecindex}) => {
     const [trans, setTrans] = useState([])
     const [add, setAdd] = useState(false)
+    const [recExp, setRecExp] = useState("")
     const [formData, setFormData] = useState({
-        expense: expense.merchant_name,
-        amount: expense.amount,
+        expense: "",
+        amount: expense.average_amount,
         state: "F",
         priority: "L",
         spending_name: expense.merchant_name,
         category: expense.category
     })
+
 
     const ignoreExpense = () => {
         axios
@@ -39,6 +41,22 @@ const RecommendedExpense = ({user, expense, setReloadExpenses, reloadExpenses, s
             });
     };    
 
+    const analyze=(data) =>{
+        axios.post(`http://localhost:4000/api/analyze_expense`, data[0])
+        .then(response=>{
+            setRecExp(response.data[0].predicted_category);
+            setFormData(prevFormData=>{
+                return{
+                    ...prevFormData,
+                    expense: response.data[0].predicted_category,
+                }
+            })
+        })
+        .catch(err=>{
+            console.log(err);
+        })
+    }
+
     useEffect(()=>{
         axios.post(`http://localhost:4000/api/find_transactions`, {
             uid: user.uid,
@@ -48,6 +66,7 @@ const RecommendedExpense = ({user, expense, setReloadExpenses, reloadExpenses, s
         })
         .then(response => {
             setTrans(response.data)
+            analyze(response.data)
         })
         .catch(err=>{
             console.log(err);
@@ -56,7 +75,7 @@ const RecommendedExpense = ({user, expense, setReloadExpenses, reloadExpenses, s
 
     const transactions = trans.map((tran, index) => {
         return(
-            tran && <h4 key={index}>{tran.merchant_name} ({tran.category}) - ({tran.currency}) {tran.amount.toFixed(2)}<br/> {tran.date}</h4>
+            tran && <h4 key={index}>{tran.merchant_name} ({tran.category}) | ({tran.currency}) {tran.amount.toFixed(2)}<br/> {tran.date}</h4>
         )
     })
 
@@ -93,8 +112,15 @@ const RecommendedExpense = ({user, expense, setReloadExpenses, reloadExpenses, s
     return (
         <>
             <div className="curve recommended-screen mb-xl-0">
-                <div className="rec-container">
-                    <h1>{expense.merchant_name} ({expense.category}) - ${expense.amount}</h1>
+                {!recExp &&
+                <div className="lds-ring">
+                    <div></div><div></div><div></div><div></div>
+                </div>
+                }
+                {recExp && <div className="rec-container">
+                    <h1>{expense.merchant_name} ({expense.category})</h1>
+                    <h2>Average Monthly expense | ${parseInt(expense.average_amount).toFixed(2)}</h2>
+                    <h2>Recommended Category | {recExp}</h2>
                     <h2>Transactions</h2>
                     {transactions}
                     <div className="button-group">
@@ -151,7 +177,7 @@ const RecommendedExpense = ({user, expense, setReloadExpenses, reloadExpenses, s
                         </div>
                     </Form>
                     }
-                </div>
+                </div>}
             </div>
         </>
     );

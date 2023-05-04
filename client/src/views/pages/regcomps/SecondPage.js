@@ -35,6 +35,7 @@ const SecondPage = ({handleIndexChange,handleAddition,userData}) =>{
       <CardBody className="px-lg-5 py-lg-5">
         <Form role="form" onSubmit={handleSubmit}>
           <FormGroup>
+            <Label className="reg-label" for="income">What your length of exchange in months</Label>
             <InputGroup className="input-group-alternative mb-3">
               <InputGroupAddon addonType="prepend">
                 <InputGroupText>
@@ -42,8 +43,7 @@ const SecondPage = ({handleIndexChange,handleAddition,userData}) =>{
                 </InputGroupText>
               </InputGroupAddon>
               <Input 
-              placeholder="What your length of exchange in months"
-              type="text"
+              type="number"
               name="length"
               autoComplete="new-length"
               value={userData.length}
@@ -72,44 +72,27 @@ const SecondPage = ({handleIndexChange,handleAddition,userData}) =>{
               </Input>
             </InputGroup>
           </FormGroup>
+          
           <FormGroup>
-            <Label className="reg-label" for="income">Will you receive income/remmittance?</Label>
+            <Label className="reg-label" for="income">Would you like the system to automatically categorize your new transactions?</Label>
             <InputGroup className="input-group-alternative mb-3">
               <InputGroupAddon addonType="prepend">
                 <InputGroupText>
-                  <BsCurrencyDollar />
+                  <BsCurrencyExchange />
                 </InputGroupText>
               </InputGroupAddon>
               <Input
                 type="select"
-                name="sel"
-                value={setBudget}
-                onChange={(e) => handleSetBudget(e)}
+                name="autoassign"
+                value={userData.autoassign}
+                onChange={(e) => handleAddition(e)}
               >
-                <option>---Select---</option>
-                <option>Yes</option>
-                <option>No</option>
+                <option value="1">YES</option>
+                <option value="2">NO</option>
               </Input>
             </InputGroup>
           </FormGroup>
-          {setBudget==="Yes" && 
-          <FormGroup>
-            <InputGroup className="input-group-alternative mb-3">
-              <InputGroupAddon addonType="prepend">
-                <InputGroupText>
-                  <i className="ni ni-hat-3" />
-                </InputGroupText>
-              </InputGroupAddon>
-              <Input 
-              placeholder="How much will you receive each month?"
-              type="text"
-              name="income"
-              autoComplete="new-income"
-              value={userData.income}
-              onChange={(e) => handleAddition(e)}
-              />
-            </InputGroup>
-          </FormGroup>}
+
           <div className="text-center buttons">
               <Button className="mt-4 back-button" onClick={()=>handleIndexChange(1)}>
                     <AiOutlineLeft /> Back
