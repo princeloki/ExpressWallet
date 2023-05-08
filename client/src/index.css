@@ -7,6 +7,7 @@
     color: #e53c3c;
     font-size: 0.8em;
     font-weight: bold;
+    text-align: center;
 }
 
 .upper{
@@ -499,6 +500,10 @@ tr:last-of-type{
     color: #050505;
 }
 
+.trans-cont{
+    margin-top: 3em;
+}
+
 .rec-exp,.cat-trans{
     min-height: 25em;
 }
@@ -756,6 +761,36 @@ tr:last-of-type{
     margin-top: 1em;
 }
 
+.cash-form{
+    background: #fff;
+    width: 60%;
+    margin: auto;
+}
+
+.cash-form form{
+    width: 90%;
+    margin: auto;
+    min-height: 50vh;
+}
+
+.cash-form form label:first-of-type{
+    margin-top: 1em;
+}
+
+.repeat-header{
+    position: absolute;
+    top: -8.5em;
+    z-index: 6;
+    text-align: center;
+    color: #fff;
+    font-size: 1em;
+    border: 1px solid #fff;
+    border-radius: 15px;
+    padding: 1em;
+    font-weight: bold;
+    animation: bouncing-animation 2s infinite;
+}
+
 .footer{
     position: absolute;
     background: none !important;
@@ -766,7 +801,22 @@ tr:last-of-type{
 }
 
 
-
+@keyframes bouncing-animation {
+    0%,
+    20%,
+    50%,
+    80%,
+    100% {
+      transform: translateY(0);
+    }
+    40% {
+      transform: translateY(-10px);
+    }
+    60% {
+      transform: translateY(-5px);
+    }
+  }
+  
 
 
 /* Absolute Center Spinner */
@@ -948,3 +998,56 @@ tr:last-of-type{
       transform: rotate(360deg);
     }
   }
+
+  .my-bank{
+    min-height: 15em;
+  }
+
+  .debit-card {
+    position: absolute;
+    top: 4em;
+    right: 1em;
+    width: 100%;
+    height: 17em;
+    background-color: #6f377b;
+    border-radius: 25px;
+    padding: 20px;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: transform 0.3s ease-in-out;
+    opacity: 0.85;
+  }
+
+  .debit-card:hover {
+    transform: perspective(1000px) rotateY(10deg);
+  }
+  
+  .debit-card-heading {
+    opacity: 0.7;
+    letter-spacing: 0.4em;
+    font-size: 1.7em;
+    margin-top: 0.8em;
+    text-align: left;
+  }
+  
+  .debit-card-name {
+    font-size: 1.3em;
+    font-weight: bold;
+    margin-top: 4em; /* Adjust this value to position the name lower on the card */
+    text-align: left;
+  }
+  
+  .debit-card-number {
+    opacity: 0.9;
+    display: flex;
+    justify-content: space-between;
+    font-size: 1.6em;
+    letter-spacing: 0.3em;
+  }
+  
+  

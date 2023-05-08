@@ -12,7 +12,7 @@ function Dashboard({user}){
     const [formData, setFormData] = useState({
         amount: 0,
         merchantName: "",
-        iso: "",
+        mcc: "",
         category: "",
         currency: "",
     })
@@ -56,10 +56,11 @@ function Dashboard({user}){
     }
 
     const makePayment = (e) =>{
+        console.log(formData)
         e.preventDefault()
         axios.post('http://localhost:5000/api/add_payment', {"username": user.username, 
         "amount": formData.amount, "merchant": formData.merchantName, 
-        "iso": formData.iso, "category": formData.category, 
+        "mcc": formData.mcc, "category": formData.category, 
         "currency": formData.currency})
         .then(result => {
             setInfo("PAYMENT MADE SUCCESSFULLY")
@@ -100,8 +101,8 @@ function Dashboard({user}){
                     <input type="text" name="amount" value={formData.amount} onChange={(e)=>handleChange(e)} placeholder="Enter amount"/>
                     <label htmlFor="amount">Merchant Name</label>
                     <input type="text" name="merchantName" value={formData.merchantName} onChange={(e)=>handleChange(e)} placeholder="Enter Merchant Name"/>
-                    <label htmlFor="amount">ISO Code</label>
-                    <input type="text" name="iso" value={formData.iso} onChange={(e)=>handleChange(e)} placeholder="Enter ISO Code "/>
+                    <label htmlFor="amount">MCC</label>
+                    <input type="text" name="mcc" value={formData.mcc} onChange={(e)=>handleChange(e)} placeholder="Enter mcc Code "/>
                     <label htmlFor="amount">Merchant Category</label>
                     <input type="text" name="category" value={formData.category} onChange={(e)=>handleChange(e)} placeholder="Enter Item Category"/>
                     <label htmlFor="amount">Currency</label>

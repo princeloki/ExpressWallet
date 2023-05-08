@@ -2,7 +2,7 @@
 
 import classnames from "classnames";
 import Chart from "chart.js";
-import { Line } from "react-chartjs-2";
+import { Bar } from "react-chartjs-2";
 import {
   Button,
   Card,
@@ -19,9 +19,9 @@ import {
 
 // core components
 import {
+  chartExample1,
   chartOptions,
-  parseOptions,
-  chartExample1
+  parseOptions
 } from "variables/charts.js";
 
 import Header from "components/Headers/Header.js";
@@ -29,6 +29,12 @@ import { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 import axios from "axios";
 import InitialManager from "./pages/components/InitialManager.js";
+import DebitCard from "./pages/components/DebitCard.js";
+
+import {
+  getExpensesByMonthAndWeek,
+  getLastSix,
+} from "../variables/TimeFrameCalc.js";
 
 const Index = (props) => {
   const history = useHistory()
@@ -38,6 +44,7 @@ const Index = (props) => {
 
   const [displayedTransactions, setDisplayedTransactions] = useState(5);
   const [transactions, setTransactions] = useState([])
+  const [spendings, setSpendings] = useState([])
   const [topCats, setTopCats] = useState([])
   const [reload, setReload] = useState(false)
   const [showExpenses, setShowExpenses] = useState(false)
@@ -113,6 +120,16 @@ const Index = (props) => {
     })
   },[props.user])
 
+  useEffect(()=>{
+    axios.get(`http://localhost:4000/api/get_each_spending/${props.user.uid}`)
+    .then(response=>{
+      setSpendings(response.data)
+    })
+    .catch(err=>{
+      console.log(err);
+    })
+  },[])
+
   const rembudg = remBudgets.map((remBudget, index) => {
     const expense = expenses.find(e => e.eid === remBudget.eid);
   
@@ -123,13 +140,11 @@ const Index = (props) => {
     return (
       <tr key={index}>
         <td>{expense.expense_name}</td>
-        <td>${expense.expense_amount.toFixed(2)}</td>
-        <td>${remBudget.total.toFixed(2)}</td>
+        <td>{props.currSym()}{(expense.expense_amount*props.rates[localStorage.getItem("currency")]).toFixed(2)}</td>
+        <td>{props.currSym()}{(remBudget.total*props.rates[localStorage.getItem("currency")]).toFixed(2)}</td>
       </tr>
     );
   });
-  
-  
 
   const trans = transactions.slice(0, displayedTransactions).map((transaction, index) => {
   
@@ -138,7 +153,7 @@ const Index = (props) => {
     return(
       <tr key={index}>
         <td>{transaction.merchant_name} ({transaction.category}) {formattedDate}</td>
-        <td>{transaction.currency} {transaction.amount}.00</td>
+        <td>{localStorage.getItem("currency")} {(transaction.amount*props.rates[localStorage.getItem("currency")]).toFixed(2)}</td>
       </tr>
     )
   });
@@ -162,13 +177,17 @@ const Index = (props) => {
     return(
       <div key={index} className="top-cats-body">
         <h2>{topCat.merchant_name}</h2>
-        <h3>${topCat.total}.00</h3>
+        <h3>{props.currSym()}{(topCat.total*props.rates[localStorage.getItem("currency")]).toFixed(2)}</h3>
       </div>
     )
   })
 
   const [activeNav, setActiveNav] = useState(1);
-  const [chartExample1Data, setChartExample1Data] = useState("data1");
+  const [realData, setRealData] = useState("data1");
+
+  let [months, weeks] = getExpensesByMonthAndWeek(spendings, props.rates);
+  const chartData = chartExample1(props.currSym);
+
   if (window.Chart) {
     parseOptions(Chart, chartOptions());
   }
@@ -176,12 +195,51 @@ const Index = (props) => {
   const toggleNavs = (e, index) => {
     e.preventDefault();
     setActiveNav(index);
-    setChartExample1Data("data" + index);
+    setRealData("data" + index);
+  };
+
+
+
+  let dataOptions = {
+    data1: (canvas) => {
+      months = getLastSix(months);
+      const monthLabels = months.map((month) => month.month + " " + month.year);
+      const monthData = months.map((month) => month.amount);
+      return {
+        labels: monthLabels,
+        datasets: [
+          {
+            label: "Performance",
+            data: monthData,
+          },
+        ],
+      };
+    },
+
+    data2: (canvas) => {
+      console.log(weeks);
+      weeks = getLastSix(weeks);
+      console.log(weeks);
+      const weekLabels = weeks.map(
+        (week) => "Week " + week.week + " " + week.year
+      );
+      const weekData = weeks.map((week) => week.amount);
+      return {
+        labels: weekLabels,
+        datasets: [
+          {
+            label: "Performance",
+            data: weekData,
+          },
+        ],
+      };
+    },
   };
 
   return (
     <>
-      <Header onDashboard={props.onDashboard} userData={props.user} setUser={props.setUserData} reload={reload} toggleShow={toggle}/>
+      <Header onDashboard={props.onDashboard} userData={props.user} 
+      setUser={props.setUserData} reload={reload} toggleShow={toggle} rates={props.rates} currSym={()=>props.currSym()}/>
       {/* Page content */}
       {showExpenses && 
         <div className="expense-left curve">
@@ -250,11 +308,10 @@ const Index = (props) => {
                 </Row>
               </CardHeader>
               <CardBody>
-                {/* Chart */}
                 <div className="chart">
-                  <Line
-                    data={chartExample1[chartExample1Data]}
-                    options={chartExample1.options}
+                  <Bar
+                    data={dataOptions[realData]}
+                    options={chartData.options}
                     getDatasetAtEvent={(e) => console.log(e)}
                   />
                 </div>
@@ -262,7 +319,7 @@ const Index = (props) => {
             </Card>
           </Col>
           <Col xl="4">
-            <Card className="curve shadow">
+            <Card className="curve shadow my-bank">
               <CardHeader className="bg-transparent">
                 <Row className="align-items-center">
                   <div className="col">
@@ -271,7 +328,7 @@ const Index = (props) => {
                 </Row>
               </CardHeader>
               <div className="bank-body">
-
+                <DebitCard name={props.user.first_name+" "+props.user.last_name}/>
               </div>
             </Card>
           </Col>
@@ -283,7 +340,7 @@ const Index = (props) => {
                 <Row className="align-items-center">
                   <div className="col latest-tran-head">
                     <h3 className="mb-0">Latest Transactions</h3>
-                    <Button
+                      <Button
                         color="primary"
                         onClick={handleSeeMore}
                         size="sm"

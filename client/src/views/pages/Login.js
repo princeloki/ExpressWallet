@@ -1,5 +1,3 @@
-
-
 import {
   Button,
   Card,
@@ -42,6 +40,7 @@ const Login = () => {
     .then(response => {
       const userString = JSON.stringify(response.data.body);
       localStorage.setItem('user', userString);
+      localStorage.setItem("currency", response.data.body.currency);
       history.push("/admin/index")
     })
     .catch(err => {

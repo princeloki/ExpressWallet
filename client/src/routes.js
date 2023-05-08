@@ -22,7 +22,7 @@ var routes = [
     layout: "/admin"
   },
   {
-    path: "log-transaction",
+    path: "/log-transaction",
     name: "Log Transaction",
     icon: "ni ni-money-coins text-green",
     component: LogTransaction,
@@ -37,8 +37,6 @@ var routes = [
   },
   {
     path: "/login",
-    name: "Login",
-    icon: "ni ni-key-25 text-info",
     component: Login,
     layout: "/auth"
   },

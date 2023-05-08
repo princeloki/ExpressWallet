@@ -90,6 +90,7 @@ router.post('/add_transaction', (req, res) => {
 router.post('/add_payment', (req, res) => {
     const user = req.body.username;
     const payment = req.body;
+    console.log(payment)
     let uid;
     const sql = `SELECT bid FROM bank WHERE username = '${user}'`
     try{

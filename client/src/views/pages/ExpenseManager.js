@@ -163,7 +163,7 @@ const ExpenseManager = (props) => {
 
   return (
     <>
-      <Header onDashboard={props.onDashboard} userData={props.user}/>
+      <Header onDashboard={props.onDashboard} userData={props.user} currSym={props.currSym} rates={props.rates}/>
       {/* Page content */}
       {clickedIndex !== null && 
       <div ref={updateExpenseRef}> {/* Add ref to UpdateExpense */}
@@ -211,16 +211,36 @@ const ExpenseManager = (props) => {
             </Card>
           </Col>
           {props.user.autoassign===1&&<Col xl="5">
+            <h2 className="repeat-header">
+              The list below displays recurring spendings identified in your bank account. 
+            We recommend considering these as new expense categories. To add or ignore a transaction, 
+            simply click on it, and the options [Add] and [Ignore] will appear for you to choose from.
+            </h2>
             <Card className="curve shadow">
               <div className="rec-exp">
-                    <h3 className="mb-0">RECOMMENDED REASSIGNMENTS<GrCircleInformation className="info"/></h3>
+                    <h3 className="mb-0">REPEAT TRANSACTIONS</h3>
+                    {recommended.length===0 &&
+                      <div className="lds-ring">
+                        <div></div><div></div><div></div><div></div>
+                      </div>
+                    }
+                    {newExpense &&
                     <div className="cats">
                       {newExpense}
-                    </div>
+                    </div>}
               </div>
             </Card>
           </Col>}
           {props.user.autoassign===0&&<Col xl="6">
+            <h2 className="repeat-header">
+              The list below displays all new transactions that have not been assigned to an expense category. To categorize a transaction, follow these steps:<br/><br/>
+
+              Click on the transaction you want to categorize.
+              Click the check mark icon beside the transaction.
+              Choose the appropriate expense category from the available options.
+
+              If you prefer not to categorize a transaction, simply click the "X" icon to ignore it.
+            </h2>
             <Card className="curve shadow trans-cont">
               <div className="cat-trans">
                     <h3 className="mb-0">CATEGORIZE TRANSACTIONS <GrCircleInformation className="info"/></h3>

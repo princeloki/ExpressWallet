@@ -12,11 +12,45 @@ const Admin = (props) => {
   const userInfo = localStorage.getItem('user');
   const [user, setUser] = useState(userInfo ? JSON.parse(userInfo) : null);
   const [remount, setRemount] = useState(false)
+  const [rates, setRates] = useState([]);
 
 
   const [onDashboard, setOnDashboard] = useState(true);
   const mainContent = React.useRef(null);
   const location = useLocation();
+
+  
+  
+  const currSym = ()=>{
+    switch (localStorage.getItem('currency')) {
+      case "JMD":
+        return "$";
+      case "USD":
+        return "$";
+      case "EUR":
+        return "€";
+      case "GBP":
+        return "£";
+      case "JPY":
+      default:
+        return "￥";
+    }
+  };
+
+  
+  useEffect(()=>{
+    axios.get(`http://localhost:4000/api/get_rates/${user.uid}`)
+    .then(response=>{
+      const result = response.data.reduce((acc, item) => {
+        acc[item.symbol] = item.rate;
+        return acc;
+      }, {});
+      setRates(result);
+    })
+    .catch(err=>{
+      console.log(err);
+    })
+  },[])
 
   const updateUser = () => {
     axios.get(`http://localhost:4000/api/get_user/${user.uid}`)
@@ -43,7 +77,8 @@ const Admin = (props) => {
             path={prop.layout + prop.path}
             key={key}
             render={(props) => (
-              <prop.component {...props} onDashboard={onDashboard} user={user} setUserData={setUser} updateUser={updateUser} />
+              <prop.component {...props} onDashboard={onDashboard} user={user} setUserData={setUser} 
+              updateUser={updateUser} currSym={currSym} rates={rates}/>
             )}
           />
         );

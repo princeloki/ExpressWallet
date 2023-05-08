@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
 import axios from 'axios';
 
-const SpendingTransactions = ({openTransaction, clicked, spending, setDetails, reload}) =>{
+const SpendingTransactions = ({openTransaction, clicked, spending, setDetails, reload, currSym, rates}) =>{
+    console.log(spending);
   
     useEffect(()=>{
       axios.post(`http://localhost:4000/api/get_spending_trans`,
@@ -25,7 +26,7 @@ const SpendingTransactions = ({openTransaction, clicked, spending, setDetails, r
         <tr className="main-row" onClick={openTransaction}>
           <td>{spending.month} | {spending.year}</td>
           <td>{spending.spending_name}</td>
-          <td>${spending.total.toFixed(2)}</td>
+          <td>{currSym()}{(spending.total*rates[localStorage.getItem("currency")]).toFixed(2)}</td>
         </tr>
       </>
     )

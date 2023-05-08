@@ -54,7 +54,7 @@ const ExpenseReports = (props) => {
       <tr key={index}>
         <td>{formattedDate}</td>
         <td>{detail.merchant_name} - {detail.category}</td>
-        <td>({detail.currency}) {detail.amount.toFixed(2)}</td>
+        <td>({localStorage.getItem("currency")}) {(detail.amount*props.rates[localStorage.getItem("currency")]).toFixed(2)}</td>
         <td><BsThreeDots onClick={()=>handleReassign(detail)}/></td>
       </tr>
     )
@@ -89,15 +89,18 @@ const ExpenseReports = (props) => {
           details={moreDetails}
           setDetails={setMoreDetails}
           reload={reload}
+          currSym={props.currSym}
+          rates={props.rates}
         />
       </div>
     )
   })
+
   
 
   return (
     <>
-      <Header onDashboard={props.onDashboard} userData={props.user}/>
+      <Header onDashboard={props.onDashboard} userData={props.user} currSym={props.currSym} rates={props.rates}/>
       {/* Page content */}
       {assign && <AssignTransactions transaction={assignTrans} setAssign={setAssign} expenseList={expenses} 
       setReloadTransaction={setReload} reloadTransaction={reload} reports={true}/>}

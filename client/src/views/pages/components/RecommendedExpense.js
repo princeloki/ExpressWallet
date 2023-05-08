@@ -16,6 +16,9 @@ const RecommendedExpense = ({user, expense, setReloadExpenses, reloadExpenses, s
     const [trans, setTrans] = useState([])
     const [add, setAdd] = useState(false)
     const [recExp, setRecExp] = useState("")
+    const [rerec, setRerec] = useState(false)
+    console.log(trans);
+    
     const [formData, setFormData] = useState({
         expense: "",
         amount: expense.average_amount,
@@ -29,12 +32,10 @@ const RecommendedExpense = ({user, expense, setReloadExpenses, reloadExpenses, s
     const ignoreExpense = () => {
         axios
             .post(`http://localhost:4000/api/ignore_recommendation/${user.uid}`, {
-                expense: expense.merchant_name,
-                category: expense.category,
-                amount: expense.amount,
+                trans: trans
             })
             .then((response) => {
-                console.log(response.data);
+                setReloadExpenses(!reloadExpenses)
             })
             .catch((err) => {
                 console.log(err);
@@ -81,7 +82,7 @@ const RecommendedExpense = ({user, expense, setReloadExpenses, reloadExpenses, s
 
     const addRecommend = (e)=>{
         e.preventDefault();
-        axios.post(`http://localhost:4000/api/add_recommended/${user.uid}`,formData)
+        axios.post(`http://localhost:4000/api/add_recommended/${user.uid}`,{...formData,...{trans: trans}})
         .then(response=>{
             setAdd(!add)
             setReloadExpenses(!reloadExpenses)
@@ -137,6 +138,18 @@ const RecommendedExpense = ({user, expense, setReloadExpenses, reloadExpenses, s
                                     name="expense"
                                     autoComplete="new-expense"
                                     value={formData.expense}
+                                    onChange={(e) => handleExpense(e)}
+                                    />
+                                </InputGroup>
+                            </FormGroup>
+                            <FormGroup>
+                                <Label className="reg-label" for="income">Budget</Label>
+                                <InputGroup className="input-group-alternative mb-3">
+                                    <Input 
+                                    type="number"
+                                    name="amount"
+                                    autoComplete="new-expense"
+                                    value={formData.amount}
                                     onChange={(e) => handleExpense(e)}
                                     />
                                 </InputGroup>

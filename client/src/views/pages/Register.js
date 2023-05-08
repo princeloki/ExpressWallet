@@ -1,5 +1,3 @@
-
-
 import {
   Card,
   Col,
@@ -51,6 +49,8 @@ const Register = () => {
     normal: 0,
     low: 0
   })
+
+  console.log(userData);
   const [index, setIndex] = useState(0)
 
   const handleIndexChange = (index) => {
@@ -88,6 +88,13 @@ const Register = () => {
     axios.put("http://localhost:4000/api/set_user",userData)
     .then(response => {
       history.push('/auth/login')
+      axios.get(`http://localhost:4000/api/initialize_initialize_currency/${userData.currency}`)
+      .then(response=>{
+        console.log("Nice");
+      })
+      .catch(err=>{
+        console.log(err);
+      })
     })
     .catch(err => {
       console.log(err)

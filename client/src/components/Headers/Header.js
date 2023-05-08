@@ -15,17 +15,31 @@ import {
 
 import { FcCurrencyExchange } from "react-icons/fc";
 import { BsCurrencyYen } from "react-icons/bs";
+import { IoLogoUsd } from "react-icons/io";
+import { FaEuroSign } from "react-icons/fa";
+import { FaPoundSign } from "react-icons/fa";
 import { useState, useEffect, useRef } from "react";
 import axios from 'axios';
 
-const Header = ({onDashboard, userData, setUser, toggleShow}) => {
+const Header = ({onDashboard, userData, toggleShow, rates, currSym}) => {
   const ref = useRef();
+  const [currency, setCurrency] = useState(localStorage.getItem('currency'));
+  const [difference, setDifference] = useState(0)
   const [alert, setAlert] = useState({
     data: {
       message: "nothing",
       adjusted_expenses: []
     }
   })
+
+  const handleCurrency =(currency)=>{
+    setCurrency(currency);
+    localStorage.setItem("currency", currency);
+  }
+
+  useEffect(()=>{
+
+  },[currency])
   const [remBudgets, setRemBudgets] = useState([])
   const [expenses, setExpenses] = useState([])
   const [today, setToday] = useState(0)
@@ -40,11 +54,22 @@ const Header = ({onDashboard, userData, setUser, toggleShow}) => {
     tmonth: 0
   })
 
-  const currIcon = () =>{
-    return(
-      <div></div>
-    )
-  }
+  const currIcon = () => {
+    switch (localStorage.getItem('currency')) {
+      case "JMD":
+        return <IoLogoUsd className="text-green" />;
+      case "USD":
+        return <IoLogoUsd className="text-green" />;
+      case "EUR":
+        return <FaEuroSign className="text-green" />;
+      case "GBP":
+        return <FaPoundSign className="text-green" />;
+      case "JPY":
+      default:
+        return <BsCurrencyYen className="text-green" />;
+    }
+  };
+
 
   const assignUpdate = () =>{
     const newAdjusted = []
@@ -63,6 +88,16 @@ const Header = ({onDashboard, userData, setUser, toggleShow}) => {
       console.log(err)
     })
   }
+
+  useEffect(()=>{
+    axios.get(`http://localhost:4000/api/get_monthly_difference/${userData.uid}`)
+    .then(response=>{
+      setDifference(response.data.difference);
+    })
+    .catch(err=>{
+      console.log(err);
+    })
+  },[])
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -87,8 +122,8 @@ const Header = ({onDashboard, userData, setUser, toggleShow}) => {
     return(
       <tr key={index}>
         <td>{adjusted_expense.name}</td>
-        <td>${expense.expense_amount.toFixed(2)}</td>
-        <td>${adjusted_expense.amount.toFixed(2)}</td>
+        <td>{currSym()}{(expense.expense_amount*rates[localStorage.getItem("currency")]).toFixed(2)}</td>
+        <td>{currSym()}{(adjusted_expense.amount*rates[localStorage.getItem("currency")]).toFixed(2)}</td>
       </tr>
     )
   })
@@ -163,34 +198,27 @@ const Header = ({onDashboard, userData, setUser, toggleShow}) => {
     },[])
   })
 
-  const setCurrency = (e) =>{
-    setUser(prevUserData=>{
-      return{
-        ...prevUserData,
-        balance: prevUserData.balance*2,
-        income: prevUserData.income*2,
-        currency: e.target.value,
-      }
-    })
-  }
-
   return (
     <>
       {userData &&
       <div className="header bg-gradient-info pb-8 pt-5 pt-md-8">
         {onDashboard && (alert.data.message==="Success" || alert.data.message === "Not adjustable")  && 
-
         <Card className="curve bank-alert mb-4 mb-xl-0">
           <CardBody>
             <Row>
               <div className="col">
                 <div className="budget-header">
                   <span className="h2 font-weight-bold mb-0">
-                  {alert.data.message==="Not adjustable" && <p className="danger"><span className="upper">Warning</span>: Your budget is unadjustable, deposit money into your account!</p>}   
+                  {alert.data.message==="Not adjustable" && 
+                  <p className="danger">
+                    ALERT: Your budget has reached a critical point and can no longer be adjusted. To continue using the budget manager effectively,
+                  please consider depositing additional funds into your account or exploring job opportunities in {userData.country} to supplement your income. 
+                  </p>  
+                  }
                   </span>
                   {alert.data.message==="Success" && 
                   <div className="readjust-alert">
-                    <p className="danger font-weight-bold mb-0">You have overspent your budget by ${projB}. To get back on track, consider reducing your expenses in these categories</p>
+                    <p className="danger font-weight-bold mb-0">You have overspent your budget by {currSym()}{(projB*rates[localStorage.getItem("currency")]).toFixed(2)}. To get back on track, consider reducing your expenses in these categories</p>
                     <Button color="primary"  onClick={() => setOpen(!open)}>View</Button>
                   </div>}
                 </div>
@@ -232,7 +260,7 @@ const Header = ({onDashboard, userData, setUser, toggleShow}) => {
                             <div className="currency-control my-auto">
                             <Col className="col-auto">
                               <div className="icon icon-shape bg-light text-white rounded-circle shadow">
-                                <BsCurrencyYen className="text-green"/>
+                                {currIcon()}
                               </div>
                             </Col>
                               <InputGroup className="input-group-alternative mb-3">
@@ -240,20 +268,20 @@ const Header = ({onDashboard, userData, setUser, toggleShow}) => {
                                   id="cur-sel"
                                   type="select"
                                   name="currency"
-                                  value={userData.currency}
-                                  onChange={(e) => setCurrency(e)}
+                                  value={currency}
+                                  onChange={(e) => handleCurrency(e.target.value)}
                                 >
-                                  <option>USD</option>
-                                  <option>EUR</option>
-                                  <option>GBP</option>
-                                  <option>YEN</option>
-                                  <option>JMD</option>
+                                  <option value="USD">USD</option>
+                                  <option value="EUR">EUR</option>
+                                  <option value="GBP">GBP</option>
+                                  <option value="JPY">JPY</option>
+                                  <option value="JMD">JMD</option>
                                 </Input>
                               </InputGroup>
                             </div>
                             <div>
-                              <h3>Current Balance | ${userData.balance}</h3>
-                              <h3>Net Balance | ${projB}</h3>
+                              <h3>Current Balance | {currSym()}{(userData.balance*rates[currency]).toFixed(2)}</h3>
+                              <h3>Net Balance | {currSym()}{(projB*rates[currency]).toFixed(2)}</h3>
                             </div>
                           </Col>
                       </Row>
@@ -273,11 +301,11 @@ const Header = ({onDashboard, userData, setUser, toggleShow}) => {
                           </CardTitle>
                           <div className="budget-header">
                             <span className="h2 font-weight-bold mb-0">
-                            Budget | ${(userData.budget).toFixed(2)} <br/>
-                            Expenses left | ${(budget).toFixed(2)}    
+                            Budget | {currSym()}{(userData.budget*rates[currency]).toFixed(2)} <br/>
+                            Expenses left | {currSym()}{(budget*rates[currency]).toFixed(2)}    
                             </span>
                             <span className="h2 font-weight-bold mb-0 bal-text">
-                            Free to spend | ${stats.tmonth}
+                            Free to spend | {currSym()}{(stats.tmonth*rates[currency]).toFixed(2)}
                             </span>
                           </div>
                         </div>
@@ -288,9 +316,14 @@ const Header = ({onDashboard, userData, setUser, toggleShow}) => {
                         </Col>
                       </Row>
                       <p className="mt-3 mb-0 text-muted text-sm">
+                        {difference < 0 && 
                         <span className="text-success mr-2">
-                          <i className="fa fa-arrow-up" /> 3.48%
-                        </span>{" "}
+                          <i className="fa fa-arrow-up" /> %{Math.abs(difference.toFixed(2))}
+                        </span>}
+                        {difference >= 0 && 
+                        <span className="text-danger mr-2">
+                          <i className="fa fa-arrow-down" /> %{Math.abs(difference.toFixed(2))}
+                        </span>}
                         <span className="text-nowrap">Since last month</span>
                       </p>
                     </CardBody>
@@ -309,7 +342,7 @@ const Header = ({onDashboard, userData, setUser, toggleShow}) => {
                           </CardTitle>
                           <div className="budget-header">
                             <span className="h2 font-weight-bold mb-0 bal-text">
-                            Free to spend | ${stats.tweek}
+                            Free to spend | {currSym()}{(stats.tweek*rates[currency]).toFixed(2)}
                             </span>
                           </div>
                         </div>
@@ -319,12 +352,6 @@ const Header = ({onDashboard, userData, setUser, toggleShow}) => {
                           </div>
                         </Col>
                       </Row>
-                      <p className="mt-3 mb-0 text-muted text-sm">
-                        <span className="text-danger mr-2">
-                          <i className="fas fa-arrow-down" /> 3.48%
-                        </span>{" "}
-                        <span className="text-nowrap">Since last week</span>
-                      </p>
                     </CardBody>
                   </Card>
                 </Col>
@@ -341,7 +368,7 @@ const Header = ({onDashboard, userData, setUser, toggleShow}) => {
                           </CardTitle>
                           <div className="budget-header">
                             <span className="h2 font-weight-bold mb-0 bal-text">
-                            Free to spend | ${stats.day}
+                            Free to spend | {currSym()}{(stats.day*rates[currency]).toFixed(2)}
                             </span>
                           </div>
                         </div>
@@ -351,12 +378,6 @@ const Header = ({onDashboard, userData, setUser, toggleShow}) => {
                           </div>
                         </Col>
                       </Row>
-                      <p className="mt-3 mb-0 text-muted text-sm">
-                        <span className="text-warning mr-2">
-                          <i className="fas fa-arrow-down" /> 1.10%
-                        </span>{" "}
-                        <span className="text-nowrap">Since yesterday</span>
-                      </p>
                     </CardBody>
                   </Card>
                 </Col>

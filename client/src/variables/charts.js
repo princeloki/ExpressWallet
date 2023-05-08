@@ -1,8 +1,8 @@
 const Chart = require("chart.js");
-//
+
 // Chart extension for making the bars rounded
 // Code from: https://codepen.io/jedtrow/full/ygRYgo
-//
+//  
 
 Chart.elements.Rectangle.prototype.draw = function () {
   var ctx = this._chart.ctx;
@@ -289,8 +289,7 @@ function parseOptions(parent, options) {
   }
 }
 
-// Example 1 of Chart inside src/views/Index.js (Sales value - Card)
-let chartExample1 = {
+let chartExample1 = (currSym) => ({
   options: {
     scales: {
       yAxes: [
@@ -302,7 +301,7 @@ let chartExample1 = {
           ticks: {
             callback: function (value) {
               if (!(value % 10)) {
-                return "$" + value + "k";
+                return currSym() + value;
               }
             }
           }
@@ -320,7 +319,7 @@ let chartExample1 = {
             content += label;
           }
 
-          content += "$" + yLabel + "k";
+          content += currSym() + yLabel;
           return content;
         }
       }
@@ -348,7 +347,7 @@ let chartExample1 = {
       ]
     };
   }
-};
+});
 
 // Example 2 of Chart inside src/views/Index.js (Total orders - Card)
 let chartExample2 = {
@@ -395,8 +394,7 @@ let chartExample2 = {
 };
 
 module.exports = {
+  chartExample1,
   chartOptions, // used inside src/views/Index.js
   parseOptions, // used inside src/views/Index.js
-  chartExample1, // used inside src/views/Index.js
-  chartExample2 // used inside src/views/Index.js
 };

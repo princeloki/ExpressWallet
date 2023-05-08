@@ -31,6 +31,7 @@ const SecondPage = ({handleIndexChange,handleAddition,userData}) =>{
         e.preventDefault()
         handleIndexChange(3)
     }
+
     return(
       <CardBody className="px-lg-5 py-lg-5">
         <Form role="form" onSubmit={handleSubmit}>

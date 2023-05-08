@@ -1,5 +1,3 @@
-
-
 import os
 import sys
 import json
@@ -58,10 +56,7 @@ new_merchant_encoded = one_hot_encoder.transform(new_data['merchant_name'].value
 new_data['is_unknown_merchant'] = new_data['merchant_name'].apply(lambda x: 1 if x == 'Unknown' else 0)
 
 new_X = np.hstack([new_merchant_encoded.toarray(), new_mcc_scaled, new_data['is_unknown_merchant'].values.reshape(-1, 1)])
-# Make predictions using the loaded model
 probs = loaded_model.predict(new_X, verbose=0)
-
-# Get the index of the highest probability for each transaction
 predicted_indices = np.argmax(probs, axis=1)
 
 # Convert the indices back to the original category names
