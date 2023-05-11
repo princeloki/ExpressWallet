@@ -207,7 +207,7 @@ const ExpenseManager = (props) => {
                 </Table>
               </div>
               
-              <Button className="add-expense" color="primary" onClick={()=>setAdd(true)}>Add</Button>
+              <Button className="add-expense" color="primary" onClick={()=>setAdd(true)}>Add New Category</Button>
             </Card>
           </Col>
           {props.user.autoassign===1&&<Col xl="5">
@@ -218,7 +218,7 @@ const ExpenseManager = (props) => {
             </h2>
             <Card className="curve shadow">
               <div className="rec-exp">
-                    <h3 className="mb-0">REPEAT TRANSACTIONS</h3>
+                    <h3 className="mb-0">REPEAT TRANSACTIONS <span className="small">Click [Add] or [Ignore]</span></h3>
                     {recommended.length===0 &&
                       <div className="lds-ring">
                         <div></div><div></div><div></div><div></div>

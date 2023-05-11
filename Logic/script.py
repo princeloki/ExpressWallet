@@ -1,3 +1,4 @@
+
 import sys
 import json
 import base64
@@ -19,15 +20,13 @@ def adjust(expenses, balance, adjustment_percentages):
         sorted_expenses = sorted(expenses, key=lambda x: (x.priority, -x.amount))
         while remaining_balance < 0:
             for expense in sorted_expenses:
-                if expense.state == "F" and (expense.priority == "H" or expense.priority == "N"):
-                    pass
-                elif expense.state == "F" and expense.priority == "L":
+                if expense.state == "F":
                     pass
                 else:
                     reduction_amount = 0
                     adjustment_percentage = adjustment_percentages[expense.priority]
-                    reduction_amount = min(expense.amount, abs(remaining_balance), expense.amount * adjustment_percentage)
-                    expense.amount -= reduction_amount
+                    reduction_amount = round(min(expense.amount, abs(remaining_balance), expense.amount * adjustment_percentage))
+                    expense.amount = round(expense.amount - reduction_amount)
                     remaining_balance += reduction_amount
                     if expense.amount <= 0:
                         expenses.remove(expense)

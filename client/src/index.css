@@ -29,6 +29,12 @@ nav h1{
     cursor: pointer;
 }
 
+.small{
+    font-size: 0.75em !important;
+    font-weight: 600 !important;
+    color: #a6a6a6 !important;
+}
+
 .initial{
     position: absolute;
     top: 5%;
@@ -54,7 +60,7 @@ nav h1{
 .rec-category {
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
+    justify-content: left;
     align-items: center;
 }
 
@@ -94,6 +100,11 @@ nav h1{
     margin-top: 1em;
 }
 
+.category-name{
+    text-align: left;
+    margin-left: 0;
+}
+
 .expense-left{
     position: absolute;
     z-index: 5;
@@ -117,9 +128,6 @@ nav h1{
     margin-bottom: 2em !important;
 }
 
-.rec-table tr{
-
-}
 
 .Initial-Container{
     margin: 1em;
@@ -143,11 +151,11 @@ nav h1{
 }
 
 .readj-body{
-    width: 50%;
+    width: 60%;
     min-height: 30em;
     position: absolute !important;
     top: 2em;
-    left: 25%;
+    left: 20%;
     z-index: 5;
     text-align: center;
 }
@@ -292,17 +300,16 @@ nav .dropdown h1{
     flex-direction: row;
 }
 
-/* .currency-control:hover{
-    background: #e6e6e6;
-    border-radius: 30px;
-} */
-
 .currency-control h2{
     margin: 0;
 }
 
 .currency-control svg{
     font-size: 2em;
+}
+
+.balance h3{
+    text-align: left;
 }
 
 .spending-container{
@@ -374,13 +381,37 @@ nav .dropdown h1{
     width: 100%;
     display: flex;
     flex-direction: row;
-    gap: 1em;
     align-items: center;
+    gap: 10em;
 }
 
-.latest-tran-head button{
-    margin-left: auto;
+
+.latest-header{
+    display: flex !important;
+    flex-direction: row;
+    gap: 1em;
+    width: 60%;
 }
+
+#search-bar{
+    display: flex;
+    flex-direction: row;
+    text-align: center;
+    align-items: center;
+    gap: 0.5em;
+}
+
+.latest-tran-head .input-group{
+    margin-right: 0;
+    width: 40%;
+}
+
+.latest-tran-head select{
+    background: #5e72e4;
+    cursor: pointer;
+    color: #fff;
+}
+
 
 .spending-list button{
     position: absolute;
@@ -567,17 +598,20 @@ tr:last-of-type{
 
 .top-cats-col{
     width: 100% !important;
+    margin: 0;
 }
 
 .top-cats-header{
-    width: 100%;
+    width: 200%;
     display: flex;
     flex-direction: row;
-    gap: 4em;
+    gap: 1em;
 }
 
 .top-cats-header h3{
-    width: 8em;
+    width: 50%;
+    margin: 0;
+    padding: 0;
 }
 
 .top-cats-header a{
@@ -653,9 +687,6 @@ tr:last-of-type{
     flex-direction: row;
 }
 
-.edit-buttons button{
-    
-}
 
 .trans-adds{
     display: flex;
@@ -789,6 +820,25 @@ tr:last-of-type{
     padding: 1em;
     font-weight: bold;
     animation: bouncing-animation 2s infinite;
+}
+
+.edit-amount{
+    position: absolute !important;
+    top: 5em;
+    right: 15%;
+    z-index: 15;
+    width: 25%;
+    height: 12em;
+}
+
+.edit-amount form{
+    width: 90%;
+    margin: auto;
+}
+
+.clickable svg{
+    cursor: pointer;
+    font-size: 1.5em;
 }
 
 .footer{

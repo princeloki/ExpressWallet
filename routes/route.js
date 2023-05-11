@@ -123,6 +123,7 @@ router.get("/initialize_currency/:base", (req, res) => {
                 if (err) throw err;
             })
         }
+        console.log("Currencies Initialized")
         res.send("Currencies Initialized");
     })
     .catch(error => {
@@ -195,8 +196,8 @@ router.put('/update_user/:id', (req, res) => {
                     const trans = response.data;
                     for (let i = 0; i < trans.length; i++) {
                         let isoDate = new Date(trans[i].date).toISOString().replace('T', ' ').replace('Z', '');
-                        const sq = `INSERT IGNORE INTO transaction (tid, bid, merchant_name, mcc, category, currency, date, amount) VALUES
-                     (${trans[i].tid}, ${trans[i].bid},"${trans[i].merchant}",${trans[i].mcc},'${trans[i].category}','${trans[i].currency}','${isoDate}',${trans[i].amount})`;
+                        const sq = `INSERT IGNORE INTO transaction (bid, merchant_name, mcc, category, currency, date, amount) VALUES
+                     (${trans[i].bid},"${trans[i].merchant}",${trans[i].mcc},'${trans[i].category}','${trans[i].currency}','${isoDate}',${trans[i].amount})`;
                         db.query(sq, (err) => {
                             if (err) throw err;
                         });
@@ -215,7 +216,7 @@ router.put('/update_user/:id', (req, res) => {
             for (let i = 0; i < trans.length; i++) {
                 let isoDate = new Date(trans[i].date).toISOString();
                 let sql1 = `INSERT IGNORE INTO spending (eid, tid, spending_name, spending_amount, date, accounted) VALUES 
-            (${trans[i].eid}, ${trans[i].tid},'${trans[i].expense}', ${trans[i].amount}, '${isoDate}', ${trans[i].expense === 'MISC' ? 0 : 1})`;
+            (${trans[i].eid}, (SELECT MAX(tid) FROM transaction WHERE bid IN (SELECT bid FROM bank WHERE uid = ${uid})),'${trans[i].expense}', ${trans[i].amount}, '${isoDate}', ${trans[i].expense === 'MISC' ? 0 : 1})`;
                 db.query(sql1, (err) => {
                     if (err) throw err;
                 });
@@ -256,7 +257,7 @@ router.put('/update_user/:id', (req, res) => {
                 if (err) throw err;
                 const base64Data = Buffer.from(JSON.stringify(result)).toString("base64");
                 const pythonProcess = spawn("python", [
-                    "Logic/predictor.py",
+                    "Logic/Decisiontree/decision_predictor.py",
                     base64Data,
                 ]);
 
@@ -316,7 +317,7 @@ router.put('/update_user/:id', (req, res) => {
                 
                             const insertSpendingSql = `
                             INSERT IGNORE INTO spending (eid, tid, spending_name, spending_amount, date, accounted)
-                            VALUES (${eid}, ${trans[i].tid}, '${expenseName}', ${trans[i].amount}, '${isoDate}', ${expenseName === 'MISC' ? 0 : 1})
+                            VALUES (${eid}, (SELECT MAX(tid) FROM transaction WHERE bid IN (SELECT bid FROM bank WHERE uid=${uid})), '${expenseName}', ${trans[i].amount}, '${isoDate}', ${expenseName === 'MISC' ? 0 : 1})
                             `;
                             db.query(insertSpendingSql, (err) => {
                                 if (err) throw err;
@@ -562,13 +563,49 @@ router.get('/get_top_five_transactions/:id', (req, res)=>{
 
 router.get('/get_most_common/:id', (req, res)=>{
     const uid = req.params.id;
-    const sql = `SELECT merchant_name, SUM(amount) as total, COUNT(*) AS transaction_count FROM transaction
-                WHERE bid IN (SELECT bid FROM bank WHERE uid = ${uid})
-                AND transaction.date >= (SELECT date(start) FROM user WHERE uid = ${uid})
-                GROUP BY merchant_name
-                ORDER BY transaction_count DESC
-                LIMIT 5;`
-    db.query(sql, (err, result)=>{
+    const sql = `
+    SELECT spending_name, SUM(spending_amount) as total
+    FROM expense
+    JOIN spending ON expense.eid = spending.eid
+    WHERE expense.uid = ?
+    GROUP BY spending.spending_name
+    ORDER BY total DESC
+    LIMIT 5;`
+    db.query(sql, [uid], (err, result)=>{
+        if (err) throw err;
+        res.send(result);
+    })
+})
+
+router.get('/get_monthly_top/:id',(req, res)=>{
+    const uid = req.params.id;
+    const sql = `
+    SELECT spending_name, SUM(spending_amount) as total
+    FROM expense
+    JOIN spending ON expense.eid = spending.eid
+    WHERE MONTH(spending.date) = MONTH(CURDATE())
+    AND expense.uid = ?
+    GROUP BY spending.spending_name
+    ORDER BY total DESC
+    `
+    db.query(sql, [uid], (err, result)=>{
+        if (err) throw err;
+        res.send(result);
+    })
+})
+
+router.get('/get_weekly_top/:id',(req, res)=>{
+    const uid = req.params.id;
+    const sql = `
+    SELECT spending_name, SUM(spending_amount) as total
+    FROM expense
+    JOIN spending ON expense.eid = spending.eid
+    WHERE WEEK(spending.date) = WEEK(CURDATE())
+    AND expense.uid = ?
+    GROUP BY spending.spending_name
+    ORDER BY total DESC
+    `
+    db.query(sql, [uid], (err, result)=>{
         if (err) throw err;
         res.send(result);
     })
@@ -760,15 +797,15 @@ router.post('/reassign_transaction', (req, res)=>{
     console.log(merchant_code, merchant_name)
     const date = new Date(req.body.date).toISOString().slice(0, 10);
     const amount = req.body.amount
-    const sql = `UPDATE assign SET eid = ${eid} WHERE merchant_code = ${merchant_code} AND merchant_name = "${merchant_name}";`
+    const sql = `UPDATE assign SET eid = ? WHERE merchant_code = ? AND merchant_name = ?;`
 
-    const sql2 = `UPDATE spending SET eid = ${eid}, spending_name=(SELECT expense_name FROM expense WHERE eid =${eid}) 
-    WHERE tid IN (SELECT tid FROM transaction WHERE mcc =${merchant_code} AND 
-        merchant_name='${merchant_name}');`
-    db.query(sql, (err)=>{
+    const sql2 = `UPDATE spending SET eid = ?, spending_name=(SELECT expense_name FROM expense WHERE eid = ?) 
+    WHERE tid IN (SELECT tid FROM transaction WHERE mcc = ? AND 
+        merchant_name= ?);`
+    db.query(sql, [eid, merchant_code, merchant_name],(err)=>{
         if (err) throw err;
     })
-    db.query(sql2, (err)=>{
+    db.query(sql2,[eid, eid, merchant_code, merchant_name] ,(err)=>{
         if (err) throw err;
         res.send("Reassignment done");
     })
@@ -849,6 +886,7 @@ router.get('/adjust_expenses/:id', (req, res) => {
             db.query(sql3, (err, result) =>{
                 if (err) throw err;
                 const exp = result;
+                const sql4 = ``
 
                 const args = [
                     scriptPath,
@@ -1076,7 +1114,7 @@ router.post('/analyze_expense', (req, res)=>{
     const base64Data = Buffer.from(JSON.stringify([{merchant_name: merchant_name, mcc: mcc}])).toString("base64");
 
     const pythonProcess = spawn("python", [
-        "Logic/predictor.py",
+        "Logic/Decisiontree/decision_predictor.py",
         base64Data,
     ]);
 
@@ -1112,7 +1150,7 @@ router.get("/get_classifications/:id", (req, res) => {
       const base64Data = Buffer.from(JSON.stringify(result)).toString("base64");
   
       const pythonProcess = spawn("python", [
-        "Logic/predictor.py",
+        "Logic/Decisiontree/decision_predictor.py",
         base64Data,
       ]);
 
@@ -1132,36 +1170,40 @@ router.get("/get_classifications/:id", (req, res) => {
     });
 });
 
-router.post('/cash_transaction/:id', (req, res)=>{
-    const uid = req.params.id
-    const trans_name = req.body.name
-    const type = req.body.type
-    const amount = req.body.amount
-    const currency = req.body.currency
-    const date = req.body.date
+router.post('/cash_transaction/:id', (req, res) => {
+    const uid = req.params.id;
+    const trans_name = req.body.name;
+    const type = req.body.type;
+    const amount = req.body.amount;
+    const currency = req.body.currency;
+    const date = req.body.date;
+    console.log(type);
+    
     const sql = `INSERT INTO transaction (tid, bid, merchant_name, mcc, category, currency, date, amount) 
     SELECT MAX(tid) + 1, (SELECT bid FROM bank WHERE uid = ? LIMIT 1), ?, 0000, ?, ?, ?, ?
     FROM transaction;`;
-
+  
     db.query(sql, [uid, trans_name, type, currency, date, amount], (err) => {
-        if (err) throw err;
+      if (err) throw err;
     });
-
-    const sql2 = `INSERT INTO assign (eid, merchant_code, merchant_name) VALUES ((SELECT eid FROM expense WHERE expense_name 
-        = "${type}"), 0000,"${trans_name}");`
-    db.query(sql2, (err)=>{
-        if (err) throw err;
-    })
-
-    const sql3 = `INSERT INTO spending (eid, tid, spending_name, spending_amount, date, accounted)
-    SELECT (SELECT eid FROM expense WHERE expense_name = ?), MAX(tid) + 1, ?, ?, ?, 1
-    FROM transaction;`;
-
-    db.query(sql3, [type, type, amount, date], (err) => {
-        if (err) throw err;
+  
+    const sql2 = `INSERT IGNORE INTO assign (eid, merchant_code, merchant_name) VALUES ((SELECT eid FROM expense WHERE expense_name 
+        = "${type}"), 0000,"${trans_name}");`;
+    
+    db.query(sql2, (err) => {
+      if (err) throw err;
     });
+  
+    const sql3 = `INSERT INTO spending (eid, tid, spending_name, spending_amount, date, accounted) VALUES (
+    (SELECT eid FROM expense WHERE expense_name = ?), (SELECT MAX(tid) FROM transaction WHERE bid in (SELECT bid FROM
+        bank WHERE uid = ?)), ?, ?, ?, 1);`;
+  
+    db.query(sql3, [type, uid, type, amount, date], (err) => {
+      if (err) throw err;
+    });
+  
     res.send("Transaction Logged");
-})
+  });
 
 router.get('/get_monthly_difference/:id', (req, res)=>{
     const uid = req.params.id
@@ -1184,26 +1226,46 @@ router.get('/get_monthly_difference/:id', (req, res)=>{
     })
 })
 
+
 router.delete('/delete_account/:id', (req, res) => {
-    const uid = req.params.id
-    const sql = `
-    DELETE FROM assign WHERE eid in (SELECT eid FROM expense WHERE uid = ${uid});
-    DELETE FROM priority WHERE uid = ${uid};
-    DELETE FROM spending WHERE eid in (SELECT eid FROM expense WHERE uid = ${uid});
-    DELETE FROM transaction WHERE bid in (SELECT bid FROM bank WHERE uid = ${uid});
-    DELETE FROM expense WHERE uid = ${uid};
-    DELETE FROM bank WHERE uid = ${uid};
-    DELETE FROM user WHERE uid = ${uid};
-    ALTER TABLE priority AUTO_INCREMENT = 0;
-    ALTER TABLE spending AUTO_INCREMENT = 0;
-    ALTER TABLE expense AUTO_INCREMENT = 0;
-    ALTER TABLE user AUTO_INCREMENT = 0;
-    `
-    db.query(sql, (err)=>{
-        if (err) throw err;
-        res.send("delete_account")
-    })
-})
+    const uid = req.params.id;
+
+    // List of queries to be executed.
+    const queries = [
+        "DELETE FROM assign WHERE eid in (SELECT eid FROM expense WHERE uid = ?)",
+        "DELETE FROM priority WHERE uid = ?",
+        "DELETE FROM spending WHERE eid in (SELECT eid FROM expense WHERE uid = ?)",
+        "DELETE FROM transaction WHERE bid in (SELECT bid FROM bank WHERE uid = ?)",
+        "DELETE FROM expense WHERE uid = ?",
+        "DELETE FROM bank WHERE uid = ?",
+        "DELETE FROM currencies WHERE uid = ?",
+        "DELETE FROM user WHERE uid = ?",
+        "ALTER TABLE priority AUTO_INCREMENT = 0",
+        "ALTER TABLE spending AUTO_INCREMENT = 0",
+        "ALTER TABLE expense AUTO_INCREMENT = 0",
+        "ALTER TABLE currencies AUTO_INCREMENT = 0",
+        "ALTER TABLE user AUTO_INCREMENT = 0",
+    ];
+
+    // Execute each query individually.
+    for (let i = 0; i < queries.length; i++) {
+        // If query has a parameter, substitute it with 'uid'.
+        if (queries[i].includes("?")) {
+            db.query(queries[i], [uid], (err) => {
+                if (err) throw err;
+            });
+        } else {
+            // If query does not have a parameter, just execute it.
+            db.query(queries[i], (err) => {
+                if (err) throw err;
+            });
+        }
+    }
+
+    // Send response after all queries have been executed.
+    res.send("delete_account");
+});
+
 
 
 

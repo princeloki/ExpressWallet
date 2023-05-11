@@ -1,14 +1,15 @@
+
+
 import {
   Button,
-  CardHeader,
-  CardBody,
-  Table,
   Form,
   FormGroup,
   Label,
   Input,
   InputGroup
 } from "reactstrap";
+
+import { FcCheckmark } from "react-icons/fc"
 
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
@@ -41,6 +42,15 @@ const InitialManager = ({ userData }) => {
   const handleAdjust = (category) => {
     current === "category" ? setCurrent(null) : setCurrent(category);
   }
+
+  const handleDelete = (category) => {
+    setFormData(prevState => {
+      const newState = { ...prevState };
+      delete newState[category];
+      return newState;
+    });
+  }
+  
 
   const addMiscTransactions = () => {
     const updatedFormData = { ...formData };
@@ -131,12 +141,13 @@ const InitialManager = ({ userData }) => {
 
               return (
                 <div className="rec-category" key={category}>
-                  <span className=""><strong>{category}</strong> {formData.hasOwnProperty(category) && "(Added)"}</span>
+                  
+                  <Button onClick={() => handleAdjust(category)}>Add</Button>
                   {current === category &&
                     <div className="rec-adjust-form curve">
               <div className="rec-adj-head">
                         <h2>{category}</h2>
-                        <Button color="primary">Delete</Button>
+                        <Button color="primary" onClick={()=>handleDelete(category)}>Delete</Button>
                       </div>
                       <Form>
                         <FormGroup>
@@ -186,7 +197,8 @@ const InitialManager = ({ userData }) => {
                         <Button color="primary" onClick={() => handleAdjust(null)}>Close</Button>
                       </Form>
                     </div>}
-                  <Button onClick={() => handleAdjust(category)}>Add</Button>
+                    
+                  <span className="category-name"><strong>{category}</strong> {formData.hasOwnProperty(category) && <FcCheckmark />}</span>
                 </div>
               )
             })}

@@ -72,6 +72,14 @@ const ThirdPage = ({handleIndexChange, handleAddition, userData}) =>{
             element: '#high',
             intro: 'To do this, the system will use the percentage you enter in the input field to reduce all expenses of that priority level, provided they are classified as Adjustable expenses.',
         },
+        {
+            element: '#perc-label',
+            intro: 'Note: Later, when you categorize your expenses, keep in mind that only Adjustable expenses can be readjusted. Fixed expenses cannot be changed unless done manually.',
+        },
+        {
+            element: '#budget',
+            intro: 'Lastly, non-categorized expenses automatically become miscellaneous expenses, as such, please set your budget for Miscellaneous expenses.',
+        },
     ];
 
     return(
@@ -84,7 +92,7 @@ const ThirdPage = ({handleIndexChange, handleAddition, userData}) =>{
             />
         <Form role="form" onSubmit={handleSubmit}>
           <FormGroup>
-            <Label className="reg-label" for="income">Set a miscellaneous expenses budget!</Label>
+            <Label className="reg-label" for="income" id="budget">Set a miscellaneous expenses budget!</Label>
             <InputGroup className="input-group-alternative mb-3">
               <InputGroupAddon addonType="prepend">
                 <InputGroupText>
@@ -102,7 +110,7 @@ const ThirdPage = ({handleIndexChange, handleAddition, userData}) =>{
             </InputGroup>
           </FormGroup>
           <FormGroup>
-            <Label className="reg-label" for="high" id="perc-label">Set the percent of expenses to reduce when re-allocating</Label>
+            <Label className="reg-label" for="high" id="perc-label">Set the percent of expenses to reduce when readjusting your budget</Label>
             <InputGroup className="input-group-alternative mb-3">
               <InputGroupAddon addonType="prepend">
                 <InputGroupText id="high-text">

@@ -10,7 +10,10 @@ import {
   Input,
   InputGroup,
   Button,
-  Table
+  Table,
+  Form,
+  FormGroup,
+  Label,
 } from "reactstrap";
 
 import { FcCurrencyExchange } from "react-icons/fc";
@@ -19,6 +22,7 @@ import { IoLogoUsd } from "react-icons/io";
 import { FaEuroSign } from "react-icons/fa";
 import { FaPoundSign } from "react-icons/fa";
 import { useState, useEffect, useRef } from "react";
+import { BsThreeDots } from "react-icons/bs"
 import axios from 'axios';
 
 const Header = ({onDashboard, userData, toggleShow, rates, currSym}) => {
@@ -32,14 +36,7 @@ const Header = ({onDashboard, userData, toggleShow, rates, currSym}) => {
     }
   })
 
-  const handleCurrency =(currency)=>{
-    setCurrency(currency);
-    localStorage.setItem("currency", currency);
-  }
 
-  useEffect(()=>{
-
-  },[currency])
   const [remBudgets, setRemBudgets] = useState([])
   const [expenses, setExpenses] = useState([])
   const [today, setToday] = useState(0)
@@ -48,11 +45,20 @@ const Header = ({onDashboard, userData, toggleShow, rates, currSym}) => {
   const [budget, setBudget] = useState(0)
   const [projB, setProjB] = useState(0)
   const [open, setOpen] = useState(false)
+  const [edit, setEdit] = useState(false)
+  const [editAmount, setEditAmount] = useState(null);
+  const [expenseToEdit, setExpenseToEdit] = useState(null);
+
   const [stats, setStats] = useState({
     day: 0,
     tweek: 0,
     tmonth: 0
   })
+
+  const handleCurrency =(currency)=>{
+    setCurrency(currency);
+    localStorage.setItem("currency", currency);
+  }
 
   const currIcon = () => {
     switch (localStorage.getItem('currency')) {
@@ -70,6 +76,7 @@ const Header = ({onDashboard, userData, toggleShow, rates, currSym}) => {
     }
   };
 
+  
 
   const assignUpdate = () =>{
     const newAdjusted = []
@@ -92,28 +99,45 @@ const Header = ({onDashboard, userData, toggleShow, rates, currSym}) => {
   useEffect(()=>{
     axios.get(`http://localhost:4000/api/get_monthly_difference/${userData.uid}`)
     .then(response=>{
-      setDifference(response.data.difference);
+      setDifference(response.data.difference ?? 0);
     })
     .catch(err=>{
       console.log(err);
     })
   },[])
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (ref.current && !ref.current.contains(event.target)) {
-        setOpen(false);
+  useEffect(()=>{
+    axios.get(`http://localhost:4000/api/get_rem_budgets/${userData.uid}`)
+    .then(response=>{
+      setRemBudgets(response.data);
+    })
+    .catch(err=>{
+      console.log(err);
+    })
+  },[])
+  
+  const handleChange = (e) => {
+    setEditAmount(e.target.value);
+  }
+  
+  const updateAmount = (e) => {
+    console.log(alert.data.adjusted_expenses)
+    e.preventDefault();
+    
+    const updatedExpenses = alert.data.adjusted_expenses.map(expense => {
+      if (expense.name === expenseToEdit) {
+        return { ...expense, amount: editAmount };
       }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [ref]);
-
+      return expense;
+    });
+  
+    setAlert(prevAlert => ({ ...prevAlert, data: { ...prevAlert.data, adjusted_expenses: updatedExpenses } }));
+    setEdit(false);
+  }
 
   const adjust = alert.data.adjusted_expenses.map((adjusted_expense,index)=>{
     const expense = expenses.find(e => e.expense_name === adjusted_expense.name);
+    const rem = remBudgets.find(e=>e.expense_name === adjusted_expense.name);
     
     if (!expense) {
       return null;
@@ -123,7 +147,9 @@ const Header = ({onDashboard, userData, toggleShow, rates, currSym}) => {
       <tr key={index}>
         <td>{adjusted_expense.name}</td>
         <td>{currSym()}{(expense.expense_amount*rates[localStorage.getItem("currency")]).toFixed(2)}</td>
+        <td>{currSym()}{(rem.total*rates[localStorage.getItem("currency")]).toFixed(2)}</td>
         <td>{currSym()}{(adjusted_expense.amount*rates[localStorage.getItem("currency")]).toFixed(2)}</td>
+        <td className="clickable"  onClick={() => { setEdit(true); setEditAmount(adjusted_expense.amount); setExpenseToEdit(adjusted_expense.name); }}><BsThreeDots /></td>
       </tr>
     )
   })
@@ -139,11 +165,7 @@ const Header = ({onDashboard, userData, toggleShow, rates, currSym}) => {
         });
     };
   
-    fetchData(); // Call the function immediately to fetch data on initial render
-  
-    //const intervalId = setInterval(fetchData, 10000); // Set an interval to fetch data every 10 seconds (10000 milliseconds)
-  
-    //return () => clearInterval(intervalId); // Clean up the interval when the component unmounts
+    fetchData(); 
   }, [projB]);
   
   
@@ -219,24 +241,45 @@ const Header = ({onDashboard, userData, toggleShow, rates, currSym}) => {
                   {alert.data.message==="Success" && 
                   <div className="readjust-alert">
                     <p className="danger font-weight-bold mb-0">You have overspent your budget by {currSym()}{(projB*rates[localStorage.getItem("currency")]).toFixed(2)}. To get back on track, consider reducing your expenses in these categories</p>
-                    <Button color="primary"  onClick={() => setOpen(!open)}>View</Button>
+                    <Button color="primary" onClick={() => setOpen(!open)}>View</Button>
                   </div>}
                 </div>
               </div>
             </Row>
           </CardBody>
         </Card>}
+        {edit &&
+        <Card className="edit-amount">
+          <Form onSubmit={updateAmount}>
+            <FormGroup>
+              <Label>Edit the amount for this expense</Label>
+              <InputGroup>
+                <Input
+                  type="number"
+                  name=""
+                  autoComplete="new-"
+                  onChange={handleChange}
+                  value={editAmount}>
+                </Input>
+              </InputGroup>
+            </FormGroup>
+            <Button color="primary" type="submit">Finish</Button>
+          </Form>
+        </Card>
+        }
         {open &&
         <div ref={ref}>
           <Card className="readj-body curve">
             <CardBody>
-              <h2 className="h2 font-weight-bold mb-0">Recommended adjustments</h2>
+              <h2 className="h2 font-weight-bold mb-0">Recommended Amount to Spend This Month</h2>
               <Table className="rec-table">
                 <thead>
                   <tr>
                     <th>Expense Name</th>
-                    <th>Original</th>
+                    <th>Original Budget</th>
+                    <th>Amount Remanining</th>
                     <th>Recommended</th>
+                    <th>Edit</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -244,6 +287,7 @@ const Header = ({onDashboard, userData, toggleShow, rates, currSym}) => {
                 </tbody>
               </Table>
               <Button color="primary" onClick={assignUpdate}>Accept</Button>
+              <Button color="primary" onClick={()=>setOpen(false)}>Ignore</Button>
             </CardBody>
           </Card>
         </div>}
@@ -279,9 +323,9 @@ const Header = ({onDashboard, userData, toggleShow, rates, currSym}) => {
                                 </Input>
                               </InputGroup>
                             </div>
-                            <div>
-                              <h3>Current Balance | {currSym()}{(userData.balance*rates[currency]).toFixed(2)}</h3>
-                              <h3>Net Balance | {currSym()}{(projB*rates[currency]).toFixed(2)}</h3>
+                            <div className="balance">
+                              <h3>Current Balance <br/> {currSym()}{(userData.balance*rates[currency]).toFixed(2)}</h3>
+                              <h3>Net Balance <br/> {currSym()}{(projB*rates[currency]).toFixed(2)}</h3>
                             </div>
                           </Col>
                       </Row>
@@ -301,8 +345,8 @@ const Header = ({onDashboard, userData, toggleShow, rates, currSym}) => {
                           </CardTitle>
                           <div className="budget-header">
                             <span className="h2 font-weight-bold mb-0">
-                            Budget | {currSym()}{(userData.budget*rates[currency]).toFixed(2)} <br/>
-                            Expenses left | {currSym()}{(budget*rates[currency]).toFixed(2)}    
+                            Budget <br/> <span className="small">{currSym()}{(userData.budget*rates[currency]).toFixed(2)}</span> <br/>
+                            Expenses left <br/> <span className="small">{currSym()}{(budget*rates[currency]).toFixed(2)} </span>   
                             </span>
                             <span className="h2 font-weight-bold mb-0 bal-text">
                             Free to spend | {currSym()}{(stats.tmonth*rates[currency]).toFixed(2)}

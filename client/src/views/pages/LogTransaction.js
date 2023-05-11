@@ -11,6 +11,7 @@ import {
   Button,
   Col
 } from 'reactstrap';
+import { useHistory } from "react-router-dom";
 import axios from 'axios';
 
 const LogTransaction = (props) => {
@@ -22,6 +23,7 @@ const LogTransaction = (props) => {
     currency: "USD",
     type: "Select"
   })
+  const history = useHistory();
 
   useEffect(()=>{
     axios.get(`http://localhost:4000/api/get_expenses/${props.user.uid}`)
@@ -47,6 +49,7 @@ const LogTransaction = (props) => {
     axios.post(`http://localhost:4000/api/cash_transaction/${props.user.uid}`,formData)
     .then(response=>{
       console.log(response.data);
+      history.push('/admin/expense-report');
     })
     .catch(err=>{
       console.log(err);
@@ -61,7 +64,7 @@ const LogTransaction = (props) => {
           <div className="cash-form curve">
             <Form onSubmit={submit}>
               <FormGroup>
-                <Label className="reg-label" for="income">Budget for the expense</Label>
+                <Label className="reg-label" for="income">What Is The Name of This Transaction?</Label>
                 <InputGroup className="input-group-alternative mb-3">
                   <Input
                     placeholder="Transaction name"
@@ -74,7 +77,7 @@ const LogTransaction = (props) => {
                 </InputGroup>
               </FormGroup>
               <FormGroup>
-                <Label className="reg-label" for="income">What type of Expense is this?</Label>
+                <Label className="reg-label" for="income">What Type of Expense Is This?</Label>
                 <InputGroup className="input-group-alternative mb-3">
                   <Input
                     type="select"
@@ -92,7 +95,7 @@ const LogTransaction = (props) => {
                 </InputGroup>
               </FormGroup>
               <FormGroup>
-                <Label className="reg-label" for="income">Currency of transaction?</Label>
+                <Label className="reg-label" for="income">Currency of Transaction?</Label>
                 <InputGroup className="input-group-alternative mb-3">
                   <Input
                     type="select"
@@ -108,7 +111,7 @@ const LogTransaction = (props) => {
                 </InputGroup>
               </FormGroup>
               <FormGroup>
-                <Label className="reg-label" for="income">How much did you spend?</Label>
+                <Label className="reg-label" for="income">Transaction Amount?</Label>
                 <InputGroup className="input-group-alternative mb-3">
                   <Input
                     type="number"
@@ -120,7 +123,7 @@ const LogTransaction = (props) => {
                 </InputGroup>
               </FormGroup>
               <FormGroup>
-                <Label className="reg-label" for="income">When did you make this transaction?</Label>
+                <Label className="reg-label" for="income">When Did You Make This Transaction?</Label>
                 <InputGroup className="input-group-alternative mb-3">
                   <Input
                     type="date"

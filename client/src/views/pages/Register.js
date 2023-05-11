@@ -50,7 +50,6 @@ const Register = () => {
     low: 0
   })
 
-  console.log(userData);
   const [index, setIndex] = useState(0)
 
   const handleIndexChange = (index) => {
@@ -63,6 +62,16 @@ const Register = () => {
         ...prevBankData,
         [e.target.name]: e.target.value,
       }
+    })
+  }
+
+  const setCurrency = (currency)=>{
+    axios.get(`http://localhost:4000/api/initialize_currency/${currency}`)
+    .then(response=>{
+      console.log("Initialized currencies");
+    })
+    .catch(err=>{
+      console.log(err);
     })
   }
 
@@ -87,14 +96,8 @@ const Register = () => {
     console.log("clicked")
     axios.put("http://localhost:4000/api/set_user",userData)
     .then(response => {
+      setCurrency(userData.currency)
       history.push('/auth/login')
-      axios.get(`http://localhost:4000/api/initialize_initialize_currency/${userData.currency}`)
-      .then(response=>{
-        console.log("Nice");
-      })
-      .catch(err=>{
-        console.log(err);
-      })
     })
     .catch(err => {
       console.log(err)

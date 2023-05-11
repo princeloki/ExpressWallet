@@ -18,8 +18,6 @@ const Admin = (props) => {
   const [onDashboard, setOnDashboard] = useState(true);
   const mainContent = React.useRef(null);
   const location = useLocation();
-
-  
   
   const currSym = ()=>{
     switch (localStorage.getItem('currency')) {
@@ -61,6 +59,21 @@ const Admin = (props) => {
       .catch(error => {
       });
   };
+  
+  
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      axios.put(`http://localhost:4000/api/update_user/${user.uid}`)
+        .then(response => {
+          updateUser();
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    }, 5000);
+    return () => clearInterval(intervalId);
+  }, []);
   
 
   React.useEffect(() => {

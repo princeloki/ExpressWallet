@@ -14,8 +14,10 @@ import {
   
 import { useState } from "react"
 import axios from "axios"
+import validator from 'validator';
 
 const Reg = ({handleIndexChange, addData}) =>{
+    const [message, setMessage] = useState("")
 
     const [formData, setFormData] = useState({
       name: "",
@@ -26,33 +28,66 @@ const Reg = ({handleIndexChange, addData}) =>{
   
 
     const handleChange = (e) => {
-        setFormData(prevFormData=>{
+      setFormData(prevFormData => {
         return {
-            ...prevFormData,
-            [e.target.name]: e.target.value,
+          ...prevFormData,
+          [e.target.name]: e.target.value,
         }
-        })
-    }
+      });
+    
+      if (e.target.name === 'password') {
+        const { isValid, message } = isValidPassword(e.target.value);
+        setMessage(message);
+        if (!isValid) {
+          return;
+        }
+      }
+    };
     
     const handleSubmit = (e) => {
         e.preventDefault()
-        axios.post("http://localhost:4000/api/register",formData)
-        .then(response => {
-          console.log(response.data.count)
-          addData(prevFormData=>{
-            return{
-              ...prevFormData,
-              uid: response.data.count,
-              email: formData.email
-            }
+        if(!message){
+          axios.post("http://localhost:4000/api/register",formData)
+          .then(response => {
+            console.log(response.data.count)
+            addData(prevFormData=>{
+              return{
+                ...prevFormData,
+                uid: response.data.count,
+                email: formData.email
+              }
+            })
+            handleIndexChange(1)
           })
-          handleIndexChange(1)
-        })
-        .catch(err => {
-        console.log(err)
-        })
+          .catch(err => {
+          console.log(err)
+          })
+        }
     }
     
+    const isValidPassword = (password) => {
+      // Password should be at least 10 characters long
+      if (!validator.isLength(password, { min: 10 })) {
+        return { isValid: false, message: 'Password should be at least 10 characters long' };
+      }
+      
+      // Password should contain at least one lowercase character
+      if (!/[a-z]/.test(password)) {
+        return { isValid: false, message: 'Password should contain at least one lowercase character' };
+      }
+
+      // Password should contain at least one uppercase character
+      if (!/[A-Z]/.test(password)) {
+        return { isValid: false, message: 'Password should contain at least one uppercase character' };
+      }
+
+      // Password should contain at least one digit
+      if (!/[0-9]/.test(password)) {
+        return { isValid: false, message: 'Password should contain at least one digit' };
+      }
+
+      return { isValid: true, message: '' };
+    };
   
     return(
     <>      
@@ -127,7 +162,7 @@ const Reg = ({handleIndexChange, addData}) =>{
               </InputGroupAddon>
               <Input
                 placeholder="Phone"
-                type="phone"
+                type="number"
                 autoComplete="new-phone"
                 name="phone"
                 value={formData.phone}
@@ -147,10 +182,12 @@ const Reg = ({handleIndexChange, addData}) =>{
                 type="password"
                 autoComplete="new-password"
                 name="password"
+                id="password"
                 value={formData.password}
                 onChange={(e) => handleChange(e)}
               />
             </InputGroup>
+            {message && <div className="text-danger">{message}</div>}
           </FormGroup>
           <div className="text-muted font-italic">
             <small>

@@ -14,7 +14,9 @@ import {
   Container,
   Row,
   Col,
-  Table
+  Table,
+  InputGroup,
+  Input
 } from "reactstrap";
 
 // core components
@@ -30,6 +32,7 @@ import { useHistory } from "react-router-dom";
 import axios from "axios";
 import InitialManager from "./pages/components/InitialManager.js";
 import DebitCard from "./pages/components/DebitCard.js";
+import { BsSearch } from "react-icons/bs";
 
 import {
   getExpensesByMonthAndWeek,
@@ -46,15 +49,16 @@ const Index = (props) => {
   const [transactions, setTransactions] = useState([])
   const [spendings, setSpendings] = useState([])
   const [topCats, setTopCats] = useState([])
+  const [monthly, setMonthly] = useState([])
+  const [weekly, setWeekly] = useState([])
   const [reload, setReload] = useState(false)
   const [showExpenses, setShowExpenses] = useState(false)
   const [remBudgets, setRemBudgets] = useState([])
   const [expenses, setExpenses] = useState([])
   const [buttonLabel, setButtonLabel] = useState("See More");
-
-  const toggle = ()=>{
-    setShowExpenses(!showExpenses);
-  }
+  const [category, setCategory] = useState("General")
+  const [search, setSearch] = useState("")
+  const [filteredTransactions, setFilteredTransactions] = useState([]);
 
   useEffect(()=>{
     axios.get(`http://localhost:4000/api/get_rem_budgets/${props.user.uid}`)
@@ -77,6 +81,26 @@ const Index = (props) => {
   })
 
   useEffect(()=>{
+    axios.get(`http://localhost:4000/api/get_monthly_top/${props.user.uid}`)
+    .then(response=>{
+      setMonthly(response.data);
+    })
+    .catch(err=>{
+      console.log(err);
+    })
+  },[])
+
+  useEffect(()=>{
+    axios.get(`http://localhost:4000/api/get_weekly_top/${props.user.uid}`)
+    .then(response=>{
+      setWeekly(response.data);
+    })
+    .catch(err=>{
+      console.log(err);
+    })
+  },[])
+
+  useEffect(()=>{
     axios.get(`http://localhost:4000/api/get_spendings/${props.user.uid}`)
     .then(response=>{
       response.data.length===0 ? setEmpty(true) : setEmpty(false);
@@ -86,24 +110,11 @@ const Index = (props) => {
     })
   },[])
 
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      axios.put(`http://localhost:4000/api/update_user/${props.user.uid}`)
-        .then(response => {
-          props.updateUser();
-        })
-        .catch(error => {
-          console.log(error);
-        });
-    }, 5000);
-    return () => clearInterval(intervalId);
-  }, []);
-  
-
   useEffect(()=>{
     axios.get(`http://localhost:4000/api/get_transactions/${props.user.uid}`)
     .then(response=>{
-      setTransactions(response.data)
+      setTransactions(response.data)      
+      setFilteredTransactions(response.data);
     })
     .catch(err=>{
       console.log(err)
@@ -130,6 +141,15 @@ const Index = (props) => {
     })
   },[])
 
+  const toggle = ()=>{
+    setShowExpenses(!showExpenses);
+  }
+
+  const handleChange = (e)=>{
+    setCategory(e.target.value)
+  }
+
+
   const rembudg = remBudgets.map((remBudget, index) => {
     const expense = expenses.find(e => e.eid === remBudget.eid);
   
@@ -146,7 +166,20 @@ const Index = (props) => {
     );
   });
 
-  const trans = transactions.slice(0, displayedTransactions).map((transaction, index) => {
+  const handleSearch = (e) => {
+    setSearch(e.target.value);
+    if (e.target.value) {
+      const filtered = transactions.filter(transaction => 
+        transaction.merchant_name.toLowerCase().includes(e.target.value.toLowerCase())
+      );
+      setFilteredTransactions(filtered);
+    } else {
+      setFilteredTransactions(transactions);
+    }
+  };
+  
+
+  const trans = filteredTransactions.slice(0, displayedTransactions).map((transaction, index) => {
   
     const date = new Date(transaction.date)
     const formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
@@ -176,8 +209,30 @@ const Index = (props) => {
   const tops = topCats.map((topCat,index)=>{
     return(
       <div key={index} className="top-cats-body">
-        <h2>{topCat.merchant_name}</h2>
+        <h2>{topCat.spending_name}</h2>
         <h3>{props.currSym()}{(topCat.total*props.rates[localStorage.getItem("currency")]).toFixed(2)}</h3>
+      </div>
+    )
+  })
+
+    
+
+  const month = monthly.map((month,index)=>{
+    return(
+      <div key={index} className="top-cats-body">
+        <h2>{month.spending_name}</h2>
+        <h3>{props.currSym()}{(month.total*props.rates[localStorage.getItem("currency")]).toFixed(2)}</h3>
+      </div>
+    )
+  })
+
+    
+
+  const week = weekly.map((week,index)=>{
+    return(
+      <div key={index} className="top-cats-body">
+        <h2>{week.spending_name}</h2>
+        <h3>{props.currSym()}{(week.total*props.rates[localStorage.getItem("currency")]).toFixed(2)}</h3>
       </div>
     )
   })
@@ -244,7 +299,7 @@ const Index = (props) => {
       {showExpenses && 
         <div className="expense-left curve">
           <div className="expense-container">
-            <h2>Expenseses Left To Be Paid</h2>
+            <h2>Expense Amount Left To Be Paid</h2>
             <Table
               responsive
               size="">
@@ -323,7 +378,7 @@ const Index = (props) => {
               <CardHeader className="bg-transparent">
                 <Row className="align-items-center">
                   <div className="col">
-                    <h2 className="mb-0">My Banks</h2>
+                    <h2 className="mb-0">My Bank</h2>
                   </div>
                 </Row>
               </CardHeader>
@@ -339,14 +394,17 @@ const Index = (props) => {
               <CardHeader className="border-0">
                 <Row className="align-items-center">
                   <div className="col latest-tran-head">
-                    <h3 className="mb-0">Latest Transactions</h3>
-                      <Button
-                        color="primary"
-                        onClick={handleSeeMore}
-                        size="sm"
-                      >
-                        {buttonLabel}
-                      </Button>
+                    <div className="latest-header">
+                      <h3 className="mb-0">Latest Transactions</h3>
+                      <div id="search-bar"><BsSearch /><input type="text" id="search" name="search" value={search} onChange={handleSearch}/></div>
+                    </div>
+                    <Button
+                      color="primary"
+                      onClick={handleSeeMore}
+                      size="sm"
+                    >
+                      {buttonLabel}
+                    </Button>
                   </div>
                 </Row>
               </CardHeader>
@@ -375,13 +433,19 @@ const Index = (props) => {
                   <div className="col">
                     <div className="top-cats-header latest-tran-head">
                       <h3 className="mb-0">Top Categories</h3>
-                      <Button
-                        color="primary"
-                        onClick={(e) => e.preventDefault()}
-                        size="sm"
-                      >
-                        General
-                      </Button>
+                      <InputGroup>
+                          <Input
+                          type="select"
+                          name="category"
+                          id="cat-drop"
+                          value={category}
+                          onChange={handleChange}
+                          >
+                          <option value="General">All Time</option>
+                          <option value="Month">This Month</option>
+                          <option value="Week">This Week</option>
+                          </Input>
+                      </InputGroup>
                     </div>
                   </div>
                   <div className="col text-right">
@@ -389,7 +453,7 @@ const Index = (props) => {
                 </Row>
               </CardHeader>
               <div className="top-cats">
-                  {tops}
+                  {category==="General" ? tops : category==="Week" ? week : month}
               </div>
             </Card>
           </Col>
