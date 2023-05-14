@@ -73,8 +73,8 @@ router.post('/add_transaction', (req, res) => {
             for(let i=0; i<transactions.length; i++){
                 const isoDate = new Date(transactions[i].date).toISOString().split('T')[0];
                 let sql1 = `INSERT transaction (bid,merchant,mcc,category,date,amount) VALUES `;
-                sql1 += `(${uid},"${transactions[i].merchant_name}",${transactions[i].mcc},'${transactions[i].category}','${isoDate}',${transactions[i].amount})`
-                db.query(sql1, (err) => {
+                sql1 += `(?,?,?,?,?,?)`
+                db.query(sql1,[uid, transactions[i].merchant_name, transactions[i].mcc, transactions[i].category, isoDate, transactions[i].amount], (err) => {
                     if(err) throw err;
                 })
             }

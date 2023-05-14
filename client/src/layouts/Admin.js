@@ -5,6 +5,7 @@ import { useLocation, Route, Switch, Redirect } from "react-router-dom";
 import AdminNavbar from "components/Navbars/AdminNavbar.js";
 import Sidebar from "components/Sidebar/Sidebar.js";
 import axios from "axios";
+import Papa from 'papaparse';
 
 import routes from "routes.js";
 
@@ -17,22 +18,27 @@ const Admin = (props) => {
 
   const [onDashboard, setOnDashboard] = useState(true);
   const mainContent = React.useRef(null);
+  const [currencySymbols, setCurrencySymbols] = useState({});
   const location = useLocation();
-  
+
+  useEffect(() => {
+    axios.get('http://localhost:4000/api/get_symbols')
+        .then(response => {
+            const symbols = {};
+            response.data.forEach(row => {
+                symbols[row.code] = row.symbol;
+            });
+            setCurrencySymbols(symbols);
+        })
+        .catch(error => {
+            console.error('Error fetching currencies:', error);
+        });
+  }, []);
+
+
   const currSym = ()=>{
-    switch (localStorage.getItem('currency')) {
-      case "JMD":
-        return "$";
-      case "USD":
-        return "$";
-      case "EUR":
-        return "€";
-      case "GBP":
-        return "£";
-      case "JPY":
-      default:
-        return "￥";
-    }
+    const currency = localStorage.getItem('currency');
+    return currencySymbols[currency] || "￥";
   };
 
   

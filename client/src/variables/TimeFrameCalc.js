@@ -1,6 +1,6 @@
 
 
-function addWeeks(date, weeks) {
+  function addWeeks(date, weeks) {
     date.setDate(date.getDate() + 7 * weeks);
     return date;
   }
@@ -146,6 +146,59 @@ function addWeeks(date, weeks) {
       })
       .filter((item) => item !== null); // Filter out the null values
   }
+
   
-  //console.log(getExpensesByMonthAndWeek(sample));
+  // export function splitByCategory(array) {
+  //   const result = {};
+  
+  //   // Split data into categories
+  //   array.forEach(({ spending_name, spending_amount }) => {
+  //     if (!result[spending_name]) {
+  //       result[spending_name] = [];
+  //     }
+  
+  //     result[spending_name].push(spending_amount);
+  //   });
+  
+  //   // Transform data into desired format
+  //   return Object.entries(result).map(([name, amounts]) => ({ name, amounts }));
+  // }
+  
+  // function groupByTimePeriod(array, period) {
+  //   const result = {};
+  
+  //   array.forEach(({ spending_name, spending_amount, date }) => {
+  //     const parsedDate = new Date(date);
+  //     const monthIndex = parsedDate.getMonth();
+  //     const monthName = new Date(parsedDate.getFullYear(), monthIndex).toLocaleString('default', { month: 'long' });
+  //     const weekName = getWeekNumber(parsedDate);
+  //     const timePeriod = period === 'month' ? monthName : weekName
+  
+  //     if (!result[timePeriod]) {
+  //       result[timePeriod] = {};
+  //     }
+  
+  //     if (!result[timePeriod][spending_name]) {
+  //       result[timePeriod][spending_name] = [];
+  //     }
+  
+  //     result[timePeriod][spending_name].push(spending_amount);
+  //   });
+  
+  //   // Transform data into desired format
+  //   return Object.entries(result).map(([period, categories]) => {
+  //     const amounts = Object.entries(categories).map(([name, amounts]) => ({ name, amounts }));
+  //     return { period, amounts };
+  //   });
+  // }
+  
+  // export function groupByMonth(array) {
+  //   return groupByTimePeriod(array, 'month');
+  // }
+  
+  // export function groupByWeek(array) {
+  //   return groupByTimePeriod(array, 'week');
+  // }
+  
+
   

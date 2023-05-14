@@ -17,10 +17,15 @@ import UserHeader from "components/Headers/UserHeader.js";
 import axios from 'axios';
 import { useHistory } from 'react-router-dom';
 import { useState,useEffect } from "react";
+import { Steps } from 'intro.js-react';
+import 'intro.js/introjs.css';
 
 const Profile = (props) => {
   const history = useHistory();
   const [edit, setEdit] = useState(false);
+  const [enabled,setEnabled] = useState(true);
+  const [initialStep,setInitialStep] = useState(0);
+  const [clicked, setClicked] = useState(false);
   const [priorities, setPriorities] = useState({
     "H": 0,
     "N": 0,
@@ -109,6 +114,7 @@ const Profile = (props) => {
   }
 
   const handleAutoAssign = () =>{
+    setClicked(true);
     setEdit(true);
     if(formData.autoassign === 0){
       setFormData(prevFormData=>{
@@ -127,11 +133,34 @@ const Profile = (props) => {
     }
   }
 
+    
+  const onExit = () => {
+    setEnabled(false)
+  }
+
+  const steps = [
+    {
+        element: '#on-but',
+        intro: 'Once disabled, it is possible to turn this feature back on.',
+    },
+    {
+        element: '#save-but',
+        intro: 'Once revelevant changes have been made, click the save button here.',
+    }
+  ];
+
+
   return (
     <>
       <UserHeader user={props.user}/>
       {/* Page content */}
       <Container className="mt--7" fluid>
+        {clicked &&<Steps
+              enabled={enabled}
+              steps={steps}
+              initialStep={initialStep}
+              onExit={onExit}
+            />}
         <Row>
           <Col className="order-xl-1" xl="8">
             <Card className="bg-secondary shadow">
@@ -159,7 +188,7 @@ const Profile = (props) => {
                   <div className="pl-lg-4">
                     <Row>
                       <Col lg="4">
-                        <Button color="primary" size="sm" onClick={handleAutoAssign}>{formData.autoassign===1 ? "On" : "Off"}</Button>
+                        <Button color="primary" size="sm" onClick={handleAutoAssign} id="on-but">{formData.autoassign===1 ? "On" : "Off"}</Button>
                       </Col>
                     </Row>
                   </div>
@@ -290,7 +319,7 @@ const Profile = (props) => {
                     </Row>
                   </div>
                   <hr className="my-4" />
-                  {edit && <Button color="primary" type="submit">Save</Button>}
+                  {edit && <Button color="primary" type="submit" id="save-but">Save</Button>}
                 </Form>
               </CardBody>
             </Card>

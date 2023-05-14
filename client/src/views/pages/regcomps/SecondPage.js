@@ -1,5 +1,3 @@
-
-
 import {
     Button,
     CardBody,
@@ -93,6 +91,31 @@ const SecondPage = ({handleIndexChange,handleAddition,userData}) =>{
               </Input>
             </InputGroup>
           </FormGroup>
+
+          <FormGroup>
+              <Label className="reg-label" for="income">What percentage of your monthly balance should trigger a spending alert?</Label>
+              <InputGroup className="input-group-alternative mb-3">
+                  <InputGroupAddon addonType="prepend">
+                      <InputGroupText>
+                          <BsCurrencyExchange />
+                      </InputGroupText>
+                  </InputGroupAddon>
+                  <Input
+                      style={{appearance: "none", width: "100%", height: "15px", borderRadius: "5px", background: "#d3d3d3", outline: "none", opacity: "0.7", transition: ".2s", hover: {opacity: "1"}}}
+                      type="range"
+                      min="0"
+                      max="100"
+                      step="1"
+                      name="alert"
+                      value={userData.alert}
+                      onChange={(e) => handleAddition(e)}
+                  />
+                  <InputGroupText>
+                      {userData.alert}%
+                  </InputGroupText>
+              </InputGroup>
+          </FormGroup>
+
 
           <div className="text-center buttons">
               <Button className="mt-4 back-button" onClick={()=>handleIndexChange(1)}>

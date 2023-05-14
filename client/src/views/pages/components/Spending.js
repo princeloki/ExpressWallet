@@ -21,7 +21,7 @@ const Spending = ({date, spend, clicked, handleClick, details, setDetails, reloa
         !details && setClickedIndex(null)
     },[details])
 
-    const trs = spend.map((sp, index) =>{
+    const trs = spend.map((sp, index) =>{   
         return(
             <SpendingTransactions key={index} openTransaction={()=>openTransaction(index)} date={date} clicked={clickedIndex===index} spending={sp} setDetails={setDetails} reload={reload}
             currSym={currSym} rates={rates}/>

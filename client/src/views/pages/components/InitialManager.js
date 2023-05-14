@@ -142,7 +142,7 @@ const InitialManager = ({ userData }) => {
               return (
                 <div className="rec-category" key={category}>
                   
-                  <Button onClick={() => handleAdjust(category)}>Add</Button>
+                  <Button onClick={() => handleAdjust(category)}> {formData.hasOwnProperty(category) ? "Edit" : "Add"}</Button>
                   {current === category &&
                     <div className="rec-adjust-form curve">
               <div className="rec-adj-head">

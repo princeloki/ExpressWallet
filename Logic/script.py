@@ -1,4 +1,3 @@
-
 import sys
 import json
 import base64
@@ -12,27 +11,30 @@ class Expense:
 
     def __repr__(self):
         return f"{self.name}: {self.amount} ({self.priority}, {self.state})"
-
-
+    
+    
+    
 def adjust(expenses, balance, adjustment_percentages):
     remaining_balance = balance
     if remaining_balance < 0:
-        sorted_expenses = sorted(expenses, key=lambda x: (x.priority, -x.amount))
-        while remaining_balance < 0:
-            for expense in sorted_expenses:
-                if expense.state == "F":
-                    pass
-                else:
-                    reduction_amount = 0
-                    adjustment_percentage = adjustment_percentages[expense.priority]
-                    reduction_amount = round(min(expense.amount, abs(remaining_balance), expense.amount * adjustment_percentage))
-                    expense.amount = round(expense.amount - reduction_amount)
-                    remaining_balance += reduction_amount
-                    if expense.amount <= 0:
-                        expenses.remove(expense)
-                    if remaining_balance >= 0:
-                        break
-
+        priority_mapping = {'L': 1, 'N': 2, 'H': 3}  # Define the priority mapping
+        sorted_expenses = sorted(expenses, key=lambda x: (priority_mapping[x.priority], -x.amount))  # Use the mapping in sorting
+        priorities = ['L', 'N', 'H']  # List of priorities in the order of adjustment
+        for priority in priorities:
+            i = 0
+            while i < len(sorted_expenses):
+                expense = expenses[i]
+                if expense.priority != priority or expense.state == "F":
+                    i += 1
+                    continue
+                if remaining_balance >= 0:
+                    break
+                adjustment_percentage = adjustment_percentages[expense.priority]
+                reduction_amount = expense.amount * adjustment_percentage
+                expense.amount *= (1-adjustment_percentage)
+                remaining_balance += reduction_amount
+                if round(expense.amount) <= 0:
+                    i +=1
     return expenses, remaining_balance
 
 
@@ -60,11 +62,18 @@ def total_adjustable_expenses(expenses):
     return total
 
 
-def main(expense_dict, remaining_balance, adjustment_percentages):
+def main(expense_dict, remaining_balance, adjustment_percentages, rembudget, balance, alert):
     expenses = create_expenses_from_dict(expense_dict)
     total_adjustable = total_adjustable_expenses(expenses)
     
-    if(remaining_balance>=0):
+    if(rembudget >= ((100-alert)/100)*balance and remaining_balance>=0):
+        result_dict = {
+            "message": "At risk",
+            "adjusted_expenses": []
+        }
+        result_json = json.dumps(result_dict)
+        print(result_json)
+    elif(remaining_balance>=0 and rembudget <= ((100-alert)/100)*balance):
         result_dict = {
             "message": "Nothing to adjust",
             "adjusted_expenses": []
@@ -100,10 +109,13 @@ if __name__ == "__main__":
 
     adj_base64 = sys.argv[3]
     adj = json.loads(base64.b64decode(adj_base64).decode('utf-8'))
+    
+    remBudget = int(sys.argv[4])
+    actual_balance = int(sys.argv[5])
+    alert = int(sys.argv[6])
 
     
     adjustment_percentages = get_adjustment_percentages(adj)
-    main(expense_dict, balance, adjustment_percentages)
-
+    main(expense_dict, balance, adjustment_percentages, remBudget, actual_balance, alert)
 
 

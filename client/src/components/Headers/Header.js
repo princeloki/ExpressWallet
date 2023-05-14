@@ -23,7 +23,10 @@ import { FaEuroSign } from "react-icons/fa";
 import { FaPoundSign } from "react-icons/fa";
 import { useState, useEffect, useRef } from "react";
 import { BsThreeDots } from "react-icons/bs"
+import 'intro.js/introjs.css';
 import axios from 'axios';
+import { Steps } from 'intro.js-react';
+import Papa from 'papaparse';
 
 const Header = ({onDashboard, userData, toggleShow, rates, currSym}) => {
   const ref = useRef();
@@ -36,7 +39,6 @@ const Header = ({onDashboard, userData, toggleShow, rates, currSym}) => {
     }
   })
 
-
   const [remBudgets, setRemBudgets] = useState([])
   const [expenses, setExpenses] = useState([])
   const [today, setToday] = useState(0)
@@ -48,6 +50,10 @@ const Header = ({onDashboard, userData, toggleShow, rates, currSym}) => {
   const [edit, setEdit] = useState(false)
   const [editAmount, setEditAmount] = useState(null);
   const [expenseToEdit, setExpenseToEdit] = useState(null);
+  const [enabled,setEnabled] = useState(true);
+  const [currencies, setCurrencies] = useState([]);
+
+  const [initialStep,setInitialStep] = useState(0);
 
   const [stats, setStats] = useState({
     day: 0,
@@ -60,30 +66,34 @@ const Header = ({onDashboard, userData, toggleShow, rates, currSym}) => {
     localStorage.setItem("currency", currency);
   }
 
+  const color = {
+    paddingTop: '0.3em',
+    color: '#5fcc6f'
+  }
+
   const currIcon = () => {
-    switch (localStorage.getItem('currency')) {
-      case "JMD":
-        return <IoLogoUsd className="text-green" />;
-      case "USD":
-        return <IoLogoUsd className="text-green" />;
-      case "EUR":
-        return <FaEuroSign className="text-green" />;
-      case "GBP":
-        return <FaPoundSign className="text-green" />;
-      case "JPY":
-      default:
-        return <BsCurrencyYen className="text-green" />;
-    }
+    return <h1 style={color}>{currSym()}</h1>
   };
 
-  
+  useEffect(() => {
+    axios.get('http://localhost:4000/api/get_currencies')
+        .then(response => {
+            const currencyCodes = response.data;
+            setCurrencies(currencyCodes);
+        });
+  }, []);
+
+
 
   const assignUpdate = () =>{
     const newAdjusted = []
 
     let expenses = alert.data.adjusted_expenses
     for(let i=0; i<expenses.length;i++){
-      expenses[i].state === "A" && newAdjusted.push(expenses[i])
+      if(expenses[i].state === "A") {
+        expenses[i].amount = Math.round(expenses[i].amount); // Round the amount
+        newAdjusted.push(expenses[i]);
+      }
     }
 
     axios.put(`http://localhost:4000/api/update_adjusted/${userData.uid}`, {expenses: newAdjusted})
@@ -94,7 +104,7 @@ const Header = ({onDashboard, userData, toggleShow, rates, currSym}) => {
     .catch(err=>{
       console.log(err)
     })
-  }
+}
 
   useEffect(()=>{
     axios.get(`http://localhost:4000/api/get_monthly_difference/${userData.uid}`)
@@ -134,7 +144,6 @@ const Header = ({onDashboard, userData, toggleShow, rates, currSym}) => {
     setAlert(prevAlert => ({ ...prevAlert, data: { ...prevAlert.data, adjusted_expenses: updatedExpenses } }));
     setEdit(false);
   }
-
   const adjust = alert.data.adjusted_expenses.map((adjusted_expense,index)=>{
     const expense = expenses.find(e => e.expense_name === adjusted_expense.name);
     const rem = remBudgets.find(e=>e.expense_name === adjusted_expense.name);
@@ -142,13 +151,19 @@ const Header = ({onDashboard, userData, toggleShow, rates, currSym}) => {
     if (!expense) {
       return null;
     }
+
+    if(rem){
+      if(rem.total === adjusted_expense.amount){
+        return null;
+      }
+    }
   
     return(
-      <tr key={index}>
+      rem && <tr key={index}>
         <td>{adjusted_expense.name}</td>
         <td>{currSym()}{(expense.expense_amount*rates[localStorage.getItem("currency")]).toFixed(2)}</td>
-        <td>{currSym()}{(rem.total*rates[localStorage.getItem("currency")]).toFixed(2)}</td>
-        <td>{currSym()}{(adjusted_expense.amount*rates[localStorage.getItem("currency")]).toFixed(2)}</td>
+        <td>{currSym()}{Math.floor((rem.total*rates[localStorage.getItem("currency")]).toFixed(2))}</td>
+        <td>{currSym()}{Math.floor((adjusted_expense.amount*rates[localStorage.getItem("currency")]).toFixed(2))}</td>
         <td className="clickable"  onClick={() => { setEdit(true); setEditAmount(adjusted_expense.amount); setExpenseToEdit(adjusted_expense.name); }}><BsThreeDots /></td>
       </tr>
     )
@@ -207,9 +222,6 @@ const Header = ({onDashboard, userData, toggleShow, rates, currSym}) => {
       });
   }, [userData.balance]);
   
-  
-
-
   useEffect(()=>{
     axios.get(`http://localhost:4000/api/get_expenses/${userData.uid}`)
     .then(response=>{
@@ -220,11 +232,28 @@ const Header = ({onDashboard, userData, toggleShow, rates, currSym}) => {
     },[])
   })
 
+  
+  
+  const onExit = () => {
+    setEnabled(false)
+  }
+
+  const steps = [
+      {
+          element: '#recommended-spending',
+          intro: 'Great! Based on your current expenses and goals, we recommend you to spend the following amount for the remainder of the month to meet your budget. ',
+      },
+      {
+          element: '#edit-spending',
+          intro: 'You have the flexibility to modify the amount here or within the Expense Manager at your convenience.',
+      }
+  ];
+
   return (
     <>
       {userData &&
       <div className="header bg-gradient-info pb-8 pt-5 pt-md-8">
-        {onDashboard && (alert.data.message==="Success" || alert.data.message === "Not adjustable")  && 
+        {onDashboard && (alert.data.message==="Success" || alert.data.message === "Not adjustable" || alert.data.message==="At risk")  && 
         <Card className="curve bank-alert mb-4 mb-xl-0">
           <CardBody>
             <Row>
@@ -236,6 +265,9 @@ const Header = ({onDashboard, userData, toggleShow, rates, currSym}) => {
                     ALERT: Your budget has reached a critical point and can no longer be adjusted. To continue using the budget manager effectively,
                   please consider depositing additional funds into your account or exploring job opportunities in {userData.country} to supplement your income. 
                   </p>  
+                  }
+                  {alert.data.message==="At risk" && 
+                    <p className="danger font-weight-bold mb-0">Hey there! Just a heads-up, you're now less than {userData.alert}% away from your spending limit for the month. It might be a good time to take a closer look at your remaining expenses. Let's keep your budget on track together!</p>
                   }
                   </span>
                   {alert.data.message==="Success" && 
@@ -259,7 +291,7 @@ const Header = ({onDashboard, userData, toggleShow, rates, currSym}) => {
                   name=""
                   autoComplete="new-"
                   onChange={handleChange}
-                  value={editAmount}>
+                  value={Math.floor(editAmount)}>
                 </Input>
               </InputGroup>
             </FormGroup>
@@ -267,19 +299,26 @@ const Header = ({onDashboard, userData, toggleShow, rates, currSym}) => {
           </Form>
         </Card>
         }
-        {open &&
+        {open && remBudgets.length>0 &&
         <div ref={ref}>
           <Card className="readj-body curve">
+            
+            <Steps
+                  enabled={enabled}
+                  steps={steps}
+                  initialStep={initialStep}
+                  onExit={onExit}
+                />
             <CardBody>
-              <h2 className="h2 font-weight-bold mb-0">Recommended Amount to Spend This Month</h2>
+              <h2 className="h2 font-weight-bold mb-0" id="adjust-header">Recommended Amount to Spend This Month <br /><span className="small">[You can personalize these later on]</span></h2>
               <Table className="rec-table">
                 <thead>
                   <tr>
                     <th>Expense Name</th>
                     <th>Original Budget</th>
                     <th>Amount Remanining</th>
-                    <th>Recommended</th>
-                    <th>Edit</th>
+                    <th id="recommended-spending">Recommended</th>
+                    <th id="edit-spending">Edit</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -309,17 +348,13 @@ const Header = ({onDashboard, userData, toggleShow, rates, currSym}) => {
                             </Col>
                               <InputGroup className="input-group-alternative mb-3">
                                 <Input
-                                  id="cur-sel"
-                                  type="select"
-                                  name="currency"
-                                  value={currency}
-                                  onChange={(e) => handleCurrency(e.target.value)}
+                                    id="cur-sel"
+                                    type="select"
+                                    name="currency"
+                                    value={currency}
+                                    onChange={(e) => handleCurrency(e.target.value)}
                                 >
-                                  <option value="USD">USD</option>
-                                  <option value="EUR">EUR</option>
-                                  <option value="GBP">GBP</option>
-                                  <option value="JPY">JPY</option>
-                                  <option value="JMD">JMD</option>
+                                    {currencies.map(curr => <option key={curr} value={curr}>{curr}</option>)}
                                 </Input>
                               </InputGroup>
                             </div>

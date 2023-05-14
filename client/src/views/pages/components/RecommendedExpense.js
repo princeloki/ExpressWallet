@@ -17,7 +17,6 @@ const RecommendedExpense = ({user, expense, setReloadExpenses, reloadExpenses, s
     const [add, setAdd] = useState(false)
     const [recExp, setRecExp] = useState("")
     const [rerec, setRerec] = useState(false)
-    console.log(trans);
     
     const [formData, setFormData] = useState({
         expense: "",

@@ -10,6 +10,7 @@ const { exec,spawn  } = require('child_process');
 const dJSON = require('dirty-json')
 const fs = require("fs");
 const csv = require('csv-parser');
+const nodemailer = require('nodemailer');
 
 require('dotenv/config')
 
@@ -32,6 +33,21 @@ db.connect((err)=>{
     if(err) throw err;
     console.log("Connected");
 })
+
+
+const transporter = nodemailer.createTransport({
+    host: process.env.MAIL_HOST,
+    port: process.env.MAIL_PORT,
+    secureConnection: false,
+    auth: {
+        user: process.env.MAIL_EMAIL,
+        pass: process.env.MAIL_PASSWORD
+    },
+    tls: {
+        ciphers:'SSLv3',
+        rejectUnauthorized: false // Trust self-signed certificates
+    }
+});
 
 
 router.post('/login', (req, res) => {
@@ -98,9 +114,10 @@ router.post('/register', async (req, res) => {
     const currency = "USD"
     const budget = 0
     const autoassign = 0
+    const alert = 0
 
-    let query = `INSERT INTO user(first_name,last_name,email,phone_num,balance,length,password,country,host,currency,budget, autoassign) VALUES`
-    query += `('${firstName}','${lastName}','${email}','${phone}',${balance},${length},'${hash}','${country}','${host}','${currency}',${budget}, ${autoassign})`
+    let query = `INSERT INTO user(first_name,last_name,email,phone_num,balance,length,password,country,host,currency,budget, autoassign, alert) VALUES`
+    query += `('${firstName}','${lastName}','${email}','${phone}',${balance},${length},'${hash}','${country}','${host}','${currency}',${budget}, ${autoassign}, ${alert})`
     db.query(query, (err) => {
         if (err) throw err;
         const size = "SELECT COUNT(*) as count FROM user"
@@ -112,24 +129,81 @@ router.post('/register', async (req, res) => {
     })
 })
 
-router.get("/initialize_currency/:base", (req, res) => {
-    let currencies;
-    axios.get(`https://api.apilayer.com/exchangerates_data/latest?symbols=GBP%2CUSD%2CEUR%2CJPY%2CJMD&base=${req.params.base}`, { headers })
-    .then(response => {
-        currencies = Object.entries(response.data.rates);
-        const sql = `INSERT INTO currencies (uid, symbol, rate) VALUES ((SELECT max(uid) FROM user), ?, ?)`;
-        for(let i=0;i<currencies.length;i++){
-            db.query(sql, [currencies[i][0], currencies[i][1]], (err)=>{
-                if (err) throw err;
-            })
-        }
-        console.log("Currencies Initialized")
-        res.send("Currencies Initialized");
-    })
-    .catch(error => {
-        console.log('error', error);
+router.get("/initialize_currency/:base", async (req, res) => {
+
+    // Create a Promise that resolves with the list of currencies from the csv file
+    const getCurrenciesFromCsv = new Promise((resolve, reject) => {
+        let currencies = [];
+        fs.createReadStream('Logic/Currencies.csv')
+        .pipe(csv())
+        .on('data', (row) => {
+            currencies.push(row.Currency);
+        })
+        .on('end', () => {
+            resolve(currencies);
+        })
+        .on('error', (error) => {
+            reject(error);
+        });
     });
-})
+
+    // Wait for the Promise to resolve, then fetch the exchange rates
+    try {
+        let currencies = await getCurrenciesFromCsv;
+        const symbols = currencies.join('%2C');
+        axios.get(`https://api.apilayer.com/exchangerates_data/latest?symbols=${symbols}&base=${req.params.base}`, { headers })
+        .then(response => {
+            currencies = Object.entries(response.data.rates);
+            const sql = `INSERT INTO currencies (uid, symbol, rate) VALUES ((SELECT max(uid) FROM user), ?, ?)`;
+            for(let i=0;i<currencies.length;i++){
+                db.query(sql, [currencies[i][0], currencies[i][1]], (err)=>{
+                    if (err) throw err;
+                })
+            }
+            console.log("Currencies Initialized")
+            res.send("Currencies Initialized");
+        })
+        .catch(error => {
+            console.log('error', error);
+        });
+    } catch (error) {
+        console.log('error', error);
+    }
+});
+
+router.get("/get_currencies", (req, res) => {
+    let currencies = [];
+    fs.createReadStream('Logic/Currencies.csv')
+    .pipe(csv())
+    .on('data', (row) => {
+        currencies.push(row.Currency);
+    })
+    .on('end', () => {
+        res.send(currencies);
+    })
+    .on('error', (error) => {
+        console.error(error);
+        res.status(500).send('Error reading CSV file');
+    });
+});
+
+
+router.get("/get_symbols", (req, res) => {
+    let currencies = [];
+    fs.createReadStream('Logic/Currencies.csv')
+    .pipe(csv())
+    .on('data', (row) => {
+        currencies.push({ code: row.Currency, symbol: row.Symbol });
+    })
+    .on('end', () => {
+        res.send(currencies);
+    })
+    .on('error', (error) => {
+        console.error(error);
+        res.status(500).send('Error reading CSV file');
+    });
+});
+
 
 router.get("/get_rates/:uid", (req, res)=>{
     const sql = `SELECT symbol, rate FROM currencies WHERE uid=${req.params.uid}`
@@ -152,8 +226,9 @@ router.put('/set_user', (req, res)=>{
     const normal = req.body.normal;
     const low = req.body.low;
     const autoassign = req.body.autoassign;
+    const alert = req.body.alert;
     let query = `UPDATE user SET country = '${country}', host = '${host}', length = ${length}, 
-    currency = '${currency}', budget = ${budget}, start='${start}',autoassign=${autoassign} WHERE email='${email}' `
+    currency = '${currency}', budget = ${budget}, start='${start}',autoassign=${autoassign}, alert=${alert} WHERE email='${email}' `
     db.query(query, (err)=>{
         if (err) throw err;
         const user = `SELECT uid, email FROM user WHERE email = '${email}'`
@@ -197,8 +272,8 @@ router.put('/update_user/:id', (req, res) => {
                     for (let i = 0; i < trans.length; i++) {
                         let isoDate = new Date(trans[i].date).toISOString().replace('T', ' ').replace('Z', '');
                         const sq = `INSERT IGNORE INTO transaction (bid, merchant_name, mcc, category, currency, date, amount) VALUES
-                     (${trans[i].bid},"${trans[i].merchant}",${trans[i].mcc},'${trans[i].category}','${trans[i].currency}','${isoDate}',${trans[i].amount})`;
-                        db.query(sq, (err) => {
+                     (?,?,?,?,?,?,?)`;
+                        db.query(sq, [trans[i].bid, trans[i].merchant, trans[i].mcc, trans[i].category, trans[i].currency, isoDate, trans[i].amount],(err) => {
                             if (err) throw err;
                         });
                     }
@@ -364,7 +439,7 @@ router.post('/update_user_info/:id', (req, res) => {
 router.get('/get_user/:id', (req, res)=>{
     const uid = req.params.id;
     const sq = `SELECT uid, first_name, last_name, email, phone_num, balance, length, 
-    country, host, currency, budget, autoassign, start FROM user WHERE uid=${uid}`
+    country, host, currency, budget, autoassign, start, alert FROM user WHERE uid=${uid}`
     db.query(sq, (err, result)=>{
         if (err) throw err;
         const user = result[0];
@@ -435,8 +510,8 @@ router.post('/add_bank', (req, res) => {
                     for(let i=0;i<trans.length;i++){
                         let isoDate = new Date(trans[i].date).toISOString().replace('T', ' ').replace('Z', '');
                         const sq = `INSERT IGNORE INTO transaction (tid, bid, merchant_name, mcc, category, currency, date, amount) VALUES
-                         (${trans[i].tid}, ${trans[i].bid},"${trans[i].merchant}",${trans[i].mcc},'${trans[i].category}','${trans[i].currency}','${isoDate}',${trans[i].amount})`
-                        db.query(sq, (err)=>{
+                         (?, ?,?,?,?,?,?,?)`
+                        db.query(sq,[trans[i].tid, trans[i].bid, trans[i].merchant, trans[i].mcc, trans[i].category, trans[i].currency, isoDate, trans[i].amount], (err)=>{
                             if (err) throw err;
                         })
                     }
@@ -506,9 +581,10 @@ router.get('/update_transactions/:id', (req, res) => {
                 .replace('T', ' ')
                 .replace('Z', '');
   
-              const sq = `INSERT IGNORE INTO transaction (bid, merchant_name, mcc, category, currency, date, amount) VALUES (${trans[i].bid},"${trans[i].merchant}",${trans[i].mcc},'${trans[i].category}','${trans[i].currency}','${isoDate}',${trans[i].amount})`;
+              const sq = `INSERT IGNORE INTO transaction (bid, merchant_name, mcc, category, currency, date, amount)
+               VALUES (?,?,?,?,?,?)`;
   
-              db.query(sq, (err) => {
+              db.query(sq,[trans[i].bid, trans[i].merhcant, trans[i].mcc, trans[i].category, trans[i].currency, isoDate, trans[i].amount], (err) => {
                 if (err) throw err;
               });
             }
@@ -843,7 +919,6 @@ router.get('/adjust_expenses/:id', (req, res) => {
     HAVING e.expense_amount - COALESCE(SUM(s.spending_amount), 0) >= 0
     ORDER BY e.eid;
     `;
-    const sql2 = `SELECT `
     db.query(sql, (err, result)=>{
         const scriptPath = path.join(__dirname,'..','Logic','script.py');
         if (err) throw err;
@@ -886,25 +961,79 @@ router.get('/adjust_expenses/:id', (req, res) => {
             db.query(sql3, (err, result) =>{
                 if (err) throw err;
                 const exp = result;
-                const sql4 = ``
+                const sql4 = `
+                SELECT SUM(adjusted_total) as grand_total
+                FROM (
+                SELECT e.eid,
+                    e.expense_name,
+                    e.expense_amount,
+                    CASE
+                        WHEN e.expense_amount - COALESCE(SUM(s.spending_amount), 0) < 0 THEN 0
+                        ELSE e.expense_amount - COALESCE(SUM(s.spending_amount), 0)
+                    END as adjusted_total
+                FROM expense e
+                LEFT JOIN spending s ON e.eid = s.eid AND MONTH(s.date) = MONTH(NOW())
+                WHERE e.uid = ?
+                GROUP BY e.eid, e.expense_name, e.expense_amount
+                ) subquery;
+                `
+                db.query(sql4, [uid], (err, result)=>{
+                    if (err) throw err;
+                    const remBudget = result[0].grand_total
+                    const sql5 = `SELECT balance FROM user WHERE uid = ?`
+                    db.query(sql5, [uid], (err, result)=>{
+                        if (err) throw err;
+                        const originalbalance = result[0].balance;
+                        
+                        const sql6 = `SELECT alert FROM user WHERE uid = ?`
+                        db.query(sql6, [uid], (err, result)=>{
+                            if (err) throw err;
+                            const alert = result[0].alert;
+                            const args = [
+                                scriptPath,
+                                Buffer.from(JSON.stringify(expense_dict)).toString("base64"),
+                                String(balance),
+                                Buffer.from(JSON.stringify(exp)).toString("base64"),
+                                String(remBudget),
+                                String(originalbalance),
+                                String(alert)
+                            ];
+                            const command = `python ${args.map((arg) => `"${arg}"`).join(" ")}`;
+                            exec(command, (error, stdout, stderr) => {
+                            if (error) {
+                                console.error(`exec error: ${error}`);
+                                return res.status(500).send("An error occurred");
+                            }
+                            res.send({ data: JSON.parse(stdout) });
+                            stderr && console.error(`exec error: ${stderr}`);
+                            stdout && console.log("Json sent successfully");
 
-                const args = [
-                    scriptPath,
-                    Buffer.from(JSON.stringify(expense_dict)).toString("base64"),
-                    String(balance),
-                    Buffer.from(JSON.stringify(exp)).toString("base64"),
-                  ];
-                const command = `python ${args.map((arg) => `"${arg}"`).join(" ")}`;
+                            // const message = JSON.parse(stdout).message === "At risk" ? 
+                            // `Hey there! Just a heads-up, you're now less than 20% away from your spending limit for the month. It might be a good time to take a closer look at your remaining expenses. Let's keep your budget on track together!`
+                            //  : JSON.parse(stdout).message === "Success" ? 
+                            //  `You have overspent your budget by $${Math.abs(balance)}. To get back on track, consider reducing your expenses using the recommendations in your dashboard.` : ``;
+                            // const mailOptions = {
+                            //     from: process.env.MAIL_EMAIL,
+                            //     to: "moonievloki@gmail.com",
+                            //     subject: `<<Exchange Wallet Alert>>`,
+                            //     text: message
+                            // }
+
+                            // message !== "" && transporter.sendMail(mailOptions, function (err, res) {
+                            //     if(err){
+                            //     console.log(err);
+                            //     console.log("Error: Could not send mail")
+                            //     } else{
+                            //     console.log('Email sent successfully')
+                            //     }
+                            // })
+                            });
+
+                        })
+                    })
+
+                })
                 
-                exec(command, (error, stdout, stderr) => {
-                if (error) {
-                    console.error(`exec error: ${error}`);
-                    return res.status(500).send("An error occurred");
-                }
-                res.send({ data: JSON.parse(stdout) });
-                stderr && console.error(`exec error: ${stderr}`);
-                stdout && console.log("Json sent successfully");
-                });
                   
 
             })
@@ -1108,10 +1237,11 @@ const query = (sql) => {
 
 router.post('/analyze_expense', (req, res)=>{
     const merchant_name = req.body.merchant_name;
+    const category = req.body.category;
     const mcc = req.body.mcc;
 
 
-    const base64Data = Buffer.from(JSON.stringify([{merchant_name: merchant_name, mcc: mcc}])).toString("base64");
+    const base64Data = Buffer.from(JSON.stringify([{merchant_name: merchant_name, category: category,mcc: mcc}])).toString("base64");
 
     const pythonProcess = spawn("python", [
         "Logic/Decisiontree/decision_predictor.py",

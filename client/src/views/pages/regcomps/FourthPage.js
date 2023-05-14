@@ -8,7 +8,6 @@ import { AiOutlinePlusCircle } from "react-icons/ai"
 import { AiOutlineLeft } from "react-icons/ai"  
 
 const FourthPage = ({handleIndexChange, setActive, submitUserData, bankAmount}) =>{
-
   const openBank = () =>{
       setActive(true);
   }

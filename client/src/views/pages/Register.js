@@ -45,6 +45,7 @@ const Register = () => {
     misc: 0,
     start: "",
     autoassign: 1,
+    alert: 0,
     high: 0,
     normal: 0,
     low: 0
