@@ -1,9 +1,15 @@
+// Importing necessary modules from react and axios
 import { useEffect } from 'react';
 import axios from 'axios';
 
+// The SpendingTransactions component represents a row in the spending table for a specific transaction.
+// It receives several props: openTransaction (function for toggling the viewing of the transaction's details), 
+// clicked (boolean indicating whether the transaction's details should be shown), spending (the transaction object), 
+// setDetails (function for setting the transaction's details), reload (trigger for re-rendering the component), 
+// currSym (function returning the current currency symbol), and rates (exchange rates).
 const SpendingTransactions = ({openTransaction, clicked, spending, setDetails, reload, currSym, rates}) =>{
-    console.log(spending);
   
+    // Effect hook for fetching the transaction's details from the server when clicked is true.
     useEffect(()=>{
       axios.post(`http://localhost:4000/api/get_spending_trans`,
       {
@@ -21,6 +27,7 @@ const SpendingTransactions = ({openTransaction, clicked, spending, setDetails, r
       })
     },[clicked, setDetails, spending, reload])
   
+    // Rendering the component. When the row is clicked, openTransaction is called.
     return(
       <>
         <tr className="main-row" onClick={openTransaction}>
@@ -31,6 +38,6 @@ const SpendingTransactions = ({openTransaction, clicked, spending, setDetails, r
       </>
     )
   }
-  
 
+// Exporting the SpendingTransactions component for use in other files.
 export default SpendingTransactions;

@@ -1,17 +1,6 @@
-
-
-
+// Import necessary components, icons, and libraries
 import Expense from "./components/Expense"
-
-import {
-  Card,
-  Container,
-  Row,
-  Col,
-  Table,
-  Button
-} from "reactstrap";
-
+import { Card, Container, Row, Col, Table, Button } from "reactstrap";
 import React, { useRef, useState, useEffect } from 'react'; 
 import Header from "components/Headers/Header.js";
 import { GrCircleInformation } from "react-icons/gr";
@@ -23,29 +12,34 @@ import { AiOutlineClose } from "react-icons/ai";
 import AssignTransactions from "./components/AssignTransaction";
 import RecommendedExpense from "./components/RecommendedExpense";
 
+// Define ExpenseManager component
 const ExpenseManager = (props) => {
-  const [trans, setTrans] = useState([])
-  const [expenses, setExpenses] = useState([])
-  const [clickedIndex, setClickedIndex] = useState(null)
-  const [add, setAdd] = useState(false)
-  const [assign, setAssign] = useState(false);
-  const [openAssign, setOpenAssign] = useState(null);
-  const [reloadTransaction, setReloadTransaction] = useState(false);
-  const [recommended, setRecommended] = useState([])
-  const [recindex, setRecindex] = useState(null);
+  // Define state variables
+  const [trans, setTrans] = useState([]) // transactions
+  const [expenses, setExpenses] = useState([]) // expenses
+  const [clickedIndex, setClickedIndex] = useState(null) // clicked index
+  const [add, setAdd] = useState(false) // add new transaction state
+  const [assign, setAssign] = useState(false); // assign transaction state
+  const [openAssign, setOpenAssign] = useState(null); // open assign state
+  const [reloadTransaction, setReloadTransaction] = useState(false); // trigger to reload transaction
+  const [recommended, setRecommended] = useState([]) // recommended transactions
+  const [recindex, setRecindex] = useState(null); // index of recommended transaction
 
+  // reload expenses state
   const [reloadExpenses, setReloadExpenses] = useState(false);
 
+  // Define refs for update, add, assign transactions and recommended expenses
   const updateExpenseRef = useRef();
   const addExpenseRef = useRef();
   const assignTransactionsRef = useRef();
   const recommendedExpenseRef = useRef(); 
 
+  // Handle click event for recommended transactions
   const handleRecClick = (index)=>{
     openAssign === index ? setRecindex(null) : setRecindex(index)
   }
-  
 
+  // Create new expense with recommendation
   const newExpense = recommended.map((recommend, index)=>{
     return(
       recommend.length !== 0 && <div key={index} className="trans-adds">
@@ -54,7 +48,7 @@ const ExpenseManager = (props) => {
     )
   })
 
-
+  // Function to handle click outside for closing open components
   const handleClickOutside = (event) => {
     if (clickedIndex !== null && updateExpenseRef.current && !updateExpenseRef.current.contains(event.target)) {
       setClickedIndex(null);
@@ -67,34 +61,37 @@ const ExpenseManager = (props) => {
     }
   };
 
+  // Function to handle click outside for closing open recommended expenses
   const handleClickOutside2 = (event) => {
     if (recindex !== null && recommendedExpenseRef.current && !recommendedExpenseRef.current.contains(event.target)) {
       setRecindex(null);
     }
   };
 
-
+  // Fetch recommended expenses data when component is loaded
   useEffect(()=>{
     axios.get(`http://localhost:4000/api/get_recommended/${props.user.uid}`)
     .then(response =>{
       setRecommended(response.data.data);
     })
+    // Log any error that occurs
     .catch(err=>{
       console.log(err)
     })
-  },[props.user, reloadTransaction, reloadExpenses])
+  },[props.user, reloadTransaction, reloadExpenses]) // re-run effect if these values change
 
-
+  // Add event listeners for mousedown event on load
   useEffect(() => {
     document.addEventListener('mousedown', handleClickOutside);
     document.addEventListener('mousedown', handleClickOutside2);
+    // Cleanup: remove listeners when component unmounts
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('mousedown', handleClickOutside2);
     };
-  }, [recindex,clickedIndex, add, assign]);
-  
+  }, [recindex, clickedIndex, add, assign]); // re-run effect if these values change
 
+  // Fetch transactions not assigned to any category on load
   useEffect(()=>{
     axios.get(`http://localhost:4000/api/get_noassign_transactions/${props.user.uid}`)
     .then(response=>{
@@ -103,8 +100,9 @@ const ExpenseManager = (props) => {
     .catch(err=>{
       console.log(err)
     })
-  },[props.user, reloadTransaction])
+  },[props.user, reloadTransaction]) // re-run effect if these values change
 
+  // Fetch all expenses on load
   useEffect(()=>{
     axios.get(`http://localhost:4000/api/get_expenses/${props.user.uid}`)
     .then(response=>{
@@ -113,16 +111,19 @@ const ExpenseManager = (props) => {
     .catch(err=>{
       console.log(err)
     })
-  }, [props.user, reloadExpenses])
+  }, [props.user, reloadExpenses]) // re-run effect if these values change
 
+  // Handle click to open assignment
   const handleAssign = (index)=>{
     setAssign(true)
   }
 
+  // Handle click to open or close assignment
   const handleOpen = (index)=>{
     openAssign === index ? setOpenAssign(null) : setOpenAssign(index)
   }
 
+  // Handle assignment of 'None' to a transaction
   const handleNone = (trans) => {
     axios.post('http://localhost:4000/api/assign_transactions',{
         eid: "",
@@ -138,6 +139,7 @@ const ExpenseManager = (props) => {
     })
   }
 
+  // Create a transaction display for the five most recent transactions
   const transactions = trans.slice(0,5).map((tran, index)=>{
     const date = new Date(tran.date)
     const formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
@@ -150,11 +152,12 @@ const ExpenseManager = (props) => {
     )
   })
 
+  // Handle click on an expense item
   const setClick = (index) =>{
     clickedIndex === index ? setClickedIndex(null) : setClickedIndex(index)
   }
 
-
+  // Render expenses
   const exps = expenses.map((expense, index) => {
     return(
       <Expense key={index} clicked={clickedIndex===index} onExpense={()=>setClick(index)} data={expense} />

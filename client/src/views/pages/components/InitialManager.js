@@ -1,5 +1,3 @@
-
-
 import {
   Button,
   Form,
@@ -14,23 +12,27 @@ import { FcCheckmark } from "react-icons/fc"
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
+// InitialManager component handles transaction data fetching, categorization, and adjustment.
 const InitialManager = ({ userData }) => {
+  // Hooks for state management of transactions, form data, current category and edit mode status.
   const [groupedTransactions, setGroupedTransactions] = useState({});
   const [formData, setFormData] = useState({});
   const [current, setCurrent] = useState(null);
   const [edit, setEdit] = useState(false);
 
+  // Fetch transactions on component mount.
   useEffect(() => {
     axios
       .get(`http://localhost:4000/api/get_classifications/${userData.uid}`)
       .then((response) => {
-        groupTransactions(response.data);
+        groupTransactions(response.data); // Group fetched transactions.
       })
       .catch((err) => {
         console.log(err);
       });
   }, []);
 
+  // Format a given date into YYYY-MM-DD format.
   const formatDate = (inputDate) => {
     const date = new Date(inputDate);
     const yyyy = date.getFullYear();
@@ -39,10 +41,13 @@ const InitialManager = ({ userData }) => {
     return `${yyyy}-${mm}-${dd}`;
   };
 
+
+  // Handle toggling of adjustment mode for a given category.
   const handleAdjust = (category) => {
     current === "category" ? setCurrent(null) : setCurrent(category);
   }
 
+  // Handle deletion of a given category from formData.
   const handleDelete = (category) => {
     setFormData(prevState => {
       const newState = { ...prevState };
@@ -50,8 +55,8 @@ const InitialManager = ({ userData }) => {
       return newState;
     });
   }
-  
 
+  // Add uncategorized transactions to MISC category in formData.
   const addMiscTransactions = () => {
     const updatedFormData = { ...formData };
 
@@ -76,8 +81,9 @@ const InitialManager = ({ userData }) => {
     return updatedFormData;
   };
 
-  const save = (e) => {
-    e.preventDefault();
+  // Save the formData to backend on user action.
+  const save = () => {
+    console.log("clicked");
 
     const updatedFormData = addMiscTransactions();
     axios.post(`http://localhost:4000/api/initialize_expenses/${userData.uid}`, updatedFormData)
@@ -89,6 +95,7 @@ const InitialManager = ({ userData }) => {
       })
   }
 
+  // Group transactions by their predicted categories.
   const groupTransactions = (transactions) => {
     const groups = transactions.reduce((acc, transaction) => {
       if (!acc[transaction.predicted_category]) {
@@ -102,6 +109,7 @@ const InitialManager = ({ userData }) => {
     setGroupedTransactions(groups);
   };
 
+  // Handle changes in input for a given category.
   const onInputChange = (category, event) => {
     console.log(groupedTransactions[category].transactions)
     setEdit(true);
@@ -203,7 +211,7 @@ const InitialManager = ({ userData }) => {
               )
             })}
           </div>
-          <Button color="primary">Ignore</Button>
+          {/* <Button color="primary">Ignore</Button> */}
           {edit && <Button color="primary" onClick={save}>Save</Button>}
         </div>
       )}

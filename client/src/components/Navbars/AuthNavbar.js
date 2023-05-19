@@ -1,24 +1,26 @@
-import { Link } from "react-router-dom";
-// reactstrap components
+// Importing necessary libraries and components
+import { Link } from "react-router-dom"; // Provides declarative, accessible navigation around your application.
 import {
   UncontrolledCollapse,
   NavbarBrand,
-  Navbar,
-  NavItem,
+  Navbar, 
+  NavItem, 
   NavLink,
-  Nav,
+  Nav, 
   Container,
-  Row,
-  Col
+  Row, 
+  Col 
 } from "reactstrap";
 
+// The functional component AdminNavbar
 const AdminNavbar = () => {
+  // Rendering the component
   return (
     <>
       <Navbar className="navbar-top navbar-horizontal navbar-dark" expand="md">
         <Container className="px-4">
           <NavbarBrand to="/auth/login" tag={Link}>
-            <h1>ExpressWallet</h1>
+            <h1>ExchangeWallet</h1>
           </NavbarBrand>
           <button className="navbar-toggler" id="navbar-collapse-main">
             <span className="navbar-toggler-icon" />

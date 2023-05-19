@@ -1,5 +1,4 @@
-
-
+// Importing necessary modules from react, reactstrap, react-router-dom, and axios
 import { useState, useEffect } from 'react';
 import Header from "components/Headers/Header.js";
 import {
@@ -14,7 +13,10 @@ import {
 import { useHistory } from "react-router-dom";
 import axios from 'axios';
 
+// The LogTransaction component provides a form for logging a new transaction. 
 const LogTransaction = (props) => {
+
+  // States for storing fetched expenses and form data
   const [expenses, setExpenses] = useState([])
   const [formData, setFormData] = useState({
     name: "",
@@ -23,8 +25,11 @@ const LogTransaction = (props) => {
     currency: "USD",
     type: "Select"
   })
+  
+  // useHistory hook for redirection after form submission
   const history = useHistory();
 
+  // Effect hook for fetching expenses from the server when the component mounts.
   useEffect(()=>{
     axios.get(`http://localhost:4000/api/get_expenses/${props.user.uid}`)
     .then(response=>{
@@ -35,6 +40,7 @@ const LogTransaction = (props) => {
     })
   },[])
 
+  // Function for handling changes to form inputs.
   const handleChange = (e)=>{
     setFormData(prevFormData=>{
       return{
@@ -44,6 +50,7 @@ const LogTransaction = (props) => {
     })
   }
 
+  // Function for handling form submission.
   const submit = (e)=>{
     e.preventDefault()
     axios.post(`http://localhost:4000/api/cash_transaction/${props.user.uid}`,formData)
@@ -55,8 +62,8 @@ const LogTransaction = (props) => {
       console.log(err);
     })
   }
-  console.log(formData);
 
+  // Rendering the LogTransaction component
   return (
     <>
       <Header onDashboard={props.onDashboard} userData={props.user} currSym={props.currSym} rates={props.rates}/>

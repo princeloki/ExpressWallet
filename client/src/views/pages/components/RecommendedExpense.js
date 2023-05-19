@@ -1,5 +1,4 @@
-
-
+// import necessary libraries and components
 import {
     Button,
     Form,
@@ -8,16 +7,18 @@ import {
     FormGroup,
     Label
 } from "reactstrap";
-
 import { useState, useEffect } from "react";
 import axios from "axios";
 
+// function to manage recommended expenses
 const RecommendedExpense = ({user, expense, setReloadExpenses, reloadExpenses, setRecindex}) => {
-    const [trans, setTrans] = useState([])
-    const [add, setAdd] = useState(false)
-    const [recExp, setRecExp] = useState("")
-    const [rerec, setRerec] = useState(false)
-    
+    // set initial state values
+    const [trans, setTrans] = useState([]) // transactions
+    const [add, setAdd] = useState(false) // add state
+    const [recExp, setRecExp] = useState("") // recommended expense
+    const [rerec, setRerec] = useState(false) // re-recommend state
+
+    // form data for adding a recommended expense
     const [formData, setFormData] = useState({
         expense: "",
         amount: expense.average_amount,
@@ -27,7 +28,7 @@ const RecommendedExpense = ({user, expense, setReloadExpenses, reloadExpenses, s
         category: expense.category
     })
 
-
+    // ignore recommended expense and update the state
     const ignoreExpense = () => {
         axios
             .post(`http://localhost:4000/api/ignore_recommendation/${user.uid}`, {
@@ -39,8 +40,9 @@ const RecommendedExpense = ({user, expense, setReloadExpenses, reloadExpenses, s
             .catch((err) => {
                 console.log(err);
             });
-    };    
+    };
 
+    // analyze the expense and set the form data
     const analyze=(data) =>{
         axios.post(`http://localhost:4000/api/analyze_expense`, data[0])
         .then(response=>{
@@ -57,6 +59,7 @@ const RecommendedExpense = ({user, expense, setReloadExpenses, reloadExpenses, s
         })
     }
 
+    // make an API call on component load
     useEffect(()=>{
         axios.post(`http://localhost:4000/api/find_transactions`, {
             uid: user.uid,
@@ -73,12 +76,14 @@ const RecommendedExpense = ({user, expense, setReloadExpenses, reloadExpenses, s
         })
     },[])
 
+    // map transactions to be displayed
     const transactions = trans.map((tran, index) => {
         return(
             tran && <h4 key={index}>{tran.merchant_name} ({tran.category}) | ({tran.currency}) {tran.amount.toFixed(2)}<br/> {tran.date}</h4>
         )
     })
 
+    // add a recommended expense
     const addRecommend = (e)=>{
         e.preventDefault();
         axios.post(`http://localhost:4000/api/add_recommended/${user.uid}`,{...formData,...{trans: trans}})
@@ -92,6 +97,7 @@ const RecommendedExpense = ({user, expense, setReloadExpenses, reloadExpenses, s
         })
     }
 
+    // handle expense form change
     const handleExpense = (e) =>{
         console.log(formData)
         setFormData(prevFormData=>{
@@ -100,8 +106,9 @@ const RecommendedExpense = ({user, expense, setReloadExpenses, reloadExpenses, s
                 [e.target.name]: e.target.value
             }
         })
-    } 
+    }
 
+    // handle ignore action
     const handleIgnore = ()=>{
         ignoreExpense()
         setAdd(!add)

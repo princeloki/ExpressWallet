@@ -15,7 +15,7 @@ const Login = () => {
               rel="noopener noreferrer"
               target="_blank"
             >
-              ExpressWallet
+              ExchangeWallet
             </a>
               </div>
             </Col>

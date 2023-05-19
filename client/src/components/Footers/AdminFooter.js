@@ -13,7 +13,7 @@ const Footer = () => {
               rel="noopener noreferrer"
               target="_blank"
             >
-              ExpressWallet
+              ExchangeWallet
             </a>
           </div>
         </Col>

@@ -13,8 +13,10 @@ class Expense:
         return f"{self.name}: {self.amount} ({self.priority}, {self.state})"
     
     
-    
 def adjust(expenses, balance, adjustment_percentages):
+    """
+    Adjusts the expenses based on the remaining balance and adjustment percentages.
+    """
     remaining_balance = balance
     if remaining_balance < 0:
         priority_mapping = {'L': 1, 'N': 2, 'H': 3}  # Define the priority mapping
@@ -31,14 +33,17 @@ def adjust(expenses, balance, adjustment_percentages):
                     break
                 adjustment_percentage = adjustment_percentages[expense.priority]
                 reduction_amount = expense.amount * adjustment_percentage
-                expense.amount *= (1-adjustment_percentage)
+                expense.amount *= (1 - adjustment_percentage)
                 remaining_balance += reduction_amount
                 if round(expense.amount) <= 0:
-                    i +=1
+                    i += 1
     return expenses, remaining_balance
 
 
 def create_expenses_from_dict(expense_dict):
+    """
+    Creates Expense objects from the expense dictionary.
+    """
     expenses = []
     for priority, expense_list in expense_dict.items():
         for attributes in expense_list:
@@ -46,7 +51,11 @@ def create_expenses_from_dict(expense_dict):
             expenses.append(expense)
     return expenses
 
+
 def get_adjustment_percentages(priority_data):
+    """
+    Retrieves adjustment percentages from the priority data.
+    """
     adjustment_percentages = {}
     for item in priority_data:
         priority_name = item["priority_name"]
@@ -54,7 +63,11 @@ def get_adjustment_percentages(priority_data):
         adjustment_percentages[priority_name] = percentage
     return adjustment_percentages
 
+
 def total_adjustable_expenses(expenses):
+    """
+    Calculates the total amount of adjustable expenses.
+    """
     total = 0
     for expense in expenses:
         if expense.state != "F":
@@ -63,24 +76,27 @@ def total_adjustable_expenses(expenses):
 
 
 def main(expense_dict, remaining_balance, adjustment_percentages, rembudget, balance, alert):
+    """
+    Main function to handle the adjustment process.
+    """
     expenses = create_expenses_from_dict(expense_dict)
     total_adjustable = total_adjustable_expenses(expenses)
     
-    if(rembudget >= ((100-alert)/100)*balance and remaining_balance>=0):
+    if rembudget >= ((100 - alert) / 100) * balance and remaining_balance >= 0:
         result_dict = {
             "message": "At risk",
             "adjusted_expenses": []
         }
         result_json = json.dumps(result_dict)
         print(result_json)
-    elif(remaining_balance>=0 and rembudget <= ((100-alert)/100)*balance):
+    elif remaining_balance >= 0 and rembudget <= ((100 - alert) / 100) * balance:
         result_dict = {
             "message": "Nothing to adjust",
             "adjusted_expenses": []
         }
         result_json = json.dumps(result_dict)
         print(result_json)
-    elif(abs(remaining_balance)>total_adjustable):
+    elif abs(remaining_balance) > total_adjustable:
         result_message = {"message": "Not adjustable", "adjusted_expenses": []}
         result_json = json.dumps(result_message)
         print(result_json)
@@ -96,22 +112,20 @@ def main(expense_dict, remaining_balance, adjustment_percentages, rembudget, bal
         result_json = json.dumps(result_dict)
         print(result_json)
 
-
-
 if __name__ == "__main__":
     json_base64_str = sys.argv[1]
     json_str = base64.b64decode(json_base64_str).decode('utf-8')
     expense_dict = json.loads(json_str)
 
-    balance = int(sys.argv[2])
+    balance = float(sys.argv[2])
 
 
 
     adj_base64 = sys.argv[3]
     adj = json.loads(base64.b64decode(adj_base64).decode('utf-8'))
     
-    remBudget = int(sys.argv[4])
-    actual_balance = int(sys.argv[5])
+    remBudget = float(sys.argv[4])
+    actual_balance = float(sys.argv[5])
     alert = int(sys.argv[6])
 
     

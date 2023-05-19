@@ -1,5 +1,3 @@
-
-
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
@@ -72,7 +70,7 @@ router.post('/add_transaction', (req, res) => {
     
             for(let i=0; i<transactions.length; i++){
                 const isoDate = new Date(transactions[i].date).toISOString().split('T')[0];
-                let sql1 = `INSERT transaction (bid,merchant,mcc,category,date,amount) VALUES `;
+                let sql1 = `INSERT IGNORE transaction (bid,merchant,mcc,category,date,amount) VALUES `;
                 sql1 += `(?,?,?,?,?,?)`
                 db.query(sql1,[uid, transactions[i].merchant_name, transactions[i].mcc, transactions[i].category, isoDate, transactions[i].amount], (err) => {
                     if(err) throw err;
@@ -110,20 +108,24 @@ router.post('/add_payment', (req, res) => {
                 })
             })
             
-            let sql1 = `INSERT transaction (tid,bid,merchant,mcc,category,currency,date,amount) VALUES `;
-            const size = "SELECT COUNT(*) as length FROM transaction";
+            let sql1 = `INSERT INTO transaction (tid,bid,merchant,mcc,category,currency,date,amount) VALUES `;
+            const size = "SELECT MAX(tid)+1 as length FROM transaction";
             db.query(size, (err, result)=>{
                 if (err) throw err;
-                let id = result[0].length + 1
+                let id = result[0].length
                 let date = new Date();
                 let formattedDate = date.toISOString().substr(0, 10);
-
-                sql1 += `(${id},${uid},'${payment.merchant}',${payment.mcc},'${payment.category}','${payment.currency}','${formattedDate}',${payment.amount})`
+            
+                // Check if payment.mcc is null and insert accordingly
+                let mccValue = payment.mcc ? `${payment.mcc}` : 'NULL';
+            
+                sql1 += `(${id},${uid},"${payment.merchant}",${mccValue},'${payment.category}','${payment.currency}','${formattedDate}',${payment.amount})`
                 db.query(sql1, (err) => {
                     if(err) throw err;
                     res.send("Transaction added")
                 })
             })
+            
 
             
         })    

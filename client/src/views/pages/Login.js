@@ -1,3 +1,4 @@
+// Import necessary components from the reactstrap library
 import {
   Button,
   Card,
@@ -13,19 +14,27 @@ import {
   Col
 } from "reactstrap";
 
+// Import the axios library for making HTTP requests
 import axios from 'axios';
+// Import the useState hook from React for managing component state
 import { useState } from "react"
+// Import useHistory hook from react-router-dom for programmatic navigation
 import { useHistory } from "react-router-dom";
 
+// Define a Login component
 const Login = () => {
+  // Define a history variable using useHistory hook for navigation
   const history = useHistory();
   
+  // Use useState hook to set initial form data for email and password
   const [formData, setFormData] = useState({
     email: "",
     password: ""
   })
 
+  // Handler for changing form fields
   const handleChange = (e) => {
+    // Update the formData state based on input changes
     setFormData(prevFormData =>{
       return{
         ...prevFormData,
@@ -34,20 +43,27 @@ const Login = () => {
     })
   }
 
+  // Handler for submitting the form
   const handleSubmit = (e) => {
+    // Prevent default form submission
     e.preventDefault()
+    // Make a POST request to the login API with form data
     axios.post('http://localhost:4000/api/login', formData)
     .then(response => {
+      // Store the user data in local storage after successful login
       const userString = JSON.stringify(response.data.body);
       localStorage.setItem('user', userString);
       localStorage.setItem("currency", response.data.body.currency);
+      // Navigate to the /admin/index route
       history.push("/admin/index")
     })
     .catch(err => {
+      // Log any errors to the console
       console.log(err)
     })
   }
 
+  // Render the login form
   return (
     <>
       <Col lg="5" md="7">

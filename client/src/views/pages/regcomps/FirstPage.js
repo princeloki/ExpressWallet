@@ -1,55 +1,60 @@
+// Importing necessary components and icons from reactstrap and react-icons
 import {
-    Button,
-    CardBody,
-    FormGroup,
-    Form,
-    Input,
-    InputGroupAddon,
-    InputGroupText,
-    InputGroup,
-    Label
-  } from "reactstrap";
-  
+  Button,
+  CardBody,
+  FormGroup,
+  Form,
+  Input,
+  InputGroupAddon,
+  InputGroupText,
+  InputGroup,
+  Label
+} from "reactstrap";
+
 import { BsGlobe } from "react-icons/bs";
 import { FaSchool } from "react-icons/fa";
 import { AiOutlineRight } from "react-icons/ai"
+
+// Importing axios for HTTP requests and useState and useEffect hooks from react
 import axios from 'axios';
 import { useEffect, useState } from "react";
-import ReactSelect from "react-select";
 
+const FirstPage = ({handleIndexChange, handleAddition, userData}) => {
+  // Initializing countries and universities state
+  const [countries, setCountries] = useState([])
+  const [universities, setUniversities] = useState([])
 
-const FirstPage = ({handleIndexChange, handleAddition, userData}) =>{
-    const [countries, setCountries] = useState([])
-    const [universities, setUniversities] = useState([])
+  // On component mount, fetch the list of countries from the server
+  useEffect(()=>{
+    axios.get("http://localhost:4000/api/get_countries")
+    .then(response=>{
+      setCountries(response.data);
+    })
+    .catch(err=>{
+      console.log(err);
+    })
+  },[])
 
-    useEffect(()=>{
-      axios.get("http://localhost:4000/api/get_countries")
-      .then(response=>{
-        setCountries(response.data);
-      })
-      .catch(err=>{
-        console.log(err);
-      })
-    },[])
+  // On component mount, fetch the list of universities from the server
+  useEffect(()=>{
+    axios.get("http://localhost:4000/api/get_universities")
+    .then(response=>{
+      setUniversities(response.data);
+    })
+    .catch(err=>{
+      console.log(err);
+    })
+  },[])
 
-    useEffect(()=>{
-      axios.get("http://localhost:4000/api/get_universities")
-      .then(response=>{
-        setUniversities(response.data);
-      })
-      .catch(err=>{
-        console.log(err);
-      })
-    },[])
-    
-    const countryOptions = countries.map((country) => ({ value: country, label: country }));
-    const universityOptions = universities.map((university) => ({ value: university, label: university }));
+  // Map countries and universities to the format expected by react-select
+  const countryOptions = countries.map((country) => ({ value: country, label: country }));
+  const universityOptions = universities.map((university) => ({ value: university, label: university }));
 
-
-    const handleSubmit = (e) => {
-        e.preventDefault()
-        handleIndexChange(2)
-    }
+  // On form submission, prevent default form submission event and move to the next page
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    handleIndexChange(2)
+  }
 
     return(
       <CardBody className="px-lg-5 py-lg-5">
@@ -70,6 +75,7 @@ const FirstPage = ({handleIndexChange, handleAddition, userData}) =>{
                 onChange={(e) => handleAddition(e)}
                 list="countries"
               />
+              {/* Data list for country suggestions */}
               <datalist id="countries">
                 {countries.map((country, index) => (
                   <option key={index} value={country} />
@@ -93,6 +99,7 @@ const FirstPage = ({handleIndexChange, handleAddition, userData}) =>{
                 onChange={(e) => handleAddition(e)}
                 list="universities"
               />
+              {/* Data list for university suggestions */}
               <datalist id="universities">
                 {universities.map((university, index) => (
                   <option key={index} value={university} />

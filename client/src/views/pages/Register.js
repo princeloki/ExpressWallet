@@ -10,6 +10,7 @@ import {
   Button
 } from "reactstrap";
 
+// Import components and hooks from different libraries
 import Reg from "./regcomps/Reg"
 import FirstPage from "./regcomps/FirstPage"
 import SecondPage from "./regcomps/SecondPage"
@@ -23,17 +24,22 @@ import { useState } from "react"
 import axios from "axios"
 
 const Register = () => {
+  // Declare a useHistory hook
   const history = useHistory()
 
+  // State for the bank account amount
   const [bankAmount, setBankAmount] = useState(0)
 
+  // State to check if bank account is active
   const [bankActive, setBankActive] = useState(true)
 
+  // State for bank account username and password
   const [bankData, setBankData] = useState({
     bank_username: "",
     bank_password: ""
   })
 
+  // State for user data
   const [userData, setUserData] = useState({
     uid: 0,
     email: "",
@@ -51,12 +57,15 @@ const Register = () => {
     low: 0
   })
 
+  // State for the index to switch between registration steps
   const [index, setIndex] = useState(0)
 
+  // Handle change of index state
   const handleIndexChange = (index) => {
     setIndex(index)
   }
 
+  // Handle changes in bank form fields
   const handleBankChange = (e) => {
     setBankData(prevBankData=>{
       return{
@@ -66,6 +75,7 @@ const Register = () => {
     })
   }
 
+  // Set currency using API
   const setCurrency = (currency)=>{
     axios.get(`http://localhost:4000/api/initialize_currency/${currency}`)
     .then(response=>{
@@ -76,6 +86,7 @@ const Register = () => {
     })
   }
 
+  // Add bank to database using API
   const addBank = (e) =>{
     e.preventDefault()
     axios.post("http://localhost:4000/api/add_bank", {
@@ -92,12 +103,13 @@ const Register = () => {
     })
   }
 
+  // Submit user data using API
   const submitUserData = (e) => {
     e.preventDefault()
     console.log("clicked")
     axios.put("http://localhost:4000/api/set_user",userData)
     .then(response => {
-      setCurrency(userData.currency)
+      setCurrency(response.data);
       history.push('/auth/login')
     })
     .catch(err => {
@@ -105,6 +117,7 @@ const Register = () => {
     })
   }
 
+  // Handle addition of new user data
   const handleAddition = (e) =>{
     e.preventDefault()
     setUserData(prevUserData=>{

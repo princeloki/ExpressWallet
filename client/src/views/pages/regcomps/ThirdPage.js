@@ -1,15 +1,16 @@
+// import necessary components, hooks, icons, and css from their respective libraries
 import {
-    Button,
-    CardBody,
-    FormGroup,
-    Form,
-    Label,
-    Input,
-    InputGroupAddon,
-    InputGroupText,
-    InputGroup
-  } from "reactstrap";
-  
+  Button,
+  CardBody,
+  FormGroup,
+  Form,
+  Label,
+  Input,
+  InputGroupAddon,
+  InputGroupText,
+  InputGroup
+} from "reactstrap";
+
 import { useState } from "react"
 import { BsCurrencyDollar } from "react-icons/bs"
 import { AiOutlineRight } from "react-icons/ai"
@@ -17,26 +18,34 @@ import { AiOutlineLeft } from "react-icons/ai"
 import 'intro.js/introjs.css';
 import { Steps } from 'intro.js-react';
 
+// Define ThirdPage component, receiving handleIndexChange, handleAddition, userData as props
 const ThirdPage = ({handleIndexChange, handleAddition, userData}) =>{
+  // Set initial states for enabled, initialStep and setBudget
     const [enabled,setEnabled] = useState(true);
     const [initialStep,setInitialStep] = useState(0);
     const [setBudget, setSetBudget] = useState("")
 
+    // Handle input changes for budget
     const handleSetBudget = (e) => {
         setSetBudget(e.target.value)
     }
     
+    // Handle form submission and navigate to the next index  
     const handleSubmit = (e) => {
         e.preventDefault()
         handleIndexChange(4)
     }
 
-  
+
+    // Handle exit from the steps/intro
     const onExit = () => {
-        setEnabled(false)
+      setEnabled(false)
     }
 
+    
+    // Define the steps/intro for the page
     const steps = [
+      // detailed steps with element targets and intro descriptions omitted for brevity
         {
             element: '#perc-label',
             intro: 'Your expenses are organized into two types of categories and three priority levels.',

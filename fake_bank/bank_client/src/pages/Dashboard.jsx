@@ -1,11 +1,12 @@
-
-
 import React,{useState} from 'react';
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 
+// Define the Dashboard function component.
 function Dashboard({user}){
     const navigate = useNavigate();
+
+    // Declare and initialize state variables.
     const [balance, setBalance] = useState(user.balance);
     const [transactions, setTransactions] = useState([]);
     const [info, setInfo] = useState("No payment made yet");
@@ -17,10 +18,12 @@ function Dashboard({user}){
         currency: "",
     })
 
+    // Handler function for updating balance state.
     const handleBalance = (e) =>{
         setBalance(e.target.value)
     }
 
+    // Function to send a POST request to update the balance.
     const sendBalance = () =>{
         axios.post("http://localhost:5000/api/update_balance", {"username": user.username,"balance": balance})
         .then(result=>{
@@ -31,10 +34,12 @@ function Dashboard({user}){
         })
     }
 
+    // Handler function for updating transactions state.
     const handleTransactions = (e) =>{
         setTransactions(e.target.value)
     }
 
+    // Function to send a POST request to add a transaction.
     const addTransaction = (e) =>{
         e.preventDefault()
         axios.post("http://localhost:5000/api/add_transaction", {"username": user.username, "transactions": JSON.parse(transactions)})
@@ -46,6 +51,7 @@ function Dashboard({user}){
         })
     }
 
+    // Function to handle form input changes and update formData state.
     const handleChange = (e) =>{
         setFormData(prevFormData=>{
             return{
@@ -55,6 +61,7 @@ function Dashboard({user}){
         })
     }
 
+    // Function to send a POST request to make a payment.
     const makePayment = (e) =>{
         console.log(formData)
         e.preventDefault()
@@ -71,11 +78,13 @@ function Dashboard({user}){
         })
     }
 
+    // Function to handle logout.
     const logout = () =>{
         localStorage.removeItem("user");
         navigate('/login');
     }
     
+    // Render the Dashboard component.
     return(
         <div className="Dashboard">
             <div>

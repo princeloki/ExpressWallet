@@ -1,94 +1,107 @@
+// Importing necessary libraries and components
 import {
-    Button,
-    CardHeader,
-    CardBody,
-    FormGroup,
-    Form,
-    Input,
-    InputGroupAddon,
-    InputGroupText,
-    InputGroup,
-    Row,
-    Col
-  } from "reactstrap";
-  
+  Button,
+  CardHeader,
+  CardBody,
+  FormGroup,
+  Form,
+  Input,
+  InputGroupAddon,
+  InputGroupText,
+  InputGroup,
+  Row,
+  Col
+} from "reactstrap";
 import { useState } from "react"
 import axios from "axios"
 import validator from 'validator';
 
-const Reg = ({handleIndexChange, addData}) =>{
-    const [message, setMessage] = useState("")
+// Reg component for handling registration process
+const Reg = ({ handleIndexChange, addData }) => {
+  // useState hook for handling form message
+  const [message, setMessage] = useState("")
 
-    const [formData, setFormData] = useState({
+  // useState hook for handling form data
+  const [formData, setFormData] = useState({
       name: "",
       email: "",
       phone: "",
       password: ""
-    })
-  
+  })
 
-    const handleChange = (e) => {
+  // Function to handle form field changes
+  const handleChange = (e) => {
       setFormData(prevFormData => {
-        return {
-          ...prevFormData,
-          [e.target.name]: e.target.value,
-        }
+          return {
+              ...prevFormData,
+              [e.target.name]: e.target.value,
+          }
       });
-    
+
+      // If the password field was updated, check the password for validity
       if (e.target.name === 'password') {
-        const { isValid, message } = isValidPassword(e.target.value);
-        setMessage(message);
-        if (!isValid) {
-          return;
-        }
+          const { isValid, message } = isValidPassword(e.target.value);
+          setMessage(message);
+          if (!isValid) {
+              return;
+          }
       }
-    };
-    
-    const handleSubmit = (e) => {
-        e.preventDefault()
-        if(!message){
-          axios.post("http://localhost:4000/api/register",formData)
-          .then(response => {
-            console.log(response.data.count)
-            addData(prevFormData=>{
-              return{
-                ...prevFormData,
-                uid: response.data.count,
-                email: formData.email
-              }
-            })
-            handleIndexChange(1)
-          })
-          .catch(err => {
-          console.log(err)
-          })
-        }
-    }
-    
-    const isValidPassword = (password) => {
+  };
+
+  // Function to handle form submission
+  const handleSubmit = (e) => {
+      e.preventDefault()
+
+      // If there's no error message
+      if (!message) {
+          // Make a POST request to the API to register the user
+          axios.post("http://localhost:4000/api/register", formData)
+              .then(response => {
+                  console.log(response.data.count)
+                  // Add user data
+                  addData(prevFormData => {
+                      return {
+                          ...prevFormData,
+                          uid: response.data.count,
+                          email: formData.email
+                      }
+                  })
+                  // Change index (could be for form steps)
+                  handleIndexChange(1)
+              })
+              .catch(err => {
+                  console.log(err)
+              })
+      }
+  }
+
+  // Function to validate password
+  const isValidPassword = (password) => {
       // Password should be at least 10 characters long
       if (!validator.isLength(password, { min: 10 })) {
-        return { isValid: false, message: 'Password should be at least 10 characters long' };
+          return { isValid: false, message: 'Password should be at least 10 characters long' };
       }
-      
+
       // Password should contain at least one lowercase character
       if (!/[a-z]/.test(password)) {
-        return { isValid: false, message: 'Password should contain at least one lowercase character' };
+          return { isValid: false, message: 'Password should contain at least one lowercase character' };
       }
 
       // Password should contain at least one uppercase character
       if (!/[A-Z]/.test(password)) {
-        return { isValid: false, message: 'Password should contain at least one uppercase character' };
+          return { isValid: false, message: 'Password should contain at least one uppercase character' };
       }
 
       // Password should contain at least one digit
       if (!/[0-9]/.test(password)) {
-        return { isValid: false, message: 'Password should contain at least one digit' };
+          return { isValid: false, message: 'Password should contain at least one digit' };
       }
 
+      // If the password passes all checks, return true for isValid
       return { isValid: true, message: '' };
-    };
-  
+  };
+
+  // Render registration form
     return(
     <>      
       <CardHeader className="bg-transparent pb-5">
@@ -167,34 +180,6 @@ const Reg = ({handleIndexChange, addData}) =>{
             </InputGroup>
             {message && <div className="text-danger">{message}</div>}
           </FormGroup>
-          <div className="text-muted font-italic">
-            <small>
-              password strength:{" "}
-              <span className="text-success font-weight-700">strong</span>
-            </small>
-          </div>
-          <Row className="my-4">
-            <Col xs="12">
-              <div className="custom-control custom-control-alternative custom-checkbox">
-                <input
-                  className="custom-control-input"
-                  id="customCheckRegister"
-                  type="checkbox"
-                />
-                <label
-                  className="custom-control-label"
-                  htmlFor="customCheckRegister"
-                >
-                  <span className="text-muted">
-                    I agree with the{" "}
-                    <a href="#pablo" onClick={(e) => e.preventDefault()}>
-                      Privacy Policy
-                    </a>
-                  </span>
-                </label>
-              </div>
-            </Col>
-          </Row>
           <div className="text-center">
             <Button className="mt-4" color="primary" type="submit">
               Create account

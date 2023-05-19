@@ -1,5 +1,4 @@
-
-
+// Imports required libraries, React components and helper functions.
 import classnames from "classnames";
 import Chart from "chart.js";
 import { Bar } from "react-chartjs-2";
@@ -41,7 +40,7 @@ import {
 
 const Index = (props) => {
   const history = useHistory()
-  !props.user && history.push("/auth/login")
+  !props.user && history.push("/auth/login") //If there is no user logged in then navigate to the login page
 
   const [empty, setEmpty] = useState(false);
 
@@ -149,7 +148,7 @@ const Index = (props) => {
     setCategory(e.target.value)
   }
 
-
+  // Creates a table row for each remaining budget
   const rembudg = remBudgets.map((remBudget, index) => {
     const expense = expenses.find(e => e.eid === remBudget.eid);
   
@@ -166,6 +165,7 @@ const Index = (props) => {
     );
   });
 
+  // Function for handling the search field changes and filtering the transactions based on the input
   const handleSearch = (e) => {
     setSearch(e.target.value);
     if (e.target.value) {
@@ -179,6 +179,7 @@ const Index = (props) => {
   };
   
 
+  // Creates a table row for each transaction that should be displayed (up to the number specified in 'displayedTransactions')
   const trans = filteredTransactions.slice(0, displayedTransactions).map((transaction, index) => {
   
     const date = new Date(transaction.date)
@@ -191,6 +192,7 @@ const Index = (props) => {
     )
   });
 
+  // Handles the "See More" button click, expands or collapses the transactions list
   const handleSeeMore = () => {
     if (buttonLabel === "Collapse") {
       setDisplayedTransactions(5);
@@ -206,6 +208,7 @@ const Index = (props) => {
   };
   
 
+  // Creates a 'div' for each top category
   const tops = topCats.map((topCat,index)=>{
     return(
       <div key={index} className="top-cats-body">
@@ -215,8 +218,7 @@ const Index = (props) => {
     )
   })
 
-    
-
+  // Creates a 'div' for each monthly top category
   const month = monthly.map((month,index)=>{
     return(
       <div key={index} className="top-cats-body">
@@ -226,8 +228,7 @@ const Index = (props) => {
     )
   })
 
-    
-
+  // Creates a 'div' for each weekly top category
   const week = weekly.map((week,index)=>{
     return(
       <div key={index} className="top-cats-body">
